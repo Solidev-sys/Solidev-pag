@@ -1,0 +1,21 @@
+
+## 🚀 Despliegue en Producción
+
+### 1. Instalacion
+```bash
+# Instalar dependencias y hacer build
+npm install
+
+# Iniciar aplicaciones
+npm start
+
+```
+### 2. Rutas
+
+La aplicacion arranca con la API en el puerto 3002 con http
+y front inicia con 3000 http igualmente.
+
+### 3. Nginx
+
+Nginx se encuentra configurado para redirigir todas las solicitudes a la API al puerto 3002 y a la aplicación frontend al puerto 3000.
+la configuracion esta en el archivo nginxconf.txt
