@@ -15,10 +15,9 @@ RUN npm ci --prefer-offline --no-audit
 COPY backend/ .
 
 
-# Copia los estáticos generados (Next.js) al backend
+# Copia los archivos estáticos generados por Next.js
 COPY --from=frontend-build /app/frontend/.next/static ./public/_next/static
 COPY --from=frontend-build /app/frontend/public ./public
-COPY --from=frontend-build /app/frontend/out ./public
 
 
 # Crear usuario sin privilegios root
