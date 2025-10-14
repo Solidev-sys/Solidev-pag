@@ -1,2 +1,2 @@
-# eldespertarFungi
-proyecto Eldespertar
+# Pagina de Solidev
+proyecto Pag Solidev
