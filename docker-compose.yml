@@ -7,12 +7,14 @@ services:
     container_name: solidev-app
     restart: always
     env_file:
-      - .env
+      - stack.env
     ports:
       - "50000:3000"
-    network_mode: bridge
+    networks:
+      - solidevnet
     depends_on:
       - mysql
+      
   mysql:
     image: mysql:8
     container_name: solidev-db
@@ -28,8 +30,10 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - solidevnet
+      
 networks:
   solidevnet:
     driver: bridge
+    
 volumes:
   mysql_data:
