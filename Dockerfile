@@ -26,11 +26,7 @@ COPY --from=backend-build /app/backend ./backend
 COPY --from=frontend-build /app/frontend/.next/static ./backend/public/_next/static
 COPY --from=frontend-build /app/frontend/public ./backend/public
 
-# Copiar docker-compose si lo necesitas
-COPY docker-compose.yml ./
-
-# NO copies README.md si no existe
-
+# Crear usuario sin privilegios
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN chown -R appuser:appgroup /app
 USER appuser
