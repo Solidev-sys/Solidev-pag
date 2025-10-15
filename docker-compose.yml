@@ -9,7 +9,9 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "50000:3000"
+      - "50000:3000"   # Next.js frontend
+      - "50001:3001"   # Backend HTTPS
+      - "50002:3002"   # Backend HTTP
     networks:
       - solidevnet
     depends_on:
