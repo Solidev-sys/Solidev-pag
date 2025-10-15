@@ -1,36 +1,41 @@
 # Etapa 1: Build de frontend
 FROM node:18-alpine AS frontend-build
+WORKDIR /app
+# Copiar TODO el repositorio primero
+COPY . .
+# Ahora trabajar con frontend
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
 RUN npm ci --prefer-offline --no-audit
-COPY frontend/ .
 RUN npm run build
 
 
-# Etapa 2: Backend con dependencias y frontend estático
-FROM node:18-alpine as backend-build
+# Etapa 2: Backend con TODO el repositorio
+FROM node:18-alpine as final
+WORKDIR /app
+# Copiar TODO el repositorio completo
+COPY . .
+
+# Instalar dependencias del backend
 WORKDIR /app/backend
-COPY backend/package*.json ./
 RUN npm ci --prefer-offline --no-audit
-COPY backend/ .
 
+# Copiar archivos estáticos del frontend build
+COPY --from=frontend-build /app/frontend/.next/static /app/backend/public/_next/static
+COPY --from=frontend-build /app/frontend/public /app/backend/public
 
-# Copia los archivos estáticos generados por Next.js
-COPY --from=frontend-build /app/frontend/.next/static ./public/_next/static
-COPY --from=frontend-build /app/frontend/public ./public
+# Volver a la raíz donde está toda la estructura
+WORKDIR /app
 
-
-# Crear usuario sin privilegios root
+# Crear usuario sin privilegios
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN chown -R appuser:appgroup /app/backend
+RUN chown -R appuser:appgroup /app
 USER appuser
-
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-
 EXPOSE 3000
 
+# Ejecutar desde la ruta completa
+CMD ["node", "/app/backend/controllers/api.js"]
 
-CMD ["node", "controllers/api.js"]
