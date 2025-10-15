@@ -1,18 +1,17 @@
 # Etapa 1: Build de frontend
 FROM node:18-alpine AS frontend-build
-WORKDIR /app
-# Copiar TODO el repositorio primero
-COPY . .
-# Ahora trabajar con frontend
 WORKDIR /app/frontend
+COPY frontend/package*.json ./
 RUN npm ci --prefer-offline --no-audit
+COPY frontend/ .
 RUN npm run build
 
 
-# Etapa 2: Backend con TODO el repositorio
+# Etapa 2: Backend
 FROM node:18-alpine as final
 WORKDIR /app
-# Copiar TODO el repositorio completo
+
+# Copiar TODO el repositorio EXCEPTO lo que está en .dockerignore
 COPY . .
 
 # Instalar dependencias del backend
@@ -20,10 +19,10 @@ WORKDIR /app/backend
 RUN npm ci --prefer-offline --no-audit
 
 # Copiar archivos estáticos del frontend build
-COPY --from=frontend-build /app/frontend/.next/static /app/backend/public/_next/static
-COPY --from=frontend-build /app/frontend/public /app/backend/public
+COPY --from=frontend-build /app/frontend/.next/static ./public/_next/static
+COPY --from=frontend-build /app/frontend/public ./public
 
-# Volver a la raíz donde está toda la estructura
+# Volver a la raíz
 WORKDIR /app
 
 # Crear usuario sin privilegios
@@ -36,6 +35,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-# Ejecutar desde la ruta completa
 CMD ["node", "/app/backend/controllers/api.js"]
-
