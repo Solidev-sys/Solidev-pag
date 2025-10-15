@@ -7,25 +7,29 @@ COPY frontend/ .
 RUN npm run build
 
 
-# Etapa 2: Backend
-FROM node:18-alpine as final
-WORKDIR /app
-
-# Copiar TODO el repositorio EXCEPTO lo que está en .dockerignore
-COPY . .
-
-# Instalar dependencias del backend
+# Etapa 2: Setup backend
+FROM node:18-alpine AS backend-build
 WORKDIR /app/backend
+COPY backend/package*.json ./
 RUN npm ci --prefer-offline --no-audit
+COPY backend/ .
 
-# Copiar archivos estáticos del frontend build
-COPY --from=frontend-build /app/frontend/.next/static ./public/_next/static
-COPY --from=frontend-build /app/frontend/public ./public
 
-# Volver a la raíz
+# Etapa 3: Final
+FROM node:18-alpine AS final
 WORKDIR /app
 
-# Crear usuario sin privilegios
+# Copiar backend completo
+COPY --from=backend-build /app/backend ./backend
+
+# Copiar estáticos del frontend al backend
+COPY --from=frontend-build /app/frontend/.next/static ./backend/public/_next/static
+COPY --from=frontend-build /app/frontend/public ./backend/public
+
+# Copiar solo archivos que NO sean package.json de raíz
+COPY docker-compose.yml ./
+COPY README.md ./
+
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN chown -R appuser:appgroup /app
 USER appuser
