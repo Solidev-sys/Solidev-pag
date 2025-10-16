@@ -1,196 +1,195 @@
-DROP DATABASE IF EXISTS el_despertar_DB;
-CREATE DATABASE IF NOT EXISTS el_despertar_DB;
-USE el_despertar_DB;
+-- =========================================================
+-- Base de datos y configuración
+-- =========================================================
+CREATE DATABASE IF NOT EXISTS solidev
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE solidev;
 
--- -----------------------------
--- Tabla: roles
--- -----------------------------
-CREATE TABLE IF NOT EXISTS roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL UNIQUE
-);
+SET NAMES utf8mb4;
+SET time_zone = '+00:00';
 
--- -----------------------------
+-- =========================================================
+-- Tabla: planes
+-- =========================================================
+CREATE TABLE planes (
+  id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  codigo          VARCHAR(32)  NOT NULL UNIQUE,      -- BASIC / STANDARD / PREMIUM
+  nombre          VARCHAR(64)  NOT NULL,
+  precio_centavos INT UNSIGNED NOT NULL,             -- precio en centavos
+  moneda          CHAR(3)      NOT NULL DEFAULT 'CLP',
+  ciclo_fact      ENUM('mensual','anual') NOT NULL DEFAULT 'mensual',
+  activo          TINYINT(1)   NOT NULL DEFAULT 1,
+  mensaje_rapido  TINYINT(1)   NOT NULL DEFAULT 1,
+  mensaje_seguro  TINYINT(1)   NOT NULL DEFAULT 1,
+  resumen         VARCHAR(255) NULL,
+  creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- Tabla: caracteristicas_plan
+-- =========================================================
+CREATE TABLE caracteristicas_plan (
+  id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  plan_id    BIGINT UNSIGNED NOT NULL,
+  etiqueta   VARCHAR(160) NOT NULL,
+  posicion   INT          NOT NULL DEFAULT 0,        -- orden de despliegue
+  CONSTRAINT fk_carac_plan_plan
+    FOREIGN KEY (plan_id) REFERENCES planes(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT uq_plan_posicion UNIQUE (plan_id, posicion)
+) ENGINE=InnoDB;
+
+-- =========================================================
 -- Tabla: usuarios
--- -----------------------------
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    nombreCompleto VARCHAR(150) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    rut VARCHAR(255) UNIQUE,
-    telefono VARCHAR(15) NOT NULL,
-    direccion TEXT NOT NULL,
-    ciudad VARCHAR(100) NOT NULL,
-    region VARCHAR(100) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    rol_id INT DEFAULT 2,
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
-    FOREIGN KEY (rol_id) REFERENCES roles(id)
-);
+-- =========================================================
+CREATE TABLE usuarios (
+  id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email            VARCHAR(191) NOT NULL UNIQUE,
+  hash_password    VARCHAR(255) NOT NULL,
+  nombre_completo  VARCHAR(120) NULL,
+  telefono         VARCHAR(30)  NULL,
+  estado           ENUM('activo','bloqueado','pendiente') NOT NULL DEFAULT 'activo',
+  rol              ENUM('cliente','admin') NOT NULL DEFAULT 'cliente',
+  mp_customer_id   VARCHAR(64) NULL,
+  creado_en        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
--- -----------------------------
--- Tabla: productos
--- -----------------------------
-CREATE TABLE IF NOT EXISTS productos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    estado ENUM('activo', 'inactivo', 'mantenimiento') DEFAULT 'activo',
-    precio DECIMAL(10,2) NOT NULL,
-    descuento INT DEFAULT 0, -- porcentaje
-    stock INT DEFAULT 0,
-    imagen_url VARCHAR(255),
-    video_url VARCHAR(500),
-    fecha_add TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    img_carrusel JSON DEFAULT NULL COMMENT 'JSON con URLs de imágenes para carrusel: {"imagenes": ["url1", "url2"]}'
-);
 
--- -----------------------------
--- Tabla: categorias
--- -----------------------------
-CREATE TABLE IF NOT EXISTS categorias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL UNIQUE
-);
-
--- -----------------------------
--- Tabla intermedia: producto_categorias
--- -----------------------------
-CREATE TABLE IF NOT EXISTS producto_categorias (
-    producto_id INT NOT NULL,
-    categoria_id INT NOT NULL,
-    PRIMARY KEY (producto_id, categoria_id),
-    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
-    FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
-);
-
--- -----------------------------
--- Tabla: carrito
--- -----------------------------
-CREATE TABLE IF NOT EXISTS carrito (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    producto_id INT NOT NULL,
-    cantidad INT DEFAULT 1 CHECK (cantidad > 0),
-    fecha_add TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
-    UNIQUE(usuario_id, producto_id)
-);
-
--- -----------------------------
--- Tabla: ventas
--- -----------------------------
-CREATE TABLE IF NOT EXISTS ventas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    fecha_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(10,2) NOT NULL,
-    payment_id VARCHAR(255) NOT NULL,
-    estado ENUM('completada', 'cancelada', 'pendiente') DEFAULT 'pendiente',
+-- =========================================================
+-- Tabla: suscripciones
+-- =========================================================
+CREATE TABLE suscripciones (
+  id                 BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id         BIGINT UNSIGNED NOT NULL,
+  plan_id            BIGINT UNSIGNED NOT NULL,
+  estado             ENUM('pendiente','autorizada','activa','pausada','cancelada','expirada') NOT NULL DEFAULT 'pendiente',
+  mp_preapproval_id  VARCHAR(64) NULL UNIQUE,
+  fecha_inicio       DATE NULL,
+  proximo_cobro      DATE NULL,
+  motivo_cancelacion VARCHAR(255) NULL,
+  cancelada_en       DATETIME NULL,
+  creado_en          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_subs_usuario
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-);
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_subs_plan
+    FOREIGN KEY (plan_id) REFERENCES planes(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  INDEX idx_subs_usuario (usuario_id),
+  INDEX idx_subs_plan (plan_id)
+) ENGINE=InnoDB;
 
--- -----------------------------
--- Tabla: detalle_venta
--- -----------------------------
-CREATE TABLE IF NOT EXISTS detalle_venta (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    venta_id INT NOT NULL,
-    producto_id INT NOT NULL,
-    cantidad INT NOT NULL CHECK (cantidad > 0),
-    precio_unitario DECIMAL(10,2) NOT NULL,
-    descuento_aplicado INT DEFAULT 0,
-    subtotal DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (venta_id) REFERENCES ventas(id) ON DELETE CASCADE,
-    FOREIGN KEY (producto_id) REFERENCES productos(id)
-);
+-- =========================================================
+-- Tabla: pagos
+-- =========================================================
+CREATE TABLE pagos (
+  id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  suscripcion_id   BIGINT UNSIGNED NOT NULL,
+  usuario_id       BIGINT UNSIGNED NOT NULL,
+  mp_payment_id    VARCHAR(64) NULL UNIQUE,
+  estado           ENUM('pendiente','aprobado','autorizado','en_proceso','rechazado','reembolsado','contracargo','cancelado') NOT NULL,
+  monto_centavos   INT UNSIGNED NOT NULL,
+  moneda           CHAR(3) NOT NULL DEFAULT 'CLP',
+  intento_n        INT NOT NULL DEFAULT 1,
+  pagado_en        DATETIME NULL,
+  motivo_fallo     VARCHAR(255) NULL,
+  payload_crudo    JSON NULL,
+  creado_en        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_pagos_subs
+    FOREIGN KEY (suscripcion_id) REFERENCES suscripciones(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_pagos_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  INDEX idx_pagos_usuario_fecha (usuario_id, creado_en),
+  INDEX idx_pagos_subs_fecha    (suscripcion_id, creado_en),
+  INDEX idx_pagos_estado        (estado)
+) ENGINE=InnoDB;
 
--- -----------------------------
--- Tabla: descuentos por cantidad
--- -----------------------------
-CREATE TABLE IF NOT EXISTS descuentos_cantidad (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    producto_id INT NOT NULL,
-    cantidad_minima INT NOT NULL,
-    porcentaje_descuento DECIMAL(5,2) NOT NULL,
-    activo BOOLEAN DEFAULT TRUE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_producto_cantidad (producto_id, cantidad_minima)
-);
+-- =========================================================
+-- Tabla: facturas
+-- =========================================================
+CREATE TABLE facturas (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  pago_id     BIGINT UNSIGNED NOT NULL UNIQUE,
+  numero      VARCHAR(64)  NOT NULL,
+  ruta_pdf    VARCHAR(255) NOT NULL,
+  emitida_en  DATETIME     NOT NULL,
+  impuesto_cent INT UNSIGNED NOT NULL DEFAULT 0,
+  neto_cent     INT UNSIGNED NOT NULL,
+  total_cent    INT UNSIGNED NOT NULL,
+  CONSTRAINT fk_facturas_pago
+    FOREIGN KEY (pago_id) REFERENCES pagos(id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB;
 
----------------------------------------------------------------
--------------------- DATOS DE PRUEBA --------------------------
----------------------------------------------------------------
+-- Trigger opcional: impedir factura si el pago no está aprobado
+DELIMITER $$
+CREATE TRIGGER trg_factura_solo_pago_aprobado
+BEFORE INSERT ON facturas
+FOR EACH ROW
+BEGIN
+  DECLARE v_estado VARCHAR(20);
+  SELECT estado INTO v_estado FROM pagos WHERE id = NEW.pago_id;
+  IF v_estado <> 'aprobado' THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'No se puede emitir factura: el pago no está aprobado';
+  END IF;
+END$$
+DELIMITER ;
 
--- Roles
-INSERT IGNORE INTO roles (nombre) VALUES ('admin'), ('usuario');
+-- =========================================================
+-- Tabla: webhooks
+-- =========================================================
+CREATE TABLE webhooks (
+  id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  proveedor      ENUM('mercadopago') NOT NULL,
+  topico         VARCHAR(64) NOT NULL,          -- 'payment', 'preapproval', etc.
+  id_externo     VARCHAR(64) NULL,              -- mp_payment_id o mp_preapproval_id
+  id_evento      VARCHAR(64) NULL,
+  recibido_en    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  payload        JSON NOT NULL,
+  procesado      TINYINT(1) NOT NULL DEFAULT 0,
+  procesado_en   DATETIME NULL,
+  error_proceso  VARCHAR(255) NULL,
+  INDEX idx_wh_topico_ext (topico, id_externo),
+  INDEX idx_wh_procesado  (procesado)
+) ENGINE=InnoDB;
 
--- Usuarios
--- Usuarios con RUT y password hasheados
-INSERT INTO usuarios (username, email, rut, telefono, direccion, ciudad, region, password, rol_id)
-VALUES
-('admin1', 'admin@tienda.com', 
- '$2b$10$aiJYbzpQvLzDyJQfPt94e.7eXoL8pA8OlL8o1KXrIV8pDe9HcW7iK', -- rut 12345678-9
- '987654321', 'Calle Admin 123', 'Santiago', 'RM',
- '$2b$10$EDVvByq26pNqMQyTzN9nIezGL9s80M/a9drqG1D9mYHkFvBkM36rC', -- password adminpass
- 1),
+-- =========================================================
+-- Tabla: notificaciones
+-- =========================================================
+CREATE TABLE notificaciones (
+  id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id      BIGINT UNSIGNED NOT NULL,
+  tipo            ENUM('pago_fallido','pago_pendiente','pago_exitoso','suscripcion_cancelada') NOT NULL,
+  canal           ENUM('email','whatsapp','sms','in_app') NOT NULL DEFAULT 'email',
+  mensaje         VARCHAR(500) NOT NULL,
+  id_relacionado  BIGINT UNSIGNED NULL,         -- id de pago o suscripción
+  leida           TINYINT(1) NOT NULL DEFAULT 0,
+  enviada_en      DATETIME NULL,
+  creado_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_notif_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  INDEX idx_notif_usuario_fecha (usuario_id, creado_en),
+  INDEX idx_notif_no_leidas     (leida)
+) ENGINE=InnoDB;
 
-('user1', 'user1@tienda.com',
- '$2b$10$s4h06OeRvjpsRBym42moOOG3Z2Yr7eV3d.vPc1uH9NGc7qXbK9iuu', -- rut 98765432-1
- '912345678', 'Calle Falsa 123', 'Santiago', 'RM',
- '$2b$10$wXc3uZxN9A/mtUhNjz3cUeT13.4j83DJwH6Zq8qebvSKGnPGeAO8K', -- password userpass
- 2);
-
--- Categorías
-INSERT INTO categorias (nombre) VALUES
-('Electrónica'),
-('Ropa'),
-('Hogar'),
-('Deportes');
-
--- Productos
-INSERT INTO productos (nombre, descripcion, precio, stock, imagen_url, video_url)
-VALUES
-('Smartphone X', 'Teléfono de última generación con pantalla OLED', 599.99, 50, 'img/smartphone.jpg', 'https://youtu.be/demo1'),
-('Camiseta Deportiva', 'Camiseta transpirable para entrenamiento', 19.99, 200, 'img/camiseta.jpg', NULL),
-('Aspiradora 3000', 'Aspiradora con potencia de 2000W', 120.00, 30, 'img/aspiradora.jpg', NULL),
-('Bicicleta Montaña', 'Bicicleta todo terreno de aluminio', 350.00, 15, 'img/bicicleta.jpg', 'https://youtu.be/demo2');
-
--- Relación productos - categorías
-INSERT INTO producto_categorias (producto_id, categoria_id) VALUES
-(1, 1), -- Smartphone -> Electrónica
-(2, 2), -- Camiseta -> Ropa
-(3, 3), -- Aspiradora -> Hogar
-(4, 4); -- Bicicleta -> Deportes
-
--- Descuentos por cantidad
-INSERT INTO descuentos_cantidad (producto_id, cantidad_minima, porcentaje_descuento) VALUES
-(1, 3, 5.00),
-(1, 5, 10.00),
-(1, 10, 15.00),
-(2, 5, 7.50),
-(2, 10, 12.50),
-(3, 2, 8.00),
-(4, 2, 5.00),
-(4, 3, 8.00);
-
--- Carrito de ejemplo
-INSERT INTO carrito (usuario_id, producto_id, cantidad)
-VALUES
-(2, 1, 2), -- user1 compra 2 Smartphones
-(2, 2, 5); -- user1 compra 5 Camisetas
-
--- Ventas de ejemplo
-INSERT INTO ventas (usuario_id, total, payment_id, estado)
-VALUES
-(2, 1279.95, 'PAY123456', 'completada');
-
--- Detalle de la venta
-INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario, descuento_aplicado, subtotal)
-VALUES
-(1, 1, 2, 599.99, 0, 1199.98),  -- 2 Smartphones
-(1, 2, 5, 19.99, 7, 79.97);    -- 5 Camisetas con descuento
+-- =========================================================
+-- Tabla: paginas_sitio
+-- =========================================================
+CREATE TABLE paginas_sitio (
+  id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug          VARCHAR(64)  NOT NULL UNIQUE,   -- 'index', 'sobre-nosotros'
+  titulo        VARCHAR(120) NOT NULL,
+  hero_titulo   VARCHAR(160) NULL,
+  hero_texto    VARCHAR(500) NULL,
+  tema_color    VARCHAR(64)  NOT NULL DEFAULT 'azul_verde_suave',
+  creado_en     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
