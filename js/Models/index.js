@@ -1,58 +1,56 @@
+// Importaciones de nuevos modelos
 const sequelize = require('../Config/database');
-const Rol = require('./Rol');
 const Usuario = require('./Usuario');
-const Producto = require('./Producto');
-const Categoria = require('./Categoria');
-const ProductoCategoria = require('./ProductoCategoria');
-const Carrito = require('./Carrito');
-const Venta = require('./Venta');
-const DetalleVenta = require('./DetalleVenta');
+const Plan = require('./Plan');
+const CaracteristicaPlan = require('./CaracteristicaPlan');
+const Suscripcion = require('./Suscripcion');
+const Pago = require('./Pago');
+const Factura = require('./Factura');
+const Webhook = require('./Webhook');
+const Notificacion = require('./Notificacion');
+const PaginaSitio = require('./PaginaSitio');
 
-// Relaciones con alias específicos
-Rol.hasMany(Usuario, { foreignKey: 'rol_id', as: 'usuarios' });
-Usuario.belongsTo(Rol, { foreignKey: 'rol_id', as: 'rol' });
+// Planes y características
+Plan.hasMany(CaracteristicaPlan, { foreignKey: 'plan_id', as: 'caracteristicas', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+CaracteristicaPlan.belongsTo(Plan, { foreignKey: 'plan_id' });
 
-Producto.belongsToMany(Categoria, {
-  through: ProductoCategoria,
-  as: 'categorias',
-  foreignKey: 'producto_id',
-  otherKey: 'categoria_id'
-});
+// Usuarios y suscripciones
+Usuario.hasMany(Suscripcion, { foreignKey: 'usuario_id', as: 'suscripciones', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+Suscripcion.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
-Categoria.belongsToMany(Producto, {
-  through: ProductoCategoria,
-  as: 'productos',
-  foreignKey: 'categoria_id',
-  otherKey: 'producto_id'
-});
+// Planes y suscripciones
+Plan.hasMany(Suscripcion, { foreignKey: 'plan_id', as: 'suscripciones', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+Suscripcion.belongsTo(Plan, { foreignKey: 'plan_id' });
 
-Usuario.hasMany(Carrito, { foreignKey: 'usuario_id' });
-Carrito.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+// Pagos y suscripciones/usuarios
+Suscripcion.hasMany(Pago, { foreignKey: 'suscripcion_id', as: 'pagos', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+Pago.belongsTo(Suscripcion, { foreignKey: 'suscripcion_id' });
 
-Producto.hasMany(Carrito, { foreignKey: 'producto_id' });
-Carrito.belongsTo(Producto, { foreignKey: 'producto_id' });
+Usuario.hasMany(Pago, { foreignKey: 'usuario_id', as: 'pagos', onUpdate: 'CASCADE', onDelete: 'RESTRICT' });
+Pago.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
-// Definir relaciones para Venta y DetalleVenta con aliases explícitos
-Venta.hasMany(DetalleVenta, { 
-  foreignKey: 'venta_id',
-  as: 'detalles'  // Alias explícito
-});
-DetalleVenta.belongsTo(Venta, { foreignKey: 'venta_id' });
+// Facturas y pagos
+Pago.hasOne(Factura, { foreignKey: 'pago_id', as: 'factura', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+Factura.belongsTo(Pago, { foreignKey: 'pago_id' });
 
-DetalleVenta.belongsTo(Producto, { foreignKey: 'producto_id' });
+// Notificaciones y usuarios
+Usuario.hasMany(Notificacion, { foreignKey: 'usuario_id', as: 'notificaciones', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+Notificacion.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
-// ✅ CORREGIR: Agregar relación bidireccional entre Usuario y Venta
-Usuario.hasMany(Venta, { foreignKey: 'usuario_id' });
-Venta.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+// Webhooks: sin relaciones directas
+Usuario.hasMany(Webhook, { foreignKey: 'usuario_id', as: 'webhooks', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+Webhook.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
+// Exportación
 module.exports = {
   sequelize,
-  Rol,
   Usuario,
-  Producto,
-  Categoria,
-  ProductoCategoria,
-  Carrito,
-  Venta,
-  DetalleVenta
+  Plan,
+  CaracteristicaPlan,
+  Suscripcion,
+  Pago,
+  Factura,
+  Webhook,
+  Notificacion,
+  PaginaSitio
 };
