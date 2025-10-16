@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: solidev-app
     restart: always
+    command: ["tail", "-f", "/dev/null"]  # ← AGREGAR ESTA LÍNEA
     env_file:
       - ./backend/.env
     ports:
