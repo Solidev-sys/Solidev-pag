@@ -18,8 +18,8 @@ const createCaracteristicasRouter = require('./routes/caracteristicasPlan');
 const createPaginasRouter = require('./routes/paginas');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const HTTP_PORT = process.env.HTTP_PORT || 3002;
+const PORT = process.env.PORT || 3001;
+const HTTP_PORT = process.env.HTTP_PORT || 3002; 
 
 // === Sesiones y CORS ===
 const session = require('express-session');
@@ -74,9 +74,11 @@ app.use('/api', paymentsRouter);
 const webhookRouter = createWebhookRouter();
 app.use('/api', webhookRouter);
 
-// Inicio de servidor HTTP y log correcto de puerto
+// ← elimina cualquier arranque HTTPS aquí (startHttpsServer/app con https/fs)
+
+// Servidor HTTP (único servidor)
 app.listen(HTTP_PORT, () => {
-    console.log(`📋 Servidor HTTP ejecutándose en http://localhost:${HTTP_PORT}`);
+    console.log(`📋 API HTTP ejecutándose en http://localhost:${HTTP_PORT}`);
 });
 try {
     if (fs.existsSync('key.pem') && fs.existsSync('cert.pem')) {
@@ -93,7 +95,7 @@ try {
     }
 } catch (error) {
     console.log(`⚠️  Error al iniciar HTTPS: ${error.message}`);
-    console.log(`📋 Solo HTTP disponible: http://localhost:${PORT}`);
+    console.log(`📋 Vista web disponible en: http://localhost:${PORT}`);
 }
 
 const suscripcionesRouter = createSuscripcionesRouter({ ensureAuth, ensureRole });

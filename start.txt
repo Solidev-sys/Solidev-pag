@@ -1,0 +1,163 @@
+9ab5b4fc00de:/app$ npm run build:frontend
+
+> proyecto-webdesarrollounido@1.0.0 build:frontend
+> cd frontend && npm run build
+
+
+> frontend-ecommerce@0.1.0 build
+> next build
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.1.6
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types    
+ ✓ Collecting page data    
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at y (.next/server/chunks/697.js:6:1263)
+Error occurred prerendering page "/404". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at Y (/app/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:5469)
+    at y (/app/frontend/.next/server/chunks/697.js:6:1263)
+    at renderWithHooks (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at finishClassComponent (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5688:3)
+    at renderClassComponent (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5696:3)
+    at renderElement (/app/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5954:7)
+Export encountered an error on /_error: /404, exiting the build.
+ ⨯ Static worker exited with code: 1 and signal: null
+npm error Lifecycle script build failed with error:
+npm error code 1
+npm error path /app/frontend
+npm error workspace frontend-ecommerce@0.1.0
+npm error location /app/frontend
+npm error command failed
+npm error command sh -c next build
+9ab5b4fc00de:/app$ cd /app/frontend
+rm -rf .next
+unset NODE_ENV
+npm run build
+
+> frontend-ecommerce@0.1.0 build
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+   ▲ Next.js 15.1.6
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types    
+ ✓ Collecting page data    
+🔍 [CART-SIDEBAR 1/2] Estado del carrito: { isOpen: false, itemsCount: 0, total: 0, items: [] }
+🔍 [CART-SIDEBAR 2/2] Funciones del carrito: {
+  hasUpdateQuantity: true,
+  hasRemoveItem: true,
+  hasGetTotal: true,
+  hasClearCart: true,
+  totalValue: 0
+}
+ ✓ Generating static pages (11/11)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization    
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    6.42 kB         139 kB
+├ ○ /_not-found                          979 B           106 kB
+├ ○ /admin                               14.8 kB         161 kB
+├ ○ /history                             3.8 kB          165 kB
+├ ○ /login                               2.67 kB         124 kB
+├ ○ /payment/failed                      2.72 kB         117 kB
+├ ○ /payment/pending                     2.83 kB         117 kB
+├ ○ /payment/success                     3.38 kB         118 kB
+├ ƒ /product/[id]                        2.16 kB         135 kB
+└ ○ /register                            4.19 kB         150 kB
++ First Load JS shared by all            105 kB
+  ├ chunks/239-53fd51fe29f8a35b.js       50.5 kB
+  ├ chunks/c7879cf7-a15ade34c60801c5.js  52.9 kB
+  └ other shared chunks (total)          1.91 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+9ab5b4fc00de:/app/frontend$ cd ..
+9ab5b4fc00de:/app$ npm start
+
+> proyecto-webdesarrollounido@1.0.0 start
+> concurrently "npm run start:backend" "npm run start:frontend"
+
+[0] 
+[0] > proyecto-webdesarrollounido@1.0.0 start:backend
+[0] > cd backend && npm start
+[0] 
+[1] 
+[1] > proyecto-webdesarrollounido@1.0.0 start:frontend
+[1] > cd frontend && npm start
+[1] 
+[0] 
+[0] > backend-ecommerce@1.0.0 start
+[0] > node controllers/api.js
+[0] 
+[1] 
+[1] > frontend-ecommerce@0.1.0 start
+[1] > next start
+[1] 
+[1]    ▲ Next.js 15.1.6
+[1]    - Local:        http://localhost:3001
+[1]    - Network:      http://172.19.0.3:3001
+[1] 
+[1]  ✓ Starting...
+[1]  ✓ Ready in 345ms
+[0] 🌐 Servidor HTTP ejecutándose en http://localhost:3002
+[0] node:events:495
+[0]       throw er; // Unhandled 'error' event
+[0]       ^
+[0] 
+[0] Error: listen EADDRINUSE: address already in use :::3001
+[0]     at Server.setupListenHandle [as _listen2] (node:net:1817:16)
+[0]     at listenInCluster (node:net:1865:12)
+[0]     at Server.listen (node:net:1953:7)
+[0]     at Object.<anonymous> (/app/backend/controllers/api.js:1105:42)
+[0]     at Module._compile (node:internal/modules/cjs/loader:1364:14)
+[0]     at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+[0]     at Module.load (node:internal/modules/cjs/loader:1203:32)
+[0]     at Module._load (node:internal/modules/cjs/loader:1019:12)
+[0]     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12)
+[0]     at node:internal/main/run_main_module:28:49
+[0] Emitted 'error' event on Server instance at:
+[0]     at emitErrorNT (node:net:1844:8)
+[0]     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+[0]   code: 'EADDRINUSE',
+[0]   errno: -98,
+[0]   syscall: 'listen',
+[0]   address: '::',
+[0]   port: 3001
+[0] }
+[0] 
+[0] Node.js v18.20.8
+[0] npm error Lifecycle script start failed with error:
+[0] npm error code 1
+[0] npm error path /app/backend
+[0] npm error workspace backend-ecommerce@1.0.0
+[0] npm error location /app/backend
+[0] npm error command failed
+[0] npm error command sh -c node controllers/api.js
+[0] npm run start:backend exited with code 1
+^C[1] npm run start:frontend exited with code 0
+9ab5b4fc00de:/app$ cd frontend/
+9ab5b4fc00de:/app/frontend$ nano package.json 
+bash: nano: command not found
+9ab5b4fc00de:/app/frontend$ ^C
+9ab5b4fc00de:/app/frontend$

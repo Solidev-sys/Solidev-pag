@@ -6,13 +6,12 @@ services:
       dockerfile: Dockerfile
     container_name: solidev-app
     restart: always
-    command: ["tail", "-f", "/dev/null"]  # ← AGREGAR ESTA LÍNEA
+    command: ["tail", "-f", "/dev/null"]  # ← si quieres autoarranque, luego te propongo cambiarlo
     env_file:
       - ./backend/.env
     ports:
-      - "50000:3000"   # Next.js frontend
-      - "50001:3001"   # Backend HTTPS
-      - "50002:3002"   # Backend HTTP
+      - "50001:3001"   # Frontend Next.js en 3001
+      - "50002:3002"   # Backend API HTTP en 3002
     networks:
       - solidevnet
     depends_on:

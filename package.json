@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "install:all": "npm install && npm run build:frontend",
-    
+    "postinstall": "npm run build:frontend",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm start",
