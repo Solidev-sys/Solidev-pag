@@ -8,15 +8,17 @@ RUN apk add --no-cache bash git
 # Copiar TODO el repositorio
 COPY . .
 
-# 1. Primero instalar el frontend
+# IMPORTANTE: Instalar dependencias en el ORDEN correcto
+
+# 1. Primero instalar el frontend (para que exista 'next')
 WORKDIR /app/frontend
 RUN npm ci --prefer-offline --no-audit
 
-# 2. Luego instalar el backend
+# 2. Luego instalar el backend (SIN ejecutar postinstall)
 WORKDIR /app/backend
-RUN npm ci --prefer-offline --no-audit
+RUN npm ci --prefer-offline --no-audit --ignore-scripts
 
-# 3. Por último instalar la raíz
+# 3. Por último instalar la raíz (SIN ejecutar postinstall)
 WORKDIR /app
 RUN npm install --ignore-scripts
 
@@ -25,13 +27,10 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN chown -R appuser:appgroup /app
 USER appuser
 
-# CAMBIAR ESTO:
-# ENV NODE_ENV=development  ← ELIMINAR O CAMBIAR A production
 ENV NODE_ENV=production
 ENV PORT=3000
 
 # Exponer puertos
-EXPOSE 3000 3002
+EXPOSE 3000 3001 3002
 
-# Este CMD será sobrescrito por el 'command' del docker-compose
-#CMD ["npm", "run", "dev"]
+CMD ["tail", "-f", "/dev/null"]
