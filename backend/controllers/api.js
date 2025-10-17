@@ -1,6 +1,6 @@
 const express = require('express');
 require('dotenv').config();
-
+const fs = require('fs');
 // Integraciones modularizadas
 const { setupCors } = require('./config/cors');
 const { setupSession } = require('./config/session');
