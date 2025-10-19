@@ -48,7 +48,7 @@ class ApiService {
   }
 
   async getProduct(id: string | number) {
-    return this.request(`/api/Productos/${id}`);
+    return this.request(`/api/productos/${id}`);
   }
 
   async getCategories() {
