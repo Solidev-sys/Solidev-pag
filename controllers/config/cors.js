@@ -14,8 +14,11 @@ function setupCors(app) {
 
     const corsOptions = {
         origin: function (origin, callback) {
+            // En desarrollo, permitir cualquier origen
+            if (NODE_ENV !== 'production') return callback(null, true);
+            
+            // En producción, verificar contra la lista de orígenes permitidos
             if (!origin) return callback(null, true);
-            if (allowedOrigins.length === 0 && NODE_ENV !== 'production') return callback(null, true);
             if (allowedOrigins.includes(origin)) return callback(null, true);
             return callback(new Error('Not allowed by CORS: ' + origin));
         },
