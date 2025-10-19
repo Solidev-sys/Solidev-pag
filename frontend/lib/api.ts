@@ -44,7 +44,7 @@ class ApiService {
   }
 
   async getProducts() {
-    return this.request('/api/Productos');
+    return this.request('/api/productos');
   }
 
   async getProduct(id: string | number) {
@@ -163,6 +163,7 @@ class ApiService {
 }
 
 
+// Exportamos los servicios de API desde sus respectivos archivos
 export { apiService } from './api/index';
 export { adminApiService } from './api/admin';
 export { historyApiService } from './api/history';

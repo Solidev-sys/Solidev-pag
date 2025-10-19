@@ -1,23 +1,33 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+// Forzando la URL del backend para evitar problemas de conexión
+const API_BASE_URL = 'http://localhost:3002';
+// Verificar en consola la URL que se está utilizando
+console.log('API URL:', API_BASE_URL);
 
 export class BaseApiService {
   protected async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
+    console.log('Realizando petición a:', url);
     
+    // Configuración mejorada para evitar problemas de CORS
     const config: RequestInit = {
       credentials: 'include',
+      mode: 'cors',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         ...options.headers,
       },
       ...options,
     };
 
     try {
+      console.log('Enviando petición con config:', JSON.stringify(config));
       const response = await fetch(url, config);
+      console.log('Respuesta recibida:', response.status);
       
       if (!response.ok) {
         if (response.status === 401) {
+          console.error('Error de autenticación');
           throw new Error('No autenticado');
         }
         
@@ -42,8 +52,11 @@ export class BaseApiService {
         throw new Error(errorMessage);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('Datos recibidos:', data);
+      return data;
     } catch (error) {
+      console.error('Error en la petición:', error);
       if (error instanceof Error) {
         throw error;
       }
