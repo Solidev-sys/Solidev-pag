@@ -11,7 +11,7 @@ services:
       - ./backend/.env
     ports:
       - "50001:3001"   # Frontend Next.js en 3001
-      - "50002:3002"   # Backend API HTTP en 3002
+      - "50002:3002"   # Backend API HTTPS en 3002
     networks:
       - solidevnet
     depends_on:

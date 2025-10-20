@@ -1,6 +1,6 @@
 import type { LoginResponse, RegisterResponse, UserResponse, LogoutResponse, CartResponse, CartActionResponse, HistoryResponse, DiscountsResponse, DiscountActionResponse, DiscountFormData, AdminPingResponse, PaymentResponse } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:3002';
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
