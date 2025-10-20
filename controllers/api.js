@@ -77,26 +77,7 @@ app.use('/api', webhookRouter);
 // ← elimina cualquier arranque HTTPS aquí (startHttpsServer/app con https/fs)
 
 // Servidor HTTP (único servidor)
-app.listen(HTTP_PORT, () => {
-    console.log(`📋 API HTTP ejecutándose en http://localhost:${HTTP_PORT}`);
-});
-try {
-    if (fs.existsSync('key.pem') && fs.existsSync('cert.pem')) {
-        const options = {
-            key: fs.readFileSync('key.pem'),
-            cert: fs.readFileSync('cert.pem')
-        };
-        
-        https.createServer(options, app).listen(PORT, () => {
-            console.log(`🔒 Servidor HTTPS ejecutándose en https://localhost:${PORT}`);
-        });
-    } else {
-        console.log(`⚠️  Certificados SSL no encontrados. Solo HTTP disponible.`);
-    }
-} catch (error) {
-    console.log(`⚠️  Error al iniciar HTTPS: ${error.message}`);
-    console.log(`📋 Vista web disponible en: http://localhost:${PORT}`);
-}
+startHttpsServer(app, HTTP_PORT);
 
 const suscripcionesRouter = createSuscripcionesRouter({ ensureAuth, ensureRole });
 app.use('/api', suscripcionesRouter);
