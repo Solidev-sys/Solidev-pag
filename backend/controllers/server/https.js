@@ -1,29 +1,31 @@
-/**
- * Inicializa servidor HTTPS si existen `key.pem` y `cert.pem`.
- * Mantiene el mismo comportamiento/logs que el archivo original.
- */
+const http = require('http');
 const https = require('https');
 const fs = require('fs');
 
 function startHttpsServer(app, port) {
-    try {
-        if (fs.existsSync('key.pem') && fs.existsSync('cert.pem')) {
-            const options = {
-                key: fs.readFileSync('key.pem'),
-                cert: fs.readFileSync('cert.pem')
-            };
+  const PORT = port || 3002;
+  const HOST = process.env.BIND || '0.0.0.0';
 
-            https.createServer(options, app).listen(port, () => {
-                console.log(`🔒 Servidor HTTPS ejecutándose en https://localhost:${port}`);
-            });
-        } else {
-            console.log(`⚠️  Certificados SSL no encontrados. Solo HTTP disponible.`);
-        }
-    } catch (error) {
-        console.log(`⚠️  Error al iniciar HTTPS: ${error.message}`);
-        const httpPort = process.env.HTTP_PORT || 3002;
-        console.log(`📋 Solo HTTP disponible: http://localhost:${httpPort}`);
+  const SSL_ENABLE   = (process.env.SSL_ENABLE || 'false').toLowerCase() === 'true';
+  const SSL_KEY_PATH = process.env.SSL_KEY_PATH || 'key.pem';
+  const SSL_CERT_PATH= process.env.SSL_CERT_PATH || 'cert.pem';
+
+  if (SSL_ENABLE && fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
+    const options = {
+      key:  fs.readFileSync(SSL_KEY_PATH),
+      cert: fs.readFileSync(SSL_CERT_PATH)
+    };
+    https.createServer(options, app).listen(PORT, HOST, () => {
+      console.log(`🔒 HTTPS escuchando en https://${HOST}:${PORT}`);
+    });
+  } else {
+    if (SSL_ENABLE) {
+      console.log('⚠️  SSL_ENABLE=TRUE pero no se encontraron certificados; iniciando HTTP.');
     }
+    http.createServer(app).listen(PORT, HOST, () => {
+      console.log(`🌐 HTTP escuchando en http://${HOST}:${PORT}`);
+    });
+  }
 }
 
 module.exports = { startHttpsServer };
