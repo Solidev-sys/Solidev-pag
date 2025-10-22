@@ -18,7 +18,6 @@ const createCaracteristicasRouter = require('./routes/caracteristicasPlan');
 const createPaginasRouter = require('./routes/paginas');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 const HTTP_PORT = process.env.HTTP_PORT || 3002; 
 
 // === Sesiones y CORS ===
@@ -76,7 +75,7 @@ app.use('/api', webhookRouter);
 
 // ← elimina cualquier arranque HTTPS aquí (startHttpsServer/app con https/fs)
 
-// Servidor HTTP (único servidor)
+// Servidor HTTPS (único servidor)
 startHttpsServer(app, HTTP_PORT);
 
 const suscripcionesRouter = createSuscripcionesRouter({ ensureAuth, ensureRole });
