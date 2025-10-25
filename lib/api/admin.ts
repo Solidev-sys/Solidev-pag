@@ -1,149 +1,152 @@
 import { BaseApiService } from './base';
-import type { 
-  DiscountsResponse, 
-  DiscountActionResponse, 
-  DiscountFormData, 
-  AdminPingResponse,
-  CategoriesResponse,
-  ProductFormData,
-  ProductActionResponse,
-  AdminOrdersResponse,
-  OrderStatusUpdateResponse,
-  SimpleProduct
-} from '@/types';
+import type { AdminPingResponse } from '@/types';
 
 export class AdminApiService extends BaseApiService {
-  // Discount management
-  async getDiscounts(): Promise<DiscountsResponse> {
-    return this.request('/api/descuentos');
+  // Planes (admin)
+  async getPlans() {
+    return this.request('/api/planes');
   }
 
-  async createDiscount(discountData: DiscountFormData): Promise<DiscountActionResponse> {
-    return this.request('/api/descuentos', {
+  async getPlan(id: string | number) {
+    return this.request(`/api/planes/${id}`);
+  }
+
+  async createPlan(data: Record<string, unknown>) {
+    return this.request('/api/planes', {
       method: 'POST',
-      body: JSON.stringify(discountData),
+      body: JSON.stringify(data),
     });
   }
 
-  async updateDiscount(id: string, discountData: DiscountFormData): Promise<DiscountActionResponse> {
-    return this.request(`/api/descuentos/${id}`, {
+  async updatePlan(id: string | number, data: Record<string, unknown>) {
+    return this.request(`/api/planes/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(discountData),
+      body: JSON.stringify(data),
     });
   }
 
-  async deleteDiscount(id: string): Promise<DiscountActionResponse> {
-    try {
-      const response = await this.request<DiscountActionResponse>(`/api/descuentos/${id}`, {
-        method: 'DELETE',
-      });
-      
-      // Verificar que la respuesta sea exitosa
-      if (!response || typeof response !== 'object') {
-        throw new Error('Respuesta inválida del servidor');
-      }
-      
-      return response;
-    } catch (error) {
-      console.error('Error en deleteDiscount:', error);
-      
-      // Re-lanzar el error con un mensaje más específico
-      if (error instanceof Error) {
-        throw new Error(`Error al eliminar descuento: ${error.message}`);
-      }
-      
-      throw new Error('Error desconocido al eliminar descuento');
-    }
-  }
-
-  // Product management
-  async getProducts() {
-    return this.request('/api/Productos');
-  }
-
-  async getProduct(id: string | number) {
-    return this.request(`/api/Productos/${id}`);
-  }
-
-  async getProductsForSelect(): Promise<SimpleProduct[]> {
-    try {
-      const products = await this.request<any[]>('/api/Productos');
-      return products.map((p: any) => ({ 
-        id: String(p.id || ''), 
-        name: p.nombre || p.name || 'Sin nombre'
-      }));
-    } catch (error) {
-      console.error('Error al obtener productos para select:', error);
-      return [];
-    }
-  }
-
-  async createProduct(productData: ProductFormData): Promise<ProductActionResponse> {
-    return this.request('/api/Productos', {
-      method: 'POST',
-      body: JSON.stringify(productData),
-    });
-  }
-
-  async updateProduct(id: string, productData: ProductFormData): Promise<ProductActionResponse> {
-    return this.request(`/api/Productos/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(productData),
-    });
-  }
-
-  async deleteProduct(id: string): Promise<ProductActionResponse> {
-    return this.request(`/api/Productos/${id}`, {
+  async deletePlan(id: string | number) {
+    return this.request(`/api/planes/${id}`, {
       method: 'DELETE',
     });
   }
 
-  async getProductCategories(id: string | number) {
-    return this.request(`/api/Productos/${id}/categorias`);
+  // Características de Plan (admin)
+  async getFeaturesByPlan(planId: string | number) {
+    return this.request(`/api/planes/${planId}/caracteristicas`);
   }
 
-  // Category management
-  async getCategories(): Promise<CategoriesResponse> {
-    return this.request('/api/admin/categorias');
+  async getFeature(id: string | number) {
+    return this.request(`/api/caracteristicas/${id}`);
   }
 
-  async getCategory(id: string | number) {
-    return this.request(`/api/admin/categorias/${id}`);
-  }
-
-  async createCategory(categoryData: { nombre: string }) {
-    return this.request('/api/admin/categorias', {
+  async createFeature(data: Record<string, unknown>) {
+    return this.request('/api/caracteristicas', {
       method: 'POST',
-      body: JSON.stringify(categoryData),
+      body: JSON.stringify(data),
     });
   }
 
-  async updateCategory(id: string | number, categoryData: { nombre: string }) {
-    return this.request(`/api/admin/categorias/${id}`, {
+  async updateFeature(id: string | number, data: Record<string, unknown>) {
+    return this.request(`/api/caracteristicas/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(categoryData),
+      body: JSON.stringify(data),
     });
   }
 
-  async deleteCategory(id: string | number) {
-    return this.request(`/api/admin/categorias/${id}`, {
+  async deleteFeature(id: string | number) {
+    return this.request(`/api/caracteristicas/${id}`, {
       method: 'DELETE',
     });
   }
 
-  // Order management
-  async getOrders(): Promise<AdminOrdersResponse> {
-    return this.request('/api/historial/admin');
+  // Páginas del sitio (admin)
+  async getPages() {
+    return this.request('/api/paginas');
   }
 
-  async updateOrderStatus(orderId: string, status: string): Promise<OrderStatusUpdateResponse> {
-    return this.request(`/api/historial/${orderId}/estado`, {
-      method: 'PUT',
-      body: JSON.stringify({ estado: status }),
+  async getPageBySlug(slug: string) {
+    return this.request(`/api/paginas/${slug}`);
+  }
+
+  async createPage(data: Record<string, unknown>) {
+    return this.request('/api/paginas', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 
-  // Admin utilities
+  async updatePage(id: string | number, data: Record<string, unknown>) {
+    return this.request(`/api/paginas/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePage(id: string | number) {
+    return this.request(`/api/paginas/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Pagos (admin)
+  async getPayments() {
+    return this.request('/api/pagos');
+  }
+
+  async createPaymentManual(data: Record<string, unknown>) {
+    return this.request('/api/pagos', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePayment(id: string | number, data: Record<string, unknown>) {
+    return this.request(`/api/pagos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getPaymentById(id: string | number) {
+    return this.request(`/api/pagos/${id}`);
+  }
+
+  // Facturas (admin)
+  async getInvoices() {
+    return this.request('/api/facturas');
+  }
+
+  async getInvoiceById(id: string | number) {
+    return this.request(`/api/facturas/${id}`);
+  }
+
+  async createInvoice(data: Record<string, unknown>) {
+    return this.request('/api/facturas', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Notificaciones (admin)
+  async getNotifications() {
+    return this.request('/api/notificaciones');
+  }
+
+  async createNotification(data: Record<string, unknown>) {
+    return this.request('/api/notificaciones', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteNotification(id: string | number) {
+    return this.request(`/api/notificaciones/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Utilidades admin
   async adminPing(): Promise<AdminPingResponse> {
     return this.request('/api/admin/ping');
   }
