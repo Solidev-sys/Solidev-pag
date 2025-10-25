@@ -1,6 +1,6 @@
 import type { LoginResponse, RegisterResponse, UserResponse, LogoutResponse, CartResponse, CartActionResponse, HistoryResponse, DiscountsResponse, DiscountActionResponse, DiscountFormData, AdminPingResponse, PaymentResponse } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:3002';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -119,9 +119,17 @@ class ApiService {
     });
   }
 
-  // History methods
+  // History methods (redirigido a pagos admin)
   async getHistory(): Promise<HistoryResponse> {
-    return this.request<HistoryResponse>('/api/historial');
+    return this.request<HistoryResponse>('/api/pagos');
+  }
+
+  // Payment methods: ahora requiere suscripcion_id en el cuerpo
+  async createPayment(suscripcionId: number | string): Promise<PaymentResponse> {
+    return this.request<PaymentResponse>('/api/pago', {
+      method: 'POST',
+      body: JSON.stringify({ suscripcion_id: Number(suscripcionId) }),
+    });
   }
 
   // Discount methods
@@ -146,13 +154,6 @@ class ApiService {
   async deleteDiscount(id: string): Promise<DiscountActionResponse> {
     return this.request<DiscountActionResponse>(`/api/descuentos/${id}`, {
       method: 'DELETE',
-    });
-  }
-
-  // Payment methods
-  async createPayment(): Promise<PaymentResponse> {
-    return this.request<PaymentResponse>('/api/pago', {
-      method: 'POST',
     });
   }
 

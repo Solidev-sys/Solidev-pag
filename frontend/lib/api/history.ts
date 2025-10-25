@@ -2,8 +2,9 @@ import { BaseApiService } from './base';
 import type { HistoryResponse } from '@/types';
 
 export class HistoryApiService extends BaseApiService {
-  async getHistory(): Promise<HistoryResponse> {
-    return this.request('/api/historial');
+  async getHistory() {
+    // Admin: historial como lista de pagos
+    return this.request('/api/pagos');
   }
 }
 
