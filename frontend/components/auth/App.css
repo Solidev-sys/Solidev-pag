@@ -1,24 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-* {
+/* Reset específico para el componente de autenticación */
+.auth-container * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
 
-body {
-  background-image: url(back.jpg);
-  color: #fff;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.container {
+.auth-container {
   position: relative;
-  width: 380px;
+  width: 380px !important;
   background: #1c1c1c;
   border-radius: 16px;
   box-shadow: 0 0 20px rgba(3, 169, 244, 0.3);
@@ -26,111 +18,159 @@ body {
   transition: 0.5s;
 }
 
+.form-container {
+  display: block;
+}
+
 .form-box {
   width: 100%;
   padding: 40px;
   position: relative;
-}
-
-.form {
-  display: none;
+  display: flex;
   flex-direction: column;
-  gap: 15px;
-  animation: fade 0.5s ease-in-out;
 }
 
-.form-box.active .signup-form {
-  display: flex;
+.login-box,
+.signup-box {
+  display: none !important;
 }
 
-.form-box:not(.active) .login-form {
-  display: flex;
+.auth-container.login-active .login-box {
+  display: flex !important;
+  animation: slideFadeInDown 0.5s ease;
 }
 
-h2 {
-  text-align: center;
+.auth-container.signup-active .signup-box {
+  display: flex !important;
+  animation: slideFadeInUp 0.5s ease;
+}
+
+.form h2 {
   color: #03a9f4;
-  margin-bottom: 10px;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
-.input-box {
+.inputBox {
   position: relative;
+  margin-bottom: 20px;
 }
 
-.input-box input {
+.inputBox input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 15px;
   background: transparent;
-  border: none;
-  border-bottom: 2px solid #555;
+  border: 1px solid #333;
+  border-radius: 8px;
   color: #fff;
+  font-size: 14px;
   outline: none;
   transition: 0.3s;
 }
 
-.input-box label {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  color: #888;
-  font-size: 0.9em;
-  transition: 0.3s;
-  pointer-events: none;
-}
-
-.input-box input:focus ~ label,
-.input-box input:valid ~ label {
-  top: -8px;
-  color: #03a9f4;
-  font-size: 0.75em;
-}
-
-.input-box input:focus {
+.inputBox input:focus {
   border-color: #03a9f4;
+  box-shadow: 0 0 5px rgba(3, 169, 244, 0.3);
+}
+
+.inputBox label {
+  position: absolute;
+  top: 12px;
+  left: 15px;
+  color: #666;
+  font-size: 14px;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.inputBox input:focus ~ label,
+.inputBox input:valid ~ label {
+  top: -8px;
+  left: 10px;
+  font-size: 12px;
+  color: #03a9f4;
+  background: #1c1c1c;
+  padding: 0 5px;
 }
 
 .btn {
-  background: #03a9f4;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(45deg, #03a9f4, #0288d1);
   border: none;
-  padding: 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #fff;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: 0.3s;
+  margin-bottom: 15px;
 }
 
 .btn:hover {
-  background: #0288d1;
+  background: linear-gradient(45deg, #0288d1, #0277bd);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(3, 169, 244, 0.3);
 }
 
+.toggle-text,
 .switch-text {
   text-align: center;
-  font-size: 0.9em;
-  color: #aaa;
+  color: #666;
+  font-size: 14px;
 }
 
+.toggle-link,
 .switch-text span {
   color: #03a9f4;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.3s;
 }
 
-.form-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8em;
-  color: #aaa;
+.toggle-link:hover,
+.switch-text span:hover {
+  color: #0288d1;
+  text-decoration: underline;
 }
 
-.form-checkbox input {
-  accent-color: #03a9f4;
+/* Animaciones */
+@keyframes slideFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Animación suave */
-@keyframes fade {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideFadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animación del botón cohete */
+.launch {
+  transition: transform 0.3s ease;
+  transform: scale(0.98);
+}
+
+/* Fondo de la página de login */
+body {
+  background-image: url('/back.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
