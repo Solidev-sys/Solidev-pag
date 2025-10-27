@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import "./App.css"
 
-const handleRocket = (e: React.FormEvent<HTMLButtonElement>) => {
+const handleRocket = (e: React.MouseEvent<HTMLButtonElement>) => {
   e.preventDefault()
   const button = e.currentTarget
   button.classList.add("launch")
@@ -19,7 +19,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className={`container ${isLoginActive ? "login-active" : "signup-active"}`}>
+    <div className={`auth-container ${isLoginActive ? "login-active" : "signup-active"}`}>
       <div className="form-container">
         {/* LOGIN */}
         <div className="form-box login-box">
