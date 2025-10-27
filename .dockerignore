@@ -1,0 +1,26 @@
+# Dependencias y caches
+node_modules
+.pnpm-store
+.cache
+
+# Artefactos de Next/Tailwind
+.next
+out
+
+# Logs y temporales
+npm-debug.log*
+yarn-error.log*
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# Configuración de editor/VCS
+.vscode
+.idea
+.git
+.gitignore
+
+# Entornos y secretos locales
+.env.local
+.env.*
