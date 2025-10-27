@@ -1,0 +1,33 @@
+# Dependencias y caches
+node_modules
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+.pnpm-store
+.cache
+
+# Control de versiones y editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Entornos y secretos
+.env
+.env.*
+key.pem
+cert.pem
+*.pem
+*.crt
+*.key
+
+# Archivos temporales
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# Otros no necesarios en la imagen
+bd.sql
+README
+README.md
