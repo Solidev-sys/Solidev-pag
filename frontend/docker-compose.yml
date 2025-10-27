@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  # Producción: imagen optimizada con build previo
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Pasamos la URL al build para que las rewrites funcionen en prod
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: solidev-frontend:latest
+    container_name: solidev-frontend
+    env_file:
+      - ./.env.local
+    environment:
+      # Fuerza modo producción dentro del contenedor
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      # El servidor Next usa este puerto (package.json: 3001)
+      - PORT=3001
+      # Nota: si el backend corre fuera de este compose, preferir:
+      # - NEXT_PUBLIC_API_URL=http://host.docker.internal:3002
+      # para evitar problemas con certificados self-signed en https://localhost:3002
+    ports:
+      # Mapea host:3001 -> contenedor:3001
+      - "3001:3001"
+    restart: always
+    # Si el backend está en otro compose, habilita acceso al host:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Desarrollo: hot-reload y montaje del proyecto
+  frontend-dev:
+    profiles:
+      - dev
+    image: node:20-alpine
+    working_dir: /app
+    container_name: solidev-frontend-dev
+    env_file:
+      - ./.env.local
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      # En dev, apunta al backend del host para evitar loopback dentro del contenedor
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://host.docker.internal:3002}
+      - PORT=3001
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3001:3001"
+    volumes:
+      # Monta el código para hot-reload
+      - .:/app
+      # Evita conflictos de node_modules entre host y contenedor
+      - /app/node_modules
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
