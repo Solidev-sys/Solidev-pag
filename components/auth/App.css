@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-image: url(back.jpg);
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  position: relative;
+  width: 380px;
+  background: #1c1c1c;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(3, 169, 244, 0.3);
+  overflow: hidden;
+  transition: 0.5s;
+}
+
+.form-box {
+  width: 100%;
+  padding: 40px;
+  position: relative;
+}
+
+.form {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  animation: fade 0.5s ease-in-out;
+}
+
+.form-box.active .signup-form {
+  display: flex;
+}
+
+.form-box:not(.active) .login-form {
+  display: flex;
+}
+
+h2 {
+  text-align: center;
+  color: #03a9f4;
+  margin-bottom: 10px;
+}
+
+.input-box {
+  position: relative;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #555;
+  color: #fff;
+  outline: none;
+  transition: 0.3s;
+}
+
+.input-box label {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 0.9em;
+  transition: 0.3s;
+  pointer-events: none;
+}
+
+.input-box input:focus ~ label,
+.input-box input:valid ~ label {
+  top: -8px;
+  color: #03a9f4;
+  font-size: 0.75em;
+}
+
+.input-box input:focus {
+  border-color: #03a9f4;
+}
+
+.btn {
+  background: #03a9f4;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #0288d1;
+}
+
+.switch-text {
+  text-align: center;
+  font-size: 0.9em;
+  color: #aaa;
+}
+
+.switch-text span {
+  color: #03a9f4;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8em;
+  color: #aaa;
+}
+
+.form-checkbox input {
+  accent-color: #03a9f4;
+}
+
+/* Animación suave */
+@keyframes fade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
