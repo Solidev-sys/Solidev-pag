@@ -9,12 +9,11 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-# Pasamos la URL del backend al build (Next la usa en rewrites y cliente)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Build optimizado para producción
+RUN mkdir -p public
 RUN npm run build
 
 # Etapa de runtime: imagen final liviana
@@ -32,7 +31,6 @@ RUN npm ci --omit=dev
 # Copiamos artefactos necesarios del build
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-# next.config.js no es estrictamente necesario en runtime, pero lo incluimos
 COPY --from=builder /app/next.config.js ./next.config.js
 
 # Exponer el puerto del servidor Next
