@@ -12,12 +12,20 @@ services:
     environment:
       - NODE_ENV=production
       - BIND=0.0.0.0
-      # Si deseas forzar puertos sin depender de interpolación:
-      # - HTTP_PORT=3002
+      # Recomiendo fijar SSL para asegurar rutas:
+      - SSL_ENABLE=true
+      - SSL_KEY_PATH=/app/key.pem
+      - SSL_CERT_PATH=/app/cert.pem
     ports:
       - "${HTTP_PORT:-3002}:${HTTP_PORT:-3002}"
     volumes:
-      # Monta certificados en solo lectura; las rutas coinciden con SSL_* del .env
-      - ./key.pem:/app/key.pem:ro
-      - ./cert.pem:/app/cert.pem:ro
+      # Montaje robusto con rutas absolutas (Windows):
+      - type: bind
+        source: d:/GitHubRepositorios/Solidev-pag/key.pem
+        target: /app/key.pem
+        read_only: true
+      - type: bind
+        source: d:/GitHubRepositorios/Solidev-pag/cert.pem
+        target: /app/cert.pem
+        read_only: true
     restart: always
