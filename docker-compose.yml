@@ -12,20 +12,27 @@ services:
     environment:
       - NODE_ENV=production
       - BIND=0.0.0.0
-      # Recomiendo fijar SSL para asegurar rutas:
       - SSL_ENABLE=true
-      - SSL_KEY_PATH=/app/key.pem
-      - SSL_CERT_PATH=/app/cert.pem
+      - SSL_KEY_PATH=/run/secrets/ssl_key
+      - SSL_CERT_PATH=/run/secrets/ssl_cert
+      # Si no está en .env, puedes forzar:
+      # - HTTP_PORT=3002
     ports:
       - "${HTTP_PORT:-3002}:${HTTP_PORT:-3002}"
-    volumes:
-      # Montaje robusto con rutas absolutas (Windows):
-      - type: bind
-        source: d:/GitHubRepositorios/Solidev-pag/key.pem
-        target: /app/key.pem
-        read_only: true
-      - type: bind
-        source: d:/GitHubRepositorios/Solidev-pag/cert.pem
-        target: /app/cert.pem
-        read_only: true
+    # Usamos secrets en lugar de bind mounts para certificados
+    secrets:
+      - ssl_key
+      - ssl_cert
     restart: always
+    networks:
+      - SoliDevNet
+
+secrets:
+  ssl_key:
+    file: ./key.pem
+  ssl_cert:
+    file: ./cert.pem
+
+networks:
+  SoliDevNet:
+    driver: bridge
