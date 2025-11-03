@@ -34,5 +34,4 @@ secrets:
     file: ./cert.pem
 
 networks:
-  SoliDevNet:
-    driver: bridge
+  cliente-1:
