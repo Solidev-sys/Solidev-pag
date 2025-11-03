@@ -1,6 +1,5 @@
 // Forzando la URL del backend para evitar problemas de conexión
-const API_BASE_URL = 'http://localhost:3002';
-// Verificar en consola la URL que se está utilizando
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 console.log('API URL:', API_BASE_URL);
 
 export class BaseApiService {

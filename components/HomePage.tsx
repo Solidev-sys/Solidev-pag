@@ -1,8 +1,33 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { apiService } from "@/lib/api"
+
 export function HomePage() {
+  const [apiMessage, setApiMessage] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  useEffect(() => {
+    apiService
+      .getApiTest()
+      .then((data) => setApiMessage(data.q))
+      .catch((err) => setApiError(err?.message || 'Error de conexión'))
+  }, [])
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
+      {/* Estado de API */}
+      <div className="max-w-6xl mx-auto px-6 pt-6">
+        <div className="p-4 mb-6 rounded-md border bg-white">
+          <p className="text-sm">
+            {apiError
+              ? <span className="text-red-600">Error de API: {apiError}</span>
+              : apiMessage
+                ? <span className="text-green-600">API conectada: {apiMessage}</span>
+                : <span className="text-gray-600">Verificando conexión con la API…</span>}
+          </p>
+        </div>
+      </div>
       {/* Hero */}
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-6 py-8">

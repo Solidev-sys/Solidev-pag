@@ -100,6 +100,11 @@ export class ApiService extends BaseApiService {
   async getHistory(): Promise<HistoryResponse> {
     return this.request('/api/historial');
   }
+
+  // Endpoint de verificación/health: devuelve { q: 'pex' }
+  async getApiTest(): Promise<{ q: string }> {
+    return this.request('/test');
+  }
 }
 export const apiService = new ApiService();
 
