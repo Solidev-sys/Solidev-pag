@@ -26,7 +26,7 @@ function startHttpsServer(app, port) {
     const keyPath  = path.resolve(SSL_KEY_PATH);
     const certPath = path.resolve(SSL_CERT_PATH);
 
-    if (SSL_ENABLE && isReadableFile(keyPath) && isReadableFile(certPath)) {
+    if (SSL_ENABLE && isReadableFile(keyPath) && isReadableFile(certPath) && false) {
         const options = {
             key:  fs.readFileSync(keyPath),
             cert: fs.readFileSync(certPath)

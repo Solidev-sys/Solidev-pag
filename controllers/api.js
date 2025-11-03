@@ -98,3 +98,7 @@ app.use('/api', caracteristicasRouter);
 
 const paginasRouter = createPaginasRouter({ ensureAuth, ensureRole });
 app.use('/api', paginasRouter);
+
+app.get('/test', (req, res) => {
+  res.json({ q: 'pex' });
+});
