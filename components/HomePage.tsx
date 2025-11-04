@@ -1,36 +1,33 @@
 "use client"
 
-import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { apiService } from "@/lib/api"
 
 export function HomePage() {
-  // Eliminamos la llamada a la API que causa errores de conexión
-  // ya que el servidor backend no está ejecutándose en el puerto 3002
+  const [apiMessage, setApiMessage] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  useEffect(() => {
+    apiService
+      .getApiTest()
+      .then((data) => setApiMessage(data.q))
+      .catch((err) => setApiError(err?.message || 'Error de conexión'))
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm py-4">
-        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
-          <div className="text-xl font-bold">SoliDev</div>
-          
-          {/* Center Navigation */}
-          <div className="flex space-x-6">
-            <Link href="/contacto" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Contactanos
-            </Link>
-            <Link href="/personal" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Personal
-            </Link>
-          </div>
-          
-          {/* Login Button */}
-          <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
-            Iniciar sesión
-          </Link>
+      {/* Estado de API */}
+      <div className="max-w-6xl mx-auto px-6 pt-6">
+        <div className="p-4 mb-6 rounded-md border bg-white">
+          <p className="text-sm">
+            {apiError
+              ? <span className="text-red-600">Error de API: {apiError}</span>
+              : apiMessage
+                ? <span className="text-green-600">API conectada: {apiMessage}</span>
+                : <span className="text-gray-600">Verificando conexión con la API…</span>}
+          </p>
         </div>
-      </nav>
-      
+      </div>
       {/* Hero */}
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-6 py-8">
@@ -39,12 +36,12 @@ export function HomePage() {
             Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para tu negocio.
           </p>
           <div className="mt-6">
-            <Link
-              href="/contacto"
+            <a
+              href="#contacto"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md transition-colors"
             >
               Solicitar una cotización
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -75,7 +72,56 @@ export function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Proceso */}
+        <section className="py-12 border-b">
+          <h2 className="text-2xl font-semibold">Nuestro proceso de trabajo</h2>
+          <ol className="mt-4 list-decimal list-inside space-y-2 text-gray-700">
+            <li>Reunión inicial y definición de objetivos</li>
+            <li>Diseño de interfaz y estructura de contenidos</li>
+            <li>Desarrollo y pruebas de funcionalidad</li>
+            <li>Optimización de rendimiento y lanzamiento</li>
+            <li>Soporte y mejoras continuas</li>
+          </ol>
+        </section>
+
+        {/* Tecnologías */}
+        <section className="py-12 border-b">
+          <h2 className="text-2xl font-semibold">Tecnologías</h2>
+          <p className="mt-2 text-gray-600">Trabajamos con herramientas modernas del ecosistema web.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {['HTML5', 'CSS3', 'Tailwind CSS', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js'].map((tech) => (
+              <span key={tech} className="px-3 py-1 bg-white border rounded-md text-sm">
+                {tech}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Contacto */}
+        <section id="contacto" className="py-12">
+          <h2 className="text-2xl font-semibold">Contacto</h2>
+          <p className="mt-2 text-gray-600">
+            ¿Listo para comenzar tu proyecto? Escríbenos y te responderemos pronto.
+          </p>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 bg-white rounded-lg border">
+              <h3 className="font-medium">Correo</h3>
+              <p className="mt-1 text-sm text-gray-600">contacto@tusitio.com</p>
+            </div>
+            <div className="p-5 bg-white rounded-lg border">
+              <h3 className="font-medium">WhatsApp</h3>
+              <p className="mt-1 text-sm text-gray-600">+52 55 1234 5678</p>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <footer className="bg-white border-t mt-12">
+        <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-600">
+          © {new Date().getFullYear()} Tu Agencia Web. Todos los derechos reservados.
+        </div>
+      </footer>
     </div>
   )
 }
