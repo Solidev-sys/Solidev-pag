@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: "http://solidev-backend:3002"
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}  
     image: solidev-frontend:latest
     container_name: solidev-frontend
     env_file:
