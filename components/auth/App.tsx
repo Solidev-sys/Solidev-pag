@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import "./App.css"
+import { useState, FormEvent } from "react"
+import "./LoginStyles.css"
+import Link from "next/link"
 
-const handleRocket = (e: React.MouseEvent<HTMLButtonElement>) => {
+const handleRocket = (e: FormEvent<HTMLButtonElement>) => {
   e.preventDefault()
   const button = e.currentTarget
   button.classList.add("launch")
@@ -19,10 +20,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className={`auth-container ${isLoginActive ? "login-active" : "signup-active"}`}>
-      <div className="form-container">
+    <div className="login-screen">
+      {/* Botón fuera del contenedor con estilo .btn */}
+      <Link href="/" className="btn return-btn">Volver al inicio</Link>
+      <div className={`container ${isLoginActive ? "login-active" : "signup-active"}`}>
+        <div className="form-container">
         {/* LOGIN */}
-        <div className="form-box login-box">
+        <div className={`form-box login-box ${isLoginActive ? 'active' : ''}`}>
           <h2>Iniciar Sesión</h2>
           <form>
             <div className="input-box">
@@ -46,7 +50,7 @@ export function LoginPage() {
         </div>
 
         {/* REGISTRO */}
-        <div className="form-box signup-box">
+        <div className={`form-box signup-box ${!isLoginActive ? 'active' : ''}`}>
           <h2>Registrarse</h2>
           <form>
             <div className="input-box">
@@ -72,11 +76,11 @@ export function LoginPage() {
             </p>
           </form>
         </div>
-      </div>
+        </div>
 
-      {/* PANEL ANIMADO */}
-      <div className="slider-panel">
-        <div className="panel-content">
+        {/* PANEL ANIMADO */}
+        <div className="slider-panel">
+          <div className="panel-content">
           {isLoginActive ? (
             <>
               <h2>¡Hola de nuevo!</h2>
@@ -88,6 +92,7 @@ export function LoginPage() {
               <p>Regístrate para unirte a nuestra comunidad.</p>
             </>
           )}
+          </div>
         </div>
       </div>
     </div>

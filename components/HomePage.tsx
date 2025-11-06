@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { apiService } from "@/lib/api"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export function HomePage() {
   const [apiMessage, setApiMessage] = useState<string | null>(null)
@@ -15,7 +17,7 @@ export function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-neutral-900 text-teal-100">
       {/* Estado de API */}
       <div className="max-w-6xl mx-auto px-6 pt-6">
         <div className="p-4 mb-6 rounded-md border bg-white">
@@ -29,20 +31,25 @@ export function HomePage() {
         </div>
       </div>
       {/* Hero */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <header className="bg-transparent">
+        <div className="max-w-6xl mx-auto px-6 py-8 relative">
+          {/* Botones fijos arriba a la derecha: Personal, Contacto y Login */}
+          <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/personal">Personal</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/contacto">Contáctanos</Link>
+            </Button>
+            <Button asChild className="bg-gray-900 text-white hover:bg-gray-800">
+              <Link href="/login">Iniciar sesión</Link>
+            </Button>
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Creación de Páginas Web</h1>
           <p className="mt-2 text-lg text-gray-600">
             Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para tu negocio.
           </p>
-          <div className="mt-6">
-            <a
-              href="#contacto"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md transition-colors"
-            >
-              Solicitar una cotización
-            </a>
-          </div>
+          {/* CTA bajo el título eliminado para evitar duplicar botones */}
         </div>
       </header>
 

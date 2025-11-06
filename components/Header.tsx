@@ -127,6 +127,36 @@ export function Header() {
               >
                 Inicio
               </Link>
+              <Link
+                href="/personal"
+                className="nav-link text-white transition-colors font-medium py-2 lg:py-0"
+                style={{
+                  borderBottom: '2px solid rgba(255, 255, 255, 0.10)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#ccfbf1'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#FFFFFF'
+                }}
+              >
+                Personal
+              </Link>
+              <Link
+                href="/contacto"
+                className="nav-link text-white transition-colors font-medium py-2 lg:py-0"
+                style={{
+                  borderBottom: '2px solid rgba(255, 255, 255, 0.10)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#ccfbf1'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#FFFFFF'
+                }}
+              >
+                Contacto
+              </Link>
             </nav>
 
             {/* User Actions */}
