@@ -48,5 +48,4 @@ services:
 
 networks:
   SoliDevNet:
-    name: SoliDevNet
     driver: bridge
