@@ -43,9 +43,3 @@ services:
       - /app/node_modules
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - SoliDevNet
-
-networks:
-  SoliDevNet:
-    driver: bridge
