@@ -1,87 +1,112 @@
+import { Instagram, Linkedin, MessageCircle } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+
+// Icono TikTok en SVG (blanco) para usar dentro de los círculos
+function TikTokIcon({ className = "w-20 h-20" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      className={className}
+      fill="currentColor"
+    >
+      <path d="M16.5 6.5c1.2 1.1 2.7 1.8 4.3 2v3.1c-1.8-.2-3.5-.9-5-2v6.3c0 3.3-2.7 6-6 6s-6-2.7-6-6c0-3.3 2.7-6 6-6 .2 0 .4 0 .6.1v3.2c-.2-.1-.4-.1-.6-.1-1.5 0-2.7 1.2-2.7 2.7S7.3 18.5 8.8 18.5 11.5 17.3 11.5 15.8V3h3.1c.3 1.4 1 2.7 1.9 3.5Z"/>
+    </svg>
+  )
+}
+
 export default function ContactoPage() {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold mb-6 text-center">Contáctanos</h1>
-        
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Información de Contacto</h2>
-            <p className="text-gray-700">
-              Estamos aquí para ayudarte. No dudes en ponerte en contacto con nosotros.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h3 className="font-medium mb-2">Dirección</h3>
-              <p className="text-gray-600">Av. Principal 123, Ciudad</p>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h3 className="font-medium mb-2">Teléfono</h3>
-              <p className="text-gray-600">+123 456 7890</p>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h3 className="font-medium mb-2">Email</h3>
-              <p className="text-gray-600">contacto@solidev.com</p>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h3 className="font-medium mb-2">Horario</h3>
-              <p className="text-gray-600">Lunes a Viernes: 9:00 - 18:00</p>
-            </div>
-          </div>
-          
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Envíanos un mensaje</h2>
-            <form className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Nombre</label>
-                  <input 
-                    type="text" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="Tu nombre"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input 
-                    type="email" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="tu@email.com"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Asunto</label>
-                <input 
-                  type="text" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Asunto de tu mensaje"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Mensaje</label>
-                <textarea 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md h-32"
-                  placeholder="Escribe tu mensaje aquí..."
-                ></textarea>
-              </div>
-              
-              <div>
-                <button 
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
-                >
-                  Enviar Mensaje
-                </button>
-              </div>
-            </form>
+    <div className="min-h-screen bg-neutral-900 text-teal-100">
+      {/* Botones fijos arriba a la derecha */}
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
+        <Button variant="outline" asChild>
+          <Link href="/personal">Personal</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/contacto">Contáctanos</Link>
+        </Button>
+        <Button asChild className="bg-gray-900 text-white hover:bg-gray-800">
+          <Link href="/login">Iniciar sesión</Link>
+        </Button>
+      </div>
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-teal-300 tracking-wide text-center">CONTÁCTANOS</h1>
+
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Formulario */}
+          <form className="rounded-xl p-6 border-2 border-teal-400/60 bg-neutral-900/70 shadow-lg">
+            <label className="block text-teal-200 mb-2">Nombre</label>
+            <input
+              type="text"
+              className="w-full mb-4 px-4 py-2 rounded-md bg-neutral-900 text-teal-100 placeholder-teal-300 border-2 border-teal-400 focus:outline-none focus:border-teal-300"
+              placeholder="Tu nombre"
+            />
+
+            <label className="block text-teal-200 mb-2">Correo</label>
+            <input
+              type="email"
+              className="w-full mb-4 px-4 py-2 rounded-md bg-neutral-900 text-teal-100 placeholder-teal-300 border-2 border-teal-400 focus:outline-none focus:border-teal-300"
+              placeholder="tucorreo@ejemplo.com"
+            />
+
+            <label className="block text-teal-200 mb-2">Teléfono</label>
+            <input
+              type="tel"
+              className="w-full mb-4 px-4 py-2 rounded-md bg-neutral-900 text-teal-100 placeholder-teal-300 border-2 border-teal-400 focus:outline-none focus:border-teal-300"
+              placeholder="+00 000 000 000"
+            />
+
+            <label className="block text-teal-200 mb-2">Mensaje</label>
+            <textarea
+              rows={5}
+              className="w-full mb-6 px-4 py-2 rounded-md bg-neutral-900 text-teal-100 placeholder-teal-300 border-2 border-teal-400 focus:outline-none focus:border-teal-300"
+              placeholder="Cuéntanos sobre tu proyecto"
+            />
+
+            <button
+              type="submit"
+              className="w-full px-5 py-2 rounded-md bg-teal-500 hover:bg-teal-600 text-white font-medium transition-colors"
+            >
+              Enviar
+            </button>
+          </form>
+
+          {/* Iconos sociales */}
+          <div className="grid grid-cols-2 gap-8 place-items-center">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
+            >
+              <Instagram className="w-20 h-20 text-white" />
+            </a>
+            <a
+              href="https://wa.me/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
+            >
+              <MessageCircle className="w-20 h-20 text-white" />
+            </a>
+            <a
+              href="https://www.tiktok.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
+            >
+              <TikTokIcon className="w-20 h-20 text-white" />
+            </a>
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
+            >
+              <Linkedin className="w-20 h-20 text-white" />
+            </a>
           </div>
         </div>
       </div>
