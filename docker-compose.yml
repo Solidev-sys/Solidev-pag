@@ -13,25 +13,14 @@ services:
       - NODE_ENV=production
       - BIND=0.0.0.0
       - SSL_ENABLE=true
-      - SSL_KEY_PATH=/run/secrets/ssl_key
-      - SSL_CERT_PATH=/run/secrets/ssl_cert
       # Si no está en .env, puedes forzar:
       # - HTTP_PORT=3002
     ports:
       - "${HTTP_PORT:-3002}:${HTTP_PORT:-3002}"
     # Usamos secrets en lugar de bind mounts para certificados
-    secrets:
-      - ssl_key
-      - ssl_cert
     restart: always
     networks:
       - SoliDevNet
-
-secrets:
-  ssl_key:
-    file: ./key.pem
-  ssl_cert:
-    file: ./cert.pem
 
 networks:
   SoliDevNet:

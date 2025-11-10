@@ -8,7 +8,7 @@ const { ensureAuth, ensureRole, ensureOwnerOrAdmin } = require('./middleware/aut
 const { createMercadoPagoClient } = require('./services/mercadopago');
 const createPaymentsRouter = require('./routes/payments');
 const createWebhookRouter = require('./routes/webhook');
-const { startHttpsServer } = require('./server/https');
+const { startServer } = require('./server/http');
 const createSuscripcionesRouter = require('./routes/suscripciones');
 const createPagosRouter = require('./routes/pagos');
 const createFacturasRouter = require('./routes/facturas');
@@ -76,7 +76,7 @@ app.use('/api', webhookRouter);
 // ← elimina cualquier arranque HTTPS aquí (startHttpsServer/app con https/fs)
 
 // Servidor HTTPS (único servidor)
-startHttpsServer(app, HTTP_PORT);
+startServer(app, HTTP_PORT);
 
 const suscripcionesRouter = createSuscripcionesRouter({ ensureAuth, ensureRole });
 app.use('/api', suscripcionesRouter);
