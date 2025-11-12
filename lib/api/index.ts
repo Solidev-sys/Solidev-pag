@@ -101,9 +101,18 @@ export class ApiService extends BaseApiService {
     return this.request('/api/historial');
   }
 
+  // Nuevos métodos públicos: planes y páginas
+  async getPlans(): Promise<import('@/types/indexNew').PlanesResponse> {
+      return this.request('/api/planes');
+  }
+  
+  async getPages(): Promise<import('@/types/indexNew').PaginasResponse> {
+      return this.request('/api/paginas');
+  }
+  
   // Endpoint de verificación/health: devuelve { q: 'pex' }
   async getApiTest(): Promise<{ q: string }> {
-    return this.request('/test');
+      return this.request('/test');
   }
 }
 export const apiService = new ApiService();
