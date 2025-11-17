@@ -27,6 +27,7 @@ export interface BackendPlan {
   mensaje_rapido: boolean
   mensaje_seguro: boolean
   resumen?: string | null
+  enlace_imagen?: string | null
   creado_en?: string
   actualizado_en?: string
 
@@ -136,6 +137,7 @@ export interface BackendPaginaSitio {
   hero_titulo?: string | null
   hero_texto?: string | null
   tema_color: string
+  imagenes?: string[] | null
   creado_en?: string
   actualizado_en?: string
 }

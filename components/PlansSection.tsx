@@ -56,13 +56,30 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
       `}
       whileHover={!isStatic && !disabled ? { scale: 1.02, transition: { duration: 0.2 } } : {}}
     >
-      {/* Título del plan */}
       <h3 
         className="font-bold text-white uppercase mb-8"
         style={{ fontSize: "clamp(24px, 5vw, 34px)" }}
       >
         {plan.nombre}
       </h3>
+
+      {plan.resumen && (
+        <p
+          className="text-[#F5F5F5] mb-6"
+          style={{ fontSize: "clamp(14px, 3vw, 16px)" }}
+        >
+          {plan.resumen}
+        </p>
+      )}
+
+      <div className="flex gap-2 mb-6">
+        {plan.mensaje_rapido && (
+          <span className="text-xs px-3 py-1 rounded-full bg-[#00CED1] text-[#1E1E1E]">rápido</span>
+        )}
+        {plan.mensaje_seguro && (
+          <span className="text-xs px-3 py-1 rounded-full bg-[#00CED1] text-[#1E1E1E]">seguro</span>
+        )}
+      </div>
 
       {/* Precio */}
       <div className="mb-10">
@@ -215,13 +232,25 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
               >
-                <Image
-                  src="/images/premium_photo-1664474834472-6c7d1e3198e2.jpeg" 
-                  alt="Vista previa del plan"
-                  width={600}
-                  height={450} 
-                  className="rounded-l-3xl object-cover w-full h-[450px]"
-                />
+                {(() => {
+                  const s = ordered[selectedIndex].enlace_imagen || "/images/premium_photo-1664474834472-6c7d1e3198e2.jpeg"
+                  return s.startsWith("http")
+                    ? (
+                      <img
+                        src={s}
+                        alt="Vista previa del plan"
+                        className="rounded-l-3xl object-cover w-full h-[450px]"
+                      />
+                    ) : (
+                      <Image
+                        src={s}
+                        alt="Vista previa del plan"
+                        width={600}
+                        height={450}
+                        className="rounded-l-3xl object-cover w-full h-[450px]"
+                      />
+                    )
+                })()}
               </motion.div>
 
               {/* Botón Siguiente (Flecha) */}
