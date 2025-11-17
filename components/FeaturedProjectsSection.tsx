@@ -14,8 +14,8 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
 
   const items = projects.slice(0, 4)
   const firstImage = (arr?: string[] | null) => {
-    if (!arr || arr.length === 0) return null
-    const raw = arr.find((s) => typeof s === 'string' && s.trim().length > 0)
+    if (!arr || !Array.isArray(arr) || arr.length === 0) return null
+    const raw = arr.find((s): s is string => typeof s === 'string' && s.trim().length > 0)
     if (!raw) return null
     const cleaned = raw.replace(/[`"']/g, '').trim()
     return cleaned.length > 0 ? cleaned : null
@@ -46,15 +46,16 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
           <div className="bg-neutral-800 rounded-md overflow-hidden">
             {(() => {
               const hero = projects[0]
-              const heroImg = firstImage(hero?.imagenes || null)
+              if (!hero) return null
+              const heroImg = firstImage(hero.imagenes ?? null)
               return (
                 <div className="relative h-64 md:h-72 flex items-center justify-center text-center group">
                   {heroImg && (
-                    <img src={heroImg} alt={hero?.titulo || "Proyecto principal"} className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-300 ease-out group-hover:scale-105" />
+                    <img src={heroImg} alt={hero.titulo || "Proyecto principal"} className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-300 ease-out group-hover:scale-105" />
                   )}
                   <div className="relative z-10 px-6">
-                    <div className="text-teal-200 text-xl md:text-2xl font-bold">{hero?.hero_titulo || hero?.titulo || "Proyecto principal"}</div>
-                    {hero?.hero_texto && (
+                    <div className="text-teal-200 text-xl md:text-2xl font-bold">{hero.hero_titulo || hero.titulo || "Proyecto principal"}</div>
+                    {hero.hero_texto && (
                       <p className="mt-2 text-teal-100 text-sm md:text-base">{hero.hero_texto}</p>
                     )}
                   </div>
