@@ -23,7 +23,8 @@ const Plan = sequelize.define('Plan', {
   activo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   mensaje_rapido: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   mensaje_seguro: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
-  resumen: { type: DataTypes.STRING(255), allowNull: true }
+  resumen: { type: DataTypes.STRING(255), allowNull: true },
+  enlace_imagen: { type: DataTypes.STRING(255), allowNull: true }
 }, {
   tableName: 'planes',
   timestamps: true,

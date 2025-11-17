@@ -22,6 +22,7 @@ CREATE TABLE planes (
   mensaje_rapido  TINYINT(1)   NOT NULL DEFAULT 1,
   mensaje_seguro  TINYINT(1)   NOT NULL DEFAULT 1,
   resumen         VARCHAR(255) NULL,
+  enlace_imagen   VARCHAR(255) NULL,
   creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -190,6 +191,7 @@ CREATE TABLE paginas_sitio (
   hero_titulo   VARCHAR(160) NULL,
   hero_texto    VARCHAR(500) NULL,
   tema_color    VARCHAR(64)  NOT NULL DEFAULT 'azul_verde_suave',
+  imagenes      JSON NULL,
   creado_en     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

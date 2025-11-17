@@ -6,7 +6,8 @@ const PaginaSitio = sequelize.define('PaginaSitio', {
   titulo: { type: DataTypes.STRING(120), allowNull: false },
   hero_titulo: { type: DataTypes.STRING(160), allowNull: true },
   hero_texto: { type: DataTypes.STRING(500), allowNull: true },
-  tema_color: { type: DataTypes.STRING(64), allowNull: false, defaultValue: 'azul_verde_suave' }
+  tema_color: { type: DataTypes.STRING(64), allowNull: false, defaultValue: 'azul_verde_suave' },
+  imagenes: { type: DataTypes.JSON, allowNull: true }
 }, {
   tableName: 'paginas_sitio',
   timestamps: true,
