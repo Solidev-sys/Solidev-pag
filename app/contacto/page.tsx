@@ -64,7 +64,7 @@ export default function ContactoPage() {
           {/* Iconos sociales */}
           <div className="grid grid-cols-2 gap-8 place-items-center">
             <a
-              href="https://instagram.com"
+              href="https://instagram.com/solidev_cl"
               target="_blank"
               rel="noopener noreferrer"
               className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
@@ -72,7 +72,7 @@ export default function ContactoPage() {
               <Instagram className="w-20 h-20 text-white" />
             </a>
             <a
-              href="https://wa.me/"
+              href="https://wa.me/+56976506320"
               target="_blank"
               rel="noopener noreferrer"
               className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
@@ -80,7 +80,7 @@ export default function ContactoPage() {
               <MessageCircle className="w-20 h-20 text-white" />
             </a>
             <a
-              href="https://www.tiktok.com/"
+              href="https://www.tiktok.com/@solidev_cl"
               target="_blank"
               rel="noopener noreferrer"
               className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl"
