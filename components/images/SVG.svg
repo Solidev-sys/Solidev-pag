@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 391.9 391.9">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Nueva_muestra_de_degradado_1-2);
+      }
+
+      .cls-2 {
+        fill: url(#Nueva_muestra_de_degradado_1-3);
+      }
+
+      .cls-3 {
+        fill: url(#Nueva_muestra_de_degradado_1);
+      }
+    </style>
+    <linearGradient id="Nueva_muestra_de_degradado_1" data-name="Nueva muestra de degradado 1" x1="0" y1="178.62" x2="357.25" y2="178.62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3cc1f3"/>
+      <stop offset="1" stop-color="#10cc99"/>
+    </linearGradient>
+    <linearGradient id="Nueva_muestra_de_degradado_1-2" data-name="Nueva muestra de degradado 1" x1="34.65" y1="213.28" x2="391.9" y2="213.28" xlink:href="#Nueva_muestra_de_degradado_1"/>
+    <linearGradient id="Nueva_muestra_de_degradado_1-3" data-name="Nueva muestra de degradado 1" x1="216.58" y1="254.96" x2="306.33" y2="254.96" xlink:href="#Nueva_muestra_de_degradado_1"/>
+  </defs>
+  <g id="Capa_1-2" data-name="Capa 1">
+    <polygon class="cls-3" points="357.25 0 308.26 48.98 48.98 48.98 48.98 100.43 51.45 97.97 259.28 97.97 244.92 112.33 210.3 146.95 0 357.25 0 195.97 48.98 195.97 48.98 238.99 92 195.97 97.97 190 141.02 146.95 0 146.95 0 0 357.25 0"/>
+    <polygon class="cls-1" points="391.9 34.65 391.9 391.9 34.65 391.9 48.98 377.57 83.64 342.92 342.92 342.92 342.92 83.64 391.9 34.65"/>
+    <path class="cls-2" d="M306.33,229.17c0,33.22-18.05,62.22-44.87,77.74-26.83-15.52-44.87-44.52-44.87-77.74,0-2.24.08-4.47.25-6.67,17.23-2.08,32.96-9.05,45.76-19.48,12.22,10.03,27.13,16.91,43.49,19.36.17,2.24.25,4.51.25,6.79Z"/>
+  </g>
+</svg>

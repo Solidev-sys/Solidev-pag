@@ -1,4 +1,7 @@
-"use client"
+// src/components/Hero.tsx (¡Modificado y más limpio!)
+"use client" // <--- OJO: Este "use client" probablemente no sea necesario aquí.
+// Tu Hero.tsx original NO usa hooks (useState, etc.), así que
+// puedes QUITAR el "use client" de este archivo.
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -7,18 +10,6 @@ export function Hero() {
   return (
     <header className="bg-transparent">
       <div className="max-w-6xl mx-auto px-6 py-8 relative">
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/personal">Nosotros</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/contacto">Contacto</Link>
-          </Button>
-          <Button asChild className="bg-gray-900 text-white hover:bg-gray-800">
-            <Link href="/login">Iniciar sesión</Link>
-          </Button>
-        </div>
-
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-teal-300">

@@ -19,18 +19,6 @@ function TikTokIcon({ className = "w-20 h-20" }: { className?: string }) {
 export default function ContactoPage() {
   return (
     <div className="min-h-screen bg-neutral-900 text-teal-100">
-      {/* Botones fijos arriba a la derecha */}
-      <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
-        <Button variant="outline" asChild>
-          <Link href="/personal">Personal</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/contacto">Contáctanos</Link>
-        </Button>
-        <Button asChild className="bg-gray-900 text-white hover:bg-gray-800">
-          <Link href="/login">Iniciar sesión</Link>
-        </Button>
-      </div>
       <div className="max-w-6xl mx-auto px-6 py-12">
         <h1 className="text-3xl md:text-4xl font-bold text-teal-300 tracking-wide text-center">CONTÁCTANOS</h1>
 
