@@ -13,6 +13,13 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
   if (!projects || projects.length === 0) return null
 
   const items = projects.slice(0, 4)
+  const firstImage = (arr?: string[] | null) => {
+    if (!arr || arr.length === 0) return null
+    const raw = arr.find((s) => typeof s === 'string' && s.trim().length > 0)
+    if (!raw) return null
+    const cleaned = raw.replace(/[`"']/g, '').trim()
+    return cleaned.length > 0 ? cleaned : null
+  }
 
   return (
     <section className="py-12">
@@ -21,16 +28,11 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="grid grid-cols-2 gap-4">
             {items.map((p) => {
-              const img = p.imagenes && p.imagenes.length > 0 ? p.imagenes[0] : null
+              const img = firstImage(p.imagenes)
               return (
                 <div key={p.id} className="bg-neutral-800 rounded-md overflow-hidden">
                   {img ? (
-                    img.startsWith("http") ? (
-                      <img src={img} alt={p.titulo} className="w-full h-28 object-cover" />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={img} alt={p.titulo} className="w-full h-28 object-cover" />
-                    )
+                      <img src={img} alt={p.titulo} className="w-full h-28 object-cover transition-transform duration-300 ease-out hover:scale-105" />
                   ) : (
                     <div className="h-28 flex items-center justify-center text-teal-200">{p.titulo}</div>
                   )}
@@ -44,12 +46,11 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
           <div className="bg-neutral-800 rounded-md overflow-hidden">
             {(() => {
               const hero = projects[0]
-              const heroImg = hero?.imagenes && hero.imagenes.length > 0 ? hero.imagenes[0] : null
+              const heroImg = firstImage(hero?.imagenes || null)
               return (
-                <div className="relative h-64 md:h-72 flex items-center justify-center text-center">
+                <div className="relative h-64 md:h-72 flex items-center justify-center text-center group">
                   {heroImg && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={heroImg} alt={hero?.titulo || "Proyecto principal"} className="absolute inset-0 w-full h-full object-cover opacity-70" />
+                    <img src={heroImg} alt={hero?.titulo || "Proyecto principal"} className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-300 ease-out group-hover:scale-105" />
                   )}
                   <div className="relative z-10 px-6">
                     <div className="text-teal-200 text-xl md:text-2xl font-bold">{hero?.hero_titulo || hero?.titulo || "Proyecto principal"}</div>
