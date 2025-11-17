@@ -36,13 +36,33 @@ export function HomePage() {
 
   return (
         <div className="min-h-screen bg-neutral-900 text-teal-100">
-          {/* Estado de API (centrado) */}
-          <div className="max-w-6xl mx-auto px-6 pt-6">
-            <ApiStatus message={apiMessage} error={apiError} />
-          </div>
+          
+          {/* --- MODIFICACIÓN --- */}
+          {/* Envolvemos el Hero y el ApiStatus en un div 'relative'.
+            Esto permite que el Hero ocupe toda la pantalla (min-h-screen)
+            y que el ApiStatus se posicione 'absolute' sobre él,
+            sin empujar el contenido hacia abajo.
+          */}
+          <div className="relative">
+              
+              {/* Hero (ancho completo) */}
+              {/* Esto ahora es la capa base de esta sección */}
+            <Hero />
     
-          {/* Hero (ancho completo) */}
-          <Hero />
+            {/* Estado de API (posicionado sobre el Hero) */}
+            {/* Usamos 'absolute' para sacarlo del flujo normal.
+              'top-0', 'left-0', 'right-0' lo anclan a la parte superior.
+              'z-10' asegura que esté encima.
+              El 'div' interior recrea el centrado y espaciado
+              que tenía antes.
+            */}
+            <div className="absolute top-0 left-0 right-0 z-10">
+              <div className="max-w-6xl mx-auto px-6 pt-6">
+                <ApiStatus message={apiMessage} error={apiError} />
+              </div>
+            </div>
+          </div>
+          {/* --- FIN DE LA MODIFICACIÓN --- */}
     
           {/* ========================================================== */}
           {/* SECCIONES MOVIDAS FUERA DE MAIN */}
