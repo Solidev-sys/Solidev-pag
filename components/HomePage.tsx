@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { apiService } from "@/lib/api"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -10,6 +11,41 @@ import { ApiStatus } from "./ApiStatus"
 import { Hero } from "./Hero"
 import { PlansSection } from "./PlansSection"
 import { FeaturedProjectsSection } from "./FeaturedProjectsSection"
+
+const fadeInUp: any = {
+  hidden: { opacity: 0, y: 60 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
+}
+
+const fadeInScale: any = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
+}
+
+const staggerContainer: any = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1
+    }
+  }
+}
 
 export function HomePage() {
   const [apiMessage, setApiMessage] = useState<string | null>(null)
@@ -35,66 +71,94 @@ export function HomePage() {
   }, [])
 
   return (
-        <div className="min-h-screen bg-neutral-900 text-teal-100">
-          
-          {/* --- MODIFICACIÓN --- */}
-          {/* Envolvemos el Hero y el ApiStatus en un div 'relative'.
-            Esto permite que el Hero ocupe toda la pantalla (min-h-screen)
-            y que el ApiStatus se posicione 'absolute' sobre él,
-            sin empujar el contenido hacia abajo.
-          */}
-          <div className="relative">
-              
-              {/* Hero (ancho completo) */}
-              {/* Esto ahora es la capa base de esta sección */}
-            <Hero />
-    
-            {/* Estado de API (posicionado sobre el Hero) */}
-            {/* Usamos 'absolute' para sacarlo del flujo normal.
-              'top-0', 'left-0', 'right-0' lo anclan a la parte superior.
-              'z-10' asegura que esté encima.
-              El 'div' interior recrea el centrado y espaciado
-              que tenía antes.
-            */}
-            <div className="absolute top-0 left-0 right-0 z-10">
-              <div className="max-w-6xl mx-auto px-6 pt-6">
-                <ApiStatus message={apiMessage} error={apiError} />
-              </div>
-            </div>
+    <div className="min-h-screen bg-neutral-900 text-teal-100">
+      
+      {/* Hero con ApiStatus superpuesto */}
+      <div className="relative">
+        <Hero />
+        
+        {/* ApiStatus animado con fade in desde arriba */}
+        <motion.div 
+          className="absolute top-0 left-0 right-0 z-10"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="max-w-6xl mx-auto px-6 pt-6">
+            <ApiStatus message={apiMessage} error={apiError} />
           </div>
-          {/* --- FIN DE LA MODIFICACIÓN --- */}
-    
-          {/* ========================================================== */}
-          {/* SECCIONES MOVIDAS FUERA DE MAIN */}
-          {/* ========================================================== */}
-          
-          {/* Nuestros Planes (ancho completo) */}
-          {/* Esta sección ahora controla su propio fondo y centrado */}
-          {plans.length > 0 && <PlansSection plans={plans} />}
-    
-          {/* Proyectos Destacados (ancho completo) */}
-          {/* Esta sección también controla su propio fondo y centrado */}
-          {projects.length > 0 && <FeaturedProjectsSection projects={projects} />}
-    
-          {/* ========================================================== */}
-    
-          {/* Contenido principal que SÍ va centrado */}
-          <main className="max-w-6xl mx-auto px-6">
-            
-            {/* Testimonios (centrado) */}
-            <section className="py-12 text-center">
-              <h2 className="text-2xl font-bold text-teal-300 mb-6">TESTIMONIOS</h2>
-              <p className="text-teal-100 italic">“ES UNA PÁGINA MUY SEGURA, RECOMENDADÍSIMO, ADEMÁS DE FACHEROS”</p>
-              <p className="mt-2 text-teal-300 font-semibold">MI MAMI</p>
-            </section>
-            
-          </main>
-    
-          {/* Footer (ancho completo, con centrado interno) */}
-          <footer className="bg-neutral-900 border-t border-teal-500/20 mt-12">
-            <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-teal-200">
-              © {new Date().getFullYear()} Solidev. Todos los derechos reservados.
-            </div>
-          </footer>
+        </motion.div>
+      </div>
+
+      {/* Sección de Planes con animación de entrada */}
+      {plans.length > 0 && (
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeInUp}
+        >
+          <PlansSection plans={plans} />
+        </motion.div>
+      )}
+
+      {/* Sección de Proyectos con animación de escala */}
+      {projects.length > 0 && (
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeInScale}
+        >
+          <FeaturedProjectsSection projects={projects} />
+        </motion.div>
+      )}
+
+      {/* Contenido principal centrado */}
+      <main className="max-w-6xl mx-auto px-6">
+        
+        {/* Testimonios con animación stagger (elementos aparecen uno tras otro) */}
+        <motion.section 
+          className="py-12 text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={staggerContainer}
+        >
+          <motion.h2 
+            className="text-2xl font-bold text-teal-300 mb-6"
+            variants={fadeInUp}
+          >
+            TESTIMONIOS
+          </motion.h2>
+          <motion.p 
+            className="text-teal-100 italic"
+            variants={fadeInUp}
+          >
+            "ES UNA PÁGINA MUY SEGURA, RECOMENDADÍSIMO, ADEMÁS DE FACHEROS"
+          </motion.p>
+          <motion.p 
+            className="mt-2 text-teal-300 font-semibold"
+            variants={fadeInUp}
+          >
+            MI MAMI
+          </motion.p>
+        </motion.section>
+        
+      </main>
+
+      {/* Footer con animación sutil */}
+      <motion.footer 
+        className="bg-neutral-900 border-t border-teal-500/20 mt-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-teal-200">
+          © {new Date().getFullYear()} Solidev. Todos los derechos reservados.
         </div>
-  )}
+      </motion.footer>
+    </div>
+  )
+}

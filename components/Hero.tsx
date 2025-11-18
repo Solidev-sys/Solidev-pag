@@ -4,7 +4,8 @@ import HeroI from "./images/hero.jpg"
 
 export function Hero() {
   return (
-    <header className="bg-[#2A2A2A] text-white min-h-screen flex items-center">
+    // CAMBIO: Se reemplazó bg-[#2A2A2A] por bg-[#292929]
+    <header className="bg-[#292929] text-white min-h-screen flex items-center">
       <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-16 xl:px-20 py-12 md:py-16 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
           

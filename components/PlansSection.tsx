@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react"
 import type { BackendPlan } from "@/types/indexNew"
-import { Button } from "@/components/ui/button" // (No se usa en la vista principal, pero sí en la modal antigua)
+import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 
@@ -27,12 +27,52 @@ type Props = {
 }
 
 // ===========================================
+// VARIANTES DE ANIMACIÓN PARA SCROLL
+// ===========================================
+
+// 🎨 AJUSTA AQUÍ LA DURACIÓN Y VELOCIDAD DE LAS ANIMACIONES
+const fadeInUpCard = {
+  hidden: { opacity: 0, y: 80 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.8, // 👈 Cambia este valor (0.5 = rápido, 1.2 = muy lento)
+      ease: [0.22, 1, 0.36, 1] as any
+    }
+  }
+}
+
+const staggerContainer = {
+  hidden: { opacity: 1 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.3, // 👈 Delay entre cada tarjeta (0.2 = rápido, 0.5 = lento)
+      delayChildren: 0.2 // 👈 Delay antes de empezar (0.1 = rápido, 0.4 = lento)
+    }
+  }
+}
+
+const titleAnimation = {
+  hidden: { opacity: 0, y: -30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.7, // 👈 Duración del título
+      ease: [0.22, 1, 0.36, 1] as any
+    }
+  }
+}
+
+// ===========================================
 // SUB-COMPONENTE REUTILIZABLE: PlanCard
 // ===========================================
 type PlanCardProps = {
   plan: BackendPlan
   onClick: () => void
-  isStatic?: boolean // Para deshabilitar clics y hovers en la vista de detalle
+  isStatic?: boolean
 }
 
 const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
@@ -44,9 +84,9 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
   const finalCursor = isStatic || disabled ? "default" : "cursor-pointer"
 
   return (
-    // La prop "layout" aquí es la que hace la magia de la animación
     <motion.div
       layout
+      variants={fadeInUpCard} // 👈 Aplica la animación definida arriba
       onClick={finalOnClick}
       className={`
         w-full h-full bg-[#1E1E1E] border-2 border-[#00CED1] rounded-[18px] p-8
@@ -118,9 +158,8 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
       {/* Botón Contratar */}
       <button
         onClick={(e) => {
-          e.stopPropagation() // Evita que el clic en el botón active el onClick de la tarjeta
+          e.stopPropagation()
           if (!isStatic) finalOnClick()
-          // Aquí puedes agregar la lógica de "Contratar"
         }}
         disabled={disabled}
         className="
@@ -164,13 +203,17 @@ export const PlansSection: FC<Props> = ({ plans }) => {
   return (
     <section 
       id="planes" 
-      className="py-12 relative w-full overflow-hidden" // Añadido overflow-hidden
+      className="py-12 relative w-full overflow-hidden"
       style={{ backgroundColor: "#2D2D2D" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Título (ahora es un botón de cerrar) */}
-        <h2 
+        {/* Título con animación */}
+        <motion.h2
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }} // 👈 La animación inicia 50px antes de ser visible
+          variants={titleAnimation}
           className={`
             text-center text-3xl md:text-4xl font-bold text-[#00CED1] mb-12 uppercase tracking-wider
             ${selectedIndex !== null ? 'cursor-pointer transition-opacity hover:opacity-80' : ''}
@@ -178,7 +221,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
           onClick={selectedIndex !== null ? handleClose : undefined}
         >
           NUESTROS PLANES
-        </h2>
+        </motion.h2>
 
         {/* AnimatePresence gestiona el cambio entre la cuadrícula y la vista de detalle */}
         <AnimatePresence mode="wait">
@@ -189,10 +232,10 @@ export const PlansSection: FC<Props> = ({ plans }) => {
           {selectedIndex === null && (
             <motion.div
               key="grid"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }} // 👈 Inicia 100px antes
+              variants={staggerContainer} // 👈 Aplica el efecto stagger (1 por 1)
               className="grid grid-cols-1 md:grid-cols-3 gap-8"
             >
               {ordered.map((plan, i) => (
@@ -221,7 +264,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               <div className="w-full max-w-sm flex-shrink-0">
                 <PlanCard 
                   plan={ordered[selectedIndex]} 
-                  onClick={() => {}} // No hace nada al hacer clic
+                  onClick={() => {}}
                   isStatic={true} 
                 />
               </div>
