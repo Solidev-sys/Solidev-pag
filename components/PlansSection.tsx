@@ -85,8 +85,8 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
 
   return (
     <motion.div
-      layout
-      variants={fadeInUpCard} // 👈 Aplica la animación definida arriba
+      layout={!isStatic} // Solo aplicar layout cuando no es estático
+      variants={isStatic ? undefined : fadeInUpCard} // Solo aplicar variantes cuando no es estático
       onClick={finalOnClick}
       className={`
         w-full h-full bg-[#1E1E1E] border-2 border-[#00CED1] rounded-[18px] p-8
@@ -212,7 +212,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
         <motion.h2
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }} // 👈 La animación inicia 50px antes de ser visible
+          viewport={{ once: false, margin: "-50px" }} // 👈 Animación reversible según scroll
           variants={titleAnimation}
           className={`
             text-center text-3xl md:text-4xl font-bold text-[#00CED1] mb-12 uppercase tracking-wider
@@ -223,7 +223,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
           NUESTROS PLANES
         </motion.h2>
 
-        {/* AnimatePresence gestiona el cambio entre la cuadrícula y la vista de detalle */}
+        {/* AnimatePresence gestiona el cambio entre la cuadrícula y la vista de detalle aqui*/}
         <AnimatePresence mode="wait">
           
           {/* ================================== */}
@@ -234,7 +234,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               key="grid"
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }} // 👈 Inicia 100px antes
+              viewport={{ once: false, margin: "-100px" }} // 👈 Animación reversible según scroll
               variants={staggerContainer} // 👈 Aplica el efecto stagger (1 por 1)
               className="grid grid-cols-1 md:grid-cols-3 gap-8"
             >
@@ -253,27 +253,33 @@ export const PlansSection: FC<Props> = ({ plans }) => {
           {/* ================================== */}
           {selectedIndex !== null && (
             <motion.div
-              key="expanded"
+              key={`expanded-${selectedIndex}`}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="w-full relative flex flex-col md:flex-row items-center justify-center gap-8 mt-12"
             >
               {/* Columna Izquierda: Tarjeta estática */}
-              <div className="w-full max-w-sm flex-shrink-0">
+              <motion.div 
+                className="w-full max-w-sm flex-shrink-0"
+                initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <PlanCard 
                   plan={ordered[selectedIndex]} 
                   onClick={() => {}}
                   isStatic={true} 
                 />
-              </div>
+              </motion.div>
 
               {/* Columna Derecha: Imagen */}
               <motion.div 
                 className="w-full md:w-1/2 relative"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               >
                 {(() => {
                   const s = ordered[selectedIndex].enlace_imagen || "/images/premium_photo-1664474834472-6c7d1e3198e2.jpeg"

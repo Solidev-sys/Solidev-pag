@@ -95,7 +95,7 @@ export function HomePage() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: false, margin: "-100px" }} // 👈 Animación reversible según scroll
           variants={fadeInUp}
         >
           <PlansSection plans={plans} />
@@ -107,7 +107,7 @@ export function HomePage() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: false, margin: "-100px" }} // 👈 Animación reversible según scroll
           variants={fadeInScale}
         >
           <FeaturedProjectsSection projects={projects} />
@@ -122,7 +122,7 @@ export function HomePage() {
           className="py-12 text-center"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: false, margin: "-50px" }} // 👈 Animación reversible según scroll
           variants={staggerContainer}
         >
           <motion.h2 
@@ -152,7 +152,7 @@ export function HomePage() {
         className="bg-neutral-900 border-t border-teal-500/20 mt-12"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
+        viewport={{ once: false }} // 👈 Animación reversible según scroll
         transition={{ duration: 0.6 }}
       >
         <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-teal-200">
