@@ -15,6 +15,7 @@ const raleway = Raleway({
 export const metadata = {
   title: 'Solidev - Desarrollo Web',
   description: 'Desarrollamos la web de tus sueños',
+  // El icono se detecta automáticamente desde app/icon.ico en Next.js 13+
 }
 
 export default function RootLayout({
