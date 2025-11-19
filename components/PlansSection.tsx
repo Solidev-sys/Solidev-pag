@@ -124,15 +124,22 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
       {/* Precio */}
       <div className="mb-10">
         <span
-          className="font-bold inline-block text-[#00CED1]"
-          style={{ fontSize: "clamp(36px, 8vw, 52px)" }}
+          className="font-bold inline-block bg-clip-text text-transparent animated-gradient"
+          style={{ 
+            fontSize: "clamp(36px, 8vw, 52px)",
+            backgroundImage: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
+            fontWeight: 700,
+          }}
         >
           {precioFormateado}
         </span>
         {esAnual && (
           <span
-            className="ml-2 align-middle font-normal text-[#00CED1]"
-            style={{ fontSize: "clamp(14px, 3vw, 19px)" }}
+            className="ml-2 align-middle font-normal bg-clip-text text-transparent animated-gradient"
+            style={{ 
+              fontSize: "clamp(14px, 3vw, 19px)",
+              backgroundImage: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
+            }}
           >
             / ANUAL
           </span>
@@ -203,10 +210,14 @@ export const PlansSection: FC<Props> = ({ plans }) => {
   return (
     <section 
       id="planes" 
-      className="py-12 relative w-full overflow-hidden"
+      className={`py-12 relative w-full overflow-hidden ${selectedIndex !== null ? 'cursor-pointer' : ''}`}
       style={{ backgroundColor: "#2D2D2D" }}
+      onClick={selectedIndex !== null ? handleClose : undefined}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        onClick={selectedIndex !== null ? (e) => e.stopPropagation() : undefined}
+      >
         
         {/* Título con animación */}
         <motion.h2
@@ -216,9 +227,8 @@ export const PlansSection: FC<Props> = ({ plans }) => {
           variants={titleAnimation}
           className={`
             text-center text-3xl md:text-4xl font-bold text-[#00CED1] mb-12 uppercase tracking-wider
-            ${selectedIndex !== null ? 'cursor-pointer transition-opacity hover:opacity-80' : ''}
+            ${selectedIndex !== null ? 'transition-opacity hover:opacity-80' : ''}
           `}
-          onClick={selectedIndex !== null ? handleClose : undefined}
         >
           NUESTROS PLANES
         </motion.h2>
@@ -266,6 +276,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 initial={{ opacity: 0, x: -50, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <PlanCard 
                   plan={ordered[selectedIndex]} 
@@ -280,6 +291,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                onClick={(e) => e.stopPropagation()}
               >
                 {(() => {
                   const s = ordered[selectedIndex].enlace_imagen || "/images/premium_photo-1664474834472-6c7d1e3198e2.jpeg"
@@ -304,7 +316,10 @@ export const PlansSection: FC<Props> = ({ plans }) => {
 
               {/* Botón Siguiente (Flecha) */}
               <motion.button
-                onClick={handleNext}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNext()
+                }}
                 className="absolute -right-4 md:right-0 lg:right-4 text-6xl text-[#00CED1] hover:text-white transition-colors z-10"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}

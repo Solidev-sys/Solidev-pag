@@ -144,7 +144,13 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
           viewport={{ once: false, margin: "-50px" }} // 👈 Animación reversible según scroll
           variants={fadeInUp}
         >
-          <Button asChild className="bg-teal-500 hover:bg-teal-600 text-white">
+          <Button
+            asChild
+            className="text-white font-semibold py-5 lg:py-6 px-8 lg:px-10 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animated-gradient"
+            style={{
+              background: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
+            }}
+          >
             <Link href="/history">Ver Portafolio</Link>
           </Button>
         </motion.div>

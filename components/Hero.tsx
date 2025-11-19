@@ -19,7 +19,7 @@ export function Hero() {
               <span className="block text-[40px] md:text-[48px] lg:text-[56px] xl:text-[64px] font-bold tracking-tight">
                 WEB DE{" "}
                 <span 
-                  className="inline-block bg-clip-text text-transparent uppercase"
+                  className="inline-block bg-clip-text text-transparent uppercase animated-gradient"
                   style={{
                     backgroundImage: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
                     fontWeight: 700,
@@ -55,7 +55,7 @@ export function Hero() {
             <div className="pt-2 lg:pt-4">
               <Button
                 asChild
-                className="text-white font-semibold py-5 lg:py-6 px-8 lg:px-10 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                className="text-white font-semibold py-5 lg:py-6 px-8 lg:px-10 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animated-gradient"
                 style={{
                   background: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
                 }}
