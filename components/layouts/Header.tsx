@@ -41,7 +41,7 @@ export function Header() {
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-teal-400 to-cyan-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center rounded-sm"></span>
             </Link>
             <Link 
-              href="/personal" 
+              href="/nosotros" 
               className="relative text-neutral-200 hover:text-teal-300 transition-colors font-medium text-lg py-2 px-1 group"
             >
               Nosotros
