@@ -39,7 +39,7 @@ const fadeInUpCard = {
     opacity: 1, 
     y: 0,
     transition: {
-      duration: 0.8, // 👈 Cambia este valor (0.5 = rápido, 1.2 = muy lento)
+      duration: 0.8,
       ease: [0.22, 1, 0.36, 1] as any
     }
   }
@@ -50,8 +50,8 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3, // 👈 Delay entre cada tarjeta (0.2 = rápido, 0.5 = lento)
-      delayChildren: 0.2 // 👈 Delay antes de empezar (0.1 = rápido, 0.4 = lento)
+      staggerChildren: 0.3,
+      delayChildren: 0.2
     }
   }
 }
@@ -62,7 +62,7 @@ const titleAnimation = {
     opacity: 1, 
     y: 0,
     transition: {
-      duration: 0.7, // 👈 Duración del título
+      duration: 0.7,
       ease: [0.22, 1, 0.36, 1] as any
     }
   }
@@ -76,9 +76,16 @@ type PlanCardProps = {
   onClick: () => void
   isStatic?: boolean
   onContract?: () => void
+  keepTiltEffect?: boolean
 }
 
-const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContract }) => {
+const PlanCard: FC<PlanCardProps> = ({ 
+  plan, 
+  onClick, 
+  isStatic = false, 
+  onContract,
+  keepTiltEffect = false 
+}) => {
   const disabled = !plan.activo
   const precioFormateado = formatMoneyFromCentavos(plan.precio_centavos, plan.moneda)
   const esAnual = plan.ciclo_fact === "anual"
@@ -92,7 +99,9 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContra
    * Calcula el efecto tilt basado en la posición del mouse
    */
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isStatic || disabled) return
+    if (!cardRef.current || disabled) return
+    // Permitir tilt si keepTiltEffect está activo o no es estático
+    if (!keepTiltEffect && isStatic) return
 
     const rect = cardRef.current.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2
@@ -121,7 +130,7 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContra
    * Maneja el hover
    */
   const handleMouseEnter = () => {
-    if (!isStatic && !disabled) {
+    if ((!isStatic || keepTiltEffect) && !disabled) {
       setIsHovered(true)
     }
   }
@@ -156,11 +165,11 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContra
           ${disabled ? "opacity-60" : ""}
         `}
         animate={{
-          rotateX: isStatic || disabled ? 0 : tilt.x,
-          rotateY: isStatic || disabled ? 0 : tilt.y,
-          scale: isHovered && !isStatic && !disabled ? 1.05 : 1,
-          y: isHovered && !isStatic && !disabled ? -12 : 0,
-          z: isHovered && !isStatic && !disabled ? 50 : 0
+          rotateX: disabled ? 0 : tilt.x,
+          rotateY: disabled ? 0 : tilt.y,
+          scale: isHovered && !disabled ? 1.05 : 1,
+          y: isHovered && !disabled ? -12 : 0,
+          z: isHovered && !disabled ? 50 : 0
         }}
         transition={{
           type: "spring",
@@ -170,7 +179,7 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContra
         }}
         style={{
           transformStyle: "preserve-3d",
-          willChange: !isStatic && !disabled ? 'transform' : 'auto',
+          willChange: !disabled ? 'transform' : 'auto',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
@@ -297,7 +306,11 @@ export const PlansSection: FC<Props> = ({ plans }) => {
     if (selectedIndex === null) return
     setSelectedIndex((selectedIndex + 1) % ordered.length)
   }
-  const handleClose = () => setSelectedIndex(null)
+  const handleClose = () => {
+    setSelectedIndex(null)
+    setShowCheckout(false)
+    setCheckoutOpen(false)
+  }
 
   useEffect(() => {
     setCheckoutOpen(false)
@@ -356,6 +369,8 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 await apiService.confirmSubscription(start.preapproval_id)
                 setSuccess('Suscripción creada y autorizada correctamente')
                 setCheckoutOpen(false)
+                setShowCheckout(false)
+                setSelectedIndex(null)
               } catch (e: any) {
                 setError(e?.message || 'Fallo al procesar la suscripción')
               } finally {
@@ -373,31 +388,47 @@ export const PlansSection: FC<Props> = ({ plans }) => {
   return (
     <section 
       id="planes" 
-      className={`py-12 relative w-full overflow-hidden ${selectedIndex !== null ? 'cursor-pointer' : ''}`}
+      className={`py-12 relative w-full overflow-hidden ${selectedIndex !== null && !showCheckout ? 'cursor-pointer' : ''}`}
       style={{ backgroundColor: "#2D2D2D" }}
-      onClick={selectedIndex !== null ? handleClose : undefined}
+      onClick={selectedIndex !== null && !showCheckout ? handleClose : undefined}
     >
       <Script src="https://sdk.mercadopago.com/js/v2" strategy="afterInteractive" onLoad={() => setSdkReady(true)} />
+      
+      {/* Backdrop blur cuando showCheckout está activo */}
+      <AnimatePresence>
+        {showCheckout && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
+            onClick={handleClose}
+          />
+        )}
+      </AnimatePresence>
+
       <div 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        onClick={selectedIndex !== null ? (e) => e.stopPropagation() : undefined}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
+        style={{ zIndex: showCheckout ? 50 : 'auto' }}
+        onClick={selectedIndex !== null && !showCheckout ? (e) => e.stopPropagation() : undefined}
       >
         
         {/* Título con animación */}
         <motion.h2
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, margin: "-50px" }} // 👈 Animación reversible según scroll
+          viewport={{ once: false, margin: "-50px" }}
           variants={titleAnimation}
           className={`
             text-center text-3xl md:text-4xl font-bold text-[#00CED1] mb-12 uppercase tracking-wider
-            ${selectedIndex !== null ? 'transition-opacity hover:opacity-80' : ''}
+            ${selectedIndex !== null && !showCheckout ? 'transition-opacity hover:opacity-80' : ''}
           `}
         >
           NUESTROS PLANES
         </motion.h2>
 
-        {/* AnimatePresence gestiona el cambio entre la cuadrícula y la vista de detalle aqui*/}
+        {/* AnimatePresence gestiona el cambio entre la cuadrícula y la vista de detalle */}
         <AnimatePresence mode="wait">
           
           {/* ================================== */}
@@ -408,8 +439,8 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               key="grid"
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: false, margin: "-100px" }} // 👈 Animación reversible según scroll
-              variants={staggerContainer} // 👈 Aplica el efecto stagger (1 por 1)
+              viewport={{ once: false, margin: "-100px" }}
+              variants={staggerContainer}
               className="grid grid-cols-1 md:grid-cols-3 gap-8"
             >
               {ordered.map((plan, i) => (
@@ -434,7 +465,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="w-full relative flex flex-col md:flex-row items-center justify-center gap-8 mt-12"
             >
-              {/* Columna Izquierda: Tarjeta estática */}
+              {/* Columna Izquierda: Tarjeta con efecto tilt continuo */}
               <motion.div 
                 className="w-full max-w-sm flex-shrink-0"
                 initial={{ opacity: 0, x: -50, scale: 0.95 }}
@@ -446,6 +477,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                   plan={ordered[selectedIndex]} 
                   onClick={() => {}}
                   isStatic={true}
+                  keepTiltEffect={true}
                   onContract={() => { setShowCheckout(true); setCheckoutOpen(true) }}
                 />
               </motion.div>
@@ -484,11 +516,12 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               {/* Checkout Suscripción */}
               {showCheckout && (
               <motion.div
-                className="w-full md:w-1/2 bg-[#1E1E1E] border-2 border-[#00CED1] rounded-2xl p-6"
+                className="w-full md:w-1/2 bg-[#1E1E1E] border-2 border-[#00CED1] rounded-2xl p-6 relative"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 onClick={(e) => e.stopPropagation()}
+                style={{ zIndex: 51 }}
               >
                 <h4 className="text-white text-xl font-bold mb-4">Contratar suscripción</h4>
                 {!publicKey && (
@@ -518,18 +551,20 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               </motion.div>
               )}
 
-              {/* Botón Siguiente (Flecha) */}
-              <motion.button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleNext()
-                }}
-                className="absolute -right-4 md:right-0 lg:right-4 text-6xl text-[#00CED1] hover:text-white transition-colors z-10"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
-              >
-                →
-              </motion.button>
+              {/* Botón Siguiente (Flecha) - Solo visible cuando NO está el checkout */}
+              {!showCheckout && (
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleNext()
+                  }}
+                  className="absolute -right-4 md:right-0 lg:right-4 text-6xl text-[#00CED1] hover:text-white transition-colors z-10"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+                >
+                  →
+                </motion.button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
