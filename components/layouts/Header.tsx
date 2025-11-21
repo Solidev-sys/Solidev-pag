@@ -1,10 +1,19 @@
 // src/components/layout/Header.tsx
+"use client"
+
 import Link from "next/link";
 import Image from "next/image"; // 1. IMPORTAR Image
 import { User, Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 import logoSVG from "../images/SVG.svg"; // Importar la imagen como módulo 
 
 export function Header() {
+  const pathname = usePathname();
+  
+  // Ocultar el Header en la página de login
+  if (pathname === "/login") {
+    return null;
+  }
   return (
     <header className="w-full bg-neutral-900 border-b border-teal-500/20 sticky top-0 z-50">
       <nav className="w-full mx-auto px-8 md:px-12 h-20 flex items-center justify-between">

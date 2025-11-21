@@ -1,7 +1,7 @@
 import './globals.css'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Header } from '@/components/layouts/Header' // 1. IMPORTADO EL HEADER DE SOLIDEV
-import { Raleway } from 'next/font/google'
+import { Raleway, Inter } from 'next/font/google'
 
 // Configurar la fuente Raleway
 const raleway = Raleway({
@@ -9,6 +9,13 @@ const raleway = Raleway({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-raleway',
+})
+
+// Configurar la fuente Inter para componentes modernos
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
 })
 
 // 2. METADATA ACTUALIZADA
@@ -24,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className={raleway.variable}>
+    <html lang="es" className={`${raleway.variable} ${inter.variable}`}>
       {/* 3. AÑADIDO EL FONDO GLOBAL AL BODY */}
       <body className="bg-neutral-900 text-teal-100">
         <ErrorBoundary>

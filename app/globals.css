@@ -339,3 +339,70 @@ body {
   background-size: 200% 200%;
   animation: gradient-flow 3s ease infinite;
 }
+
+/* ===========================================
+   ESTILOS PARA PRICING CARD
+   =========================================== */
+
+/* Animación del borde fluido/agua */
+@keyframes borderFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Animación de resplandor pulsante */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.4),
+                0 0 40px rgba(0, 217, 255, 0.2),
+                0 0 60px rgba(0, 217, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 217, 255, 0.6),
+                0 0 60px rgba(0, 217, 255, 0.4),
+                0 0 90px rgba(0, 217, 255, 0.2);
+  }
+}
+
+/* Clase para el borde animado */
+.pricing-card-border {
+  position: relative;
+  padding: 3px;
+  background: linear-gradient(
+    90deg,
+    #00d9ff 0%,
+    #00e5cc 25%,
+    #00d9ff 50%,
+    #00e5cc 75%,
+    #00d9ff 100%
+  );
+  background-size: 300% 100%;
+  animation: borderFlow 4s ease infinite;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.pricing-card-border:hover {
+  animation: borderFlow 2s ease infinite, glowPulse 2s ease-in-out infinite;
+}
+
+/* Contenido de la tarjeta */
+.pricing-card-content {
+  background: #1a1a1a;
+  border-radius: 17px;
+  padding: 2rem;
+  height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.pricing-card-content:hover {
+  box-shadow: 0 20px 60px rgba(0, 217, 255, 0.3);
+}

@@ -83,22 +83,100 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContra
   const precioFormateado = formatMoneyFromCentavos(plan.precio_centavos, plan.moneda)
   const esAnual = plan.ciclo_fact === "anual"
 
+  // Estados para el efecto 3D tilt
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  /**
+   * Calcula el efecto tilt basado en la posición del mouse
+   */
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current || isStatic || disabled) return
+
+    const rect = cardRef.current.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+
+    const mouseX = e.clientX - centerX
+    const mouseY = e.clientY - centerY
+
+    // Calcula el ángulo de inclinación (máximo 10 grados para suavidad)
+    const maxTilt = 10
+    const tiltX = (mouseY / (rect.height / 2)) * -maxTilt
+    const tiltY = (mouseX / (rect.width / 2)) * maxTilt
+
+    setTilt({ x: tiltX, y: tiltY })
+  }
+
+  /**
+   * Resetea el tilt cuando el mouse sale de la tarjeta
+   */
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 })
+    setIsHovered(false)
+  }
+
+  /**
+   * Maneja el hover
+   */
+  const handleMouseEnter = () => {
+    if (!isStatic && !disabled) {
+      setIsHovered(true)
+    }
+  }
+
   const finalOnClick = isStatic || disabled ? () => {} : onClick
   const finalCursor = isStatic || disabled ? "default" : "cursor-pointer"
 
+  // Calcula la sombra dinámica basada en el tilt
+  const shadowIntensity = isHovered ? 0.4 : 0.15
+  const shadowX = Math.round(tilt.y * 1.5)
+  const shadowY = Math.round(tilt.x * 1.5) + (isHovered ? 12 : 0)
+  const shadowBlur = 20 + Math.abs(shadowY) * 0.5
+
   return (
-    <motion.div
-      layout={!isStatic} // Solo aplicar layout cuando no es estático
-      variants={isStatic ? undefined : fadeInUpCard} // Solo aplicar variantes cuando no es estático
-      onClick={finalOnClick}
-      className={`
-        w-full h-full bg-[#1E1E1E] border-2 border-[#00CED1] rounded-[18px] p-8
-        shadow-[0_4px_20px_rgba(0,206,209,0.15)]
-        ${finalCursor}
-        ${disabled ? "opacity-60" : ""}
-      `}
-      whileHover={!isStatic && !disabled ? { scale: 1.02, transition: { duration: 0.2 } } : {}}
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      style={{
+        perspective: "1000px",
+        transformStyle: "preserve-3d"
+      }}
     >
+      <motion.div
+        layout={!isStatic}
+        variants={isStatic ? undefined : fadeInUpCard}
+        onClick={finalOnClick}
+        className={`
+          w-full h-full bg-[#1E1E1E] border-2 border-[#00CED1] rounded-[18px] p-8
+          ${finalCursor}
+          ${disabled ? "opacity-60" : ""}
+        `}
+        animate={{
+          rotateX: isStatic || disabled ? 0 : tilt.x,
+          rotateY: isStatic || disabled ? 0 : tilt.y,
+          scale: isHovered && !isStatic && !disabled ? 1.05 : 1,
+          y: isHovered && !isStatic && !disabled ? -12 : 0,
+          z: isHovered && !isStatic && !disabled ? 50 : 0
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 25,
+          mass: 0.5
+        }}
+        style={{
+          transformStyle: "preserve-3d",
+          willChange: !isStatic && !disabled ? 'transform' : 'auto',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+          boxShadow: `${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 206, 209, ${shadowIntensity}), 0 0 ${shadowBlur * 0.5}px rgba(0, 206, 209, ${shadowIntensity * 0.3})`
+        }}
+      >
       <h3 
         className="font-bold text-white uppercase mb-8"
         style={{ fontSize: "clamp(24px, 5vw, 34px)" }}
@@ -187,7 +265,8 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContra
       >
         Contratar
       </button>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 }
 
