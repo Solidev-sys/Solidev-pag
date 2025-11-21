@@ -16,6 +16,9 @@ const createNotificacionesRouter = require('./routes/notificaciones');
 const createPlanesRouter = require('./routes/planes');
 const createCaracteristicasRouter = require('./routes/caracteristicasPlan');
 const createPaginasRouter = require('./routes/paginas');
+const createAuthRouter = require('./routes/auth');
+const createUsersRouter = require('./routes/users');
+const createAdminRouter = require('./routes/admin');
 
 const app = express();
 const HTTP_PORT = process.env.HTTP_PORT || 3002; 
@@ -59,8 +62,11 @@ setupCors(app);
 setupSession(app);
 
 // Inicializar Mercado Pago y montar routers al nivel superior
-const { client, Preference } = createMercadoPagoClient();
+const { client, Preference, PreApproval, PreApprovalPlan, Payment } = createMercadoPagoClient();
 const preference = new Preference(client);
+const preapproval = new PreApproval(client);
+const preapprovalPlan = new PreApprovalPlan(client);
+const payment = new Payment(client);
 const ngrok = process.env.NGROK_URL;
 
 const paymentsRouter = createPaymentsRouter({
@@ -70,7 +76,7 @@ const paymentsRouter = createPaymentsRouter({
 });
 app.use('/api', paymentsRouter);
 
-const webhookRouter = createWebhookRouter();
+const webhookRouter = createWebhookRouter({ payment });
 app.use('/api', webhookRouter);
 
 // ← elimina cualquier arranque HTTPS aquí (startHttpsServer/app con https/fs)
@@ -78,7 +84,7 @@ app.use('/api', webhookRouter);
 // Servidor HTTPS (único servidor)
 startServer(app, HTTP_PORT);
 
-const suscripcionesRouter = createSuscripcionesRouter({ ensureAuth, ensureRole });
+const suscripcionesRouter = createSuscripcionesRouter({ ensureAuth, ensureRole, preapproval, preapprovalPlan, ngrok });
 app.use('/api', suscripcionesRouter);
 
 const pagosRouter = createPagosRouter({ ensureAuth, ensureRole });
@@ -90,7 +96,7 @@ app.use('/api', facturasRouter);
 const notificacionesRouter = createNotificacionesRouter({ ensureAuth, ensureRole });
 app.use('/api', notificacionesRouter);
 
-const planesRouter = createPlanesRouter({ ensureAuth, ensureRole });
+const planesRouter = createPlanesRouter({ ensureAuth, ensureRole, preapprovalPlan, ngrok });
 app.use('/api', planesRouter);
 
 const caracteristicasRouter = createCaracteristicasRouter({ ensureAuth, ensureRole });
@@ -98,6 +104,15 @@ app.use('/api', caracteristicasRouter);
 
 const paginasRouter = createPaginasRouter({ ensureAuth, ensureRole });
 app.use('/api', paginasRouter);
+
+const authRouter = createAuthRouter();
+app.use('/api', authRouter);
+
+const usersRouter = createUsersRouter({ ensureRole });
+app.use('/api', usersRouter);
+
+const adminRouter = createAdminRouter({ ensureRole });
+app.use('/api', adminRouter);
 
 app.get('/test', (req, res) => {
   res.json({ q: 'pex' });

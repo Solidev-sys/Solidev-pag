@@ -1,7 +1,7 @@
 const express = require('express');
 const planService = require('../../js/service/plan');
 
-module.exports = function createPlanesRouter({ ensureAuth, ensureRole }) {
+module.exports = function createPlanesRouter({ ensureAuth, ensureRole, preapprovalPlan, ngrok }) {
     const router = express.Router();
 
     // Público: listar planes y detalles
@@ -29,7 +29,7 @@ module.exports = function createPlanesRouter({ ensureAuth, ensureRole }) {
     router.post('/planes', ensureRole('admin'), async (req, res) => {
         try {
             const created = await planService.createPlan(req.body);
-            res.status(201).json(created);
+            res.status(201).json({ message: 'Plan creado', plan: created });
         } catch (err) {
             res.status(400).json({ error: err.message || 'Error al crear plan' });
         }
@@ -52,6 +52,16 @@ module.exports = function createPlanesRouter({ ensureAuth, ensureRole }) {
             res.json({ deleted: ok });
         } catch (err) {
             res.status(400).json({ error: err.message || 'Error al eliminar plan' });
+        }
+    });
+
+    router.post('/planes/:id/sync-mercadopago', ensureRole('admin'), async (req, res) => {
+        try {
+            const backUrl = (ngrok || '') + '/api/suscripcion-exitosa';
+            const id = await planService.syncMercadoPagoPlan({ planId: req.params.id, preapprovalPlan, backUrl });
+            res.status(201).json({ message: 'Plan sincronizado con Mercado Pago', preapproval_plan_id: id });
+        } catch (err) {
+            res.status(400).json({ error: err.message || 'Error al sincronizar plan con Mercado Pago' });
         }
     });
 

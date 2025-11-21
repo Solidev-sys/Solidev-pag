@@ -18,6 +18,7 @@ CREATE TABLE planes (
   precio_centavos INT UNSIGNED NOT NULL,             -- precio en centavos
   moneda          CHAR(3)      NOT NULL DEFAULT 'CLP',
   ciclo_fact      ENUM('mensual','anual') NOT NULL DEFAULT 'mensual',
+  mp_preapproval_plan_id VARCHAR(64) NULL UNIQUE,
   activo          TINYINT(1)   NOT NULL DEFAULT 1,
   mensaje_rapido  TINYINT(1)   NOT NULL DEFAULT 1,
   mensaje_seguro  TINYINT(1)   NOT NULL DEFAULT 1,
@@ -148,15 +149,20 @@ DELIMITER ;
 -- =========================================================
 CREATE TABLE webhooks (
   id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id     BIGINT UNSIGNED NULL,
   proveedor      ENUM('mercadopago') NOT NULL,
-  topico         VARCHAR(64) NOT NULL,          -- 'payment', 'preapproval', etc.
-  id_externo     VARCHAR(64) NULL,              -- mp_payment_id o mp_preapproval_id
+  topico         VARCHAR(64) NOT NULL,
+  id_externo     VARCHAR(64) NULL,
   id_evento      VARCHAR(64) NULL,
   recibido_en    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   payload        JSON NOT NULL,
   procesado      TINYINT(1) NOT NULL DEFAULT 0,
   procesado_en   DATETIME NULL,
   error_proceso  VARCHAR(255) NULL,
+  CONSTRAINT fk_webhook_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  INDEX idx_wh_usuario (usuario_id),
   INDEX idx_wh_topico_ext (topico, id_externo),
   INDEX idx_wh_procesado  (procesado)
 ) ENGINE=InnoDB;

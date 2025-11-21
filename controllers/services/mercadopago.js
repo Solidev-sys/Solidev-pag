@@ -1,18 +1,14 @@
-/**
- * Inicializa el cliente de MercadoPago SDK 2.x.
- * Variables: `Access_token`.
- */
-const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { MercadoPagoConfig, Preference, PreApproval, PreApprovalPlan, Payment } = require('mercadopago');
 
 function createMercadoPagoClient() {
+    const accessToken = process.env.MP_ACCESS_TOKEN || process.env.Access_token;
     const client = new MercadoPagoConfig({
-        accessToken: process.env.Access_token,
+        accessToken,
         options: {
-            timeout: 5000,
-            idempotencyKey: 'abc'
+            timeout: 8000
         }
     });
-    return { client, Preference };
+    return { client, Preference, PreApproval, PreApprovalPlan, Payment };
 }
 
 module.exports = { createMercadoPagoClient };

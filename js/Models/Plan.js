@@ -25,6 +25,7 @@ const Plan = sequelize.define('Plan', {
   mensaje_seguro: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   resumen: { type: DataTypes.STRING(255), allowNull: true },
   enlace_imagen: { type: DataTypes.STRING(255), allowNull: true }
+  , mp_preapproval_plan_id: { type: DataTypes.STRING(64), allowNull: true, unique: true }
 }, {
   tableName: 'planes',
   timestamps: true,
