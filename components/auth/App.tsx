@@ -4,6 +4,8 @@ import type React from "react"
 import { useState, FormEvent } from "react"
 import "./LoginStyles.css"
 import Link from "next/link"
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 const handleRocket = (e: FormEvent<HTMLButtonElement>) => {
   e.preventDefault()
@@ -14,9 +16,35 @@ const handleRocket = (e: FormEvent<HTMLButtonElement>) => {
 
 export function LoginPage() {
   const [isLoginActive, setIsLoginActive] = useState<boolean>(true)
+  const { login, register } = useAuth()
+  const router = useRouter()
+
+  const [loginEmail, setLoginEmail] = useState("")
+  const [loginPassword, setLoginPassword] = useState("")
+  const [regUsername, setRegUsername] = useState("")
+  const [regEmail, setRegEmail] = useState("")
+  const [regPassword, setRegPassword] = useState("")
+  const [loadingLogin, setLoadingLogin] = useState(false)
+  const [loadingReg, setLoadingReg] = useState(false)
 
   const toggleForm = () => {
     setIsLoginActive(!isLoginActive)
+  }
+
+  const doLogin = async () => {
+    if (loadingLogin) return
+    setLoadingLogin(true)
+    const res = await login(loginEmail, loginPassword)
+    setLoadingLogin(false)
+    if (res.success) router.replace(res.redirectUrl || "/")
+  }
+
+  const doRegister = async () => {
+    if (loadingReg) return
+    setLoadingReg(true)
+    const res = await register({ username: regUsername || regEmail, name: regUsername, email: regEmail, password: regPassword, rut: "", phone: "", address: "", comuna: "", region: "" })
+    setLoadingReg(false)
+    if (res.success) router.replace("/")
   }
 
   return (
@@ -28,16 +56,16 @@ export function LoginPage() {
         {/* LOGIN */}
         <div className={`form-box login-box ${isLoginActive ? 'active' : ''}`}>
           <h2>Iniciar Sesión</h2>
-          <form>
+          <form onSubmit={(e)=>{e.preventDefault(); doLogin()}}>
             <div className="input-box">
-              <input type="email" required />
+              <input type="email" required value={loginEmail} onChange={(e)=>setLoginEmail(e.target.value)} />
               <label>Correo electrónico</label>
             </div>
             <div className="input-box">
-              <input type="password" required />
+              <input type="password" required value={loginPassword} onChange={(e)=>setLoginPassword(e.target.value)} />
               <label>Contraseña</label>
             </div>
-            <button type="submit" className="btn" onClick={handleRocket}>
+            <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doLogin()}}>
               Entrar
             </button>
             <p className="toggle-text">
@@ -52,20 +80,20 @@ export function LoginPage() {
         {/* REGISTRO */}
         <div className={`form-box signup-box ${!isLoginActive ? 'active' : ''}`}>
           <h2>Registrarse</h2>
-          <form>
+          <form onSubmit={(e)=>{e.preventDefault(); doRegister()}}>
             <div className="input-box">
-              <input type="text" required />
+              <input type="text" required value={regUsername} onChange={(e)=>setRegUsername(e.target.value)} />
               <label>Nombre de usuario</label>
             </div>
             <div className="input-box">
-              <input type="email" required />
+              <input type="email" required value={regEmail} onChange={(e)=>setRegEmail(e.target.value)} />
               <label>Correo electrónico</label>
             </div>
             <div className="input-box">
-              <input type="password" required />
+              <input type="password" required value={regPassword} onChange={(e)=>setRegPassword(e.target.value)} />
               <label>Contraseña</label>
             </div>
-            <button type="submit" className="btn" onClick={handleRocket}>
+            <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doRegister()}}>
               Registrarse
             </button>
             <p className="toggle-text">

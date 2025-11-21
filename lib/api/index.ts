@@ -96,6 +96,24 @@ export class ApiService extends BaseApiService {
     });
   }
 
+  async createSubscription(planId: number): Promise<import('@/types/indexNew').BackendSuscripcion> {
+    return this.request('/api/suscripciones', {
+      method: 'POST',
+      body: JSON.stringify({ plan_id: planId }),
+    });
+  }
+
+  async startSubscription(suscripcionId: number, cardTokenId: string): Promise<{ preapproval_id: string }> {
+    return this.request(`/api/suscripciones/${suscripcionId}/iniciar`, {
+      method: 'POST',
+      body: JSON.stringify({ card_token_id: cardTokenId }),
+    });
+  }
+
+  async confirmSubscription(preapprovalId: string): Promise<{ ok: boolean; estado: string }> {
+    return this.request(`/api/suscripcion-exitosa?preapproval_id=${encodeURIComponent(preapprovalId)}`);
+  }
+
   // History methods
   async getHistory(): Promise<HistoryResponse> {
     return this.request('/api/historial');

@@ -1,10 +1,12 @@
 "use client"
 
-import { FC, useState } from "react"
+import { FC, useEffect, useRef, useState } from "react"
 import type { BackendPlan } from "@/types/indexNew"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import Script from "next/script"
+import { apiService } from "@/lib/api"
 
 // --- Función de ayuda (sin cambios) ---
 function formatMoneyFromCentavos(value: number, currency: string) {
@@ -73,9 +75,10 @@ type PlanCardProps = {
   plan: BackendPlan
   onClick: () => void
   isStatic?: boolean
+  onContract?: () => void
 }
 
-const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
+const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false, onContract }) => {
   const disabled = !plan.activo
   const precioFormateado = formatMoneyFromCentavos(plan.precio_centavos, plan.moneda)
   const esAnual = plan.ciclo_fact === "anual"
@@ -166,7 +169,8 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
       <button
         onClick={(e) => {
           e.stopPropagation()
-          if (!isStatic) finalOnClick()
+          if (onContract) onContract()
+          else if (!isStatic) finalOnClick()
         }}
         disabled={disabled}
         className="
@@ -193,6 +197,15 @@ const PlanCard: FC<PlanCardProps> = ({ plan, onClick, isStatic = false }) => {
 // ===========================================
 export const PlansSection: FC<Props> = ({ plans }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const formRef = useRef<HTMLFormElement | null>(null)
+  const mpReadyRef = useRef(false)
+  const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || ""
+  const [sdkReady, setSdkReady] = useState(false)
 
   if (!plans || plans.length === 0) return null
 
@@ -207,6 +220,77 @@ export const PlansSection: FC<Props> = ({ plans }) => {
   }
   const handleClose = () => setSelectedIndex(null)
 
+  useEffect(() => {
+    setCheckoutOpen(false)
+    setShowCheckout(false)
+    setError(null)
+    setSuccess(null)
+  }, [selectedIndex])
+
+  useEffect(() => {
+    if (checkoutOpen) {
+      if (!publicKey) { setError('Falta NEXT_PUBLIC_MP_PUBLIC_KEY para inicializar Mercado Pago'); return }
+      if (!sdkReady) { setError('SDK de Mercado Pago aún no está listo'); return }
+      if (!(window as any).MercadoPago) { setError('SDK de Mercado Pago no cargado'); return }
+      if (!formRef.current) { setError('Formulario de tarjeta no disponible'); return }
+      if (selectedIndex === null) { setError('Ningún plan seleccionado'); return }
+    }
+    if (checkoutOpen && sdkReady && (window as any).MercadoPago && formRef.current && selectedIndex !== null) {
+      try {
+        const mp = new (window as any).MercadoPago(publicKey, { locale: 'es-CL' })
+        mp.cardForm({
+          amount: String((ordered[selectedIndex].precio_centavos ?? 0) / 100),
+          autoMount: true,
+          form: {
+            id: '#subscription-card-form',
+            cardholderName: { id: 'form-cardholder-name' },
+            cardNumber: { id: 'form-card-number' },
+            cardExpirationMonth: { id: 'form-card-exp-month' },
+            cardExpirationYear: { id: 'form-card-exp-year' },
+            securityCode: { id: 'form-security-code' },
+            identificationType: { id: 'form-doc-type' },
+            identificationNumber: { id: 'form-doc-number' },
+            cardholderEmail: { id: 'form-cardholder-email' }
+          },
+          callbacks: {
+            onFormMounted: (error: any) => {
+              if (error) setError('Error al montar el formulario de tarjeta')
+              else mpReadyRef.current = true
+            },
+            onSubmit: async (event: any) => {
+              event.preventDefault()
+              if (selectedIndex === null) return
+              setLoading(true)
+              setError(null)
+              try {
+                const formData = (mp as any).cardForm.getCardFormData()
+                const tokenResult = await (mp as any).cardForm.createCardToken()
+                const token = tokenResult?.token || formData?.token
+                if (!token) throw new Error('No se pudo generar el token de tarjeta')
+
+                const plan = ordered[selectedIndex]
+                // 1) Crear suscripción en backend
+                const suscripcion = await apiService.createSubscription(plan.id)
+                // 2) Iniciar suscripción con plan asociado y card token
+                const start = await apiService.startSubscription(suscripcion.id, token)
+                // 3) Confirmar suscripción en backend (actualiza estado y próximas fechas)
+                await apiService.confirmSubscription(start.preapproval_id)
+                setSuccess('Suscripción creada y autorizada correctamente')
+                setCheckoutOpen(false)
+              } catch (e: any) {
+                setError(e?.message || 'Fallo al procesar la suscripción')
+              } finally {
+                setLoading(false)
+              }
+            }
+          }
+        })
+      } catch (e) {
+        setError('No se pudo inicializar Mercado Pago')
+      }
+    }
+  }, [checkoutOpen, sdkReady, publicKey, selectedIndex, ordered])
+
   return (
     <section 
       id="planes" 
@@ -214,6 +298,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
       style={{ backgroundColor: "#2D2D2D" }}
       onClick={selectedIndex !== null ? handleClose : undefined}
     >
+      <Script src="https://sdk.mercadopago.com/js/v2" strategy="afterInteractive" onLoad={() => setSdkReady(true)} />
       <div 
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         onClick={selectedIndex !== null ? (e) => e.stopPropagation() : undefined}
@@ -281,11 +366,13 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 <PlanCard 
                   plan={ordered[selectedIndex]} 
                   onClick={() => {}}
-                  isStatic={true} 
+                  isStatic={true}
+                  onContract={() => { setShowCheckout(true); setCheckoutOpen(true) }}
                 />
               </motion.div>
 
               {/* Columna Derecha: Imagen */}
+              {!showCheckout && (
               <motion.div 
                 className="w-full md:w-1/2 relative"
                 initial={{ opacity: 0, x: 30 }}
@@ -313,6 +400,44 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                     )
                 })()}
               </motion.div>
+              )}
+
+              {/* Checkout Suscripción */}
+              {showCheckout && (
+              <motion.div
+                className="w-full md:w-1/2 bg-[#1E1E1E] border-2 border-[#00CED1] rounded-2xl p-6"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h4 className="text-white text-xl font-bold mb-4">Contratar suscripción</h4>
+                {!publicKey && (
+                  <p className="text-red-400 mb-3">Configura NEXT_PUBLIC_MP_PUBLIC_KEY en el entorno para tokenizar la tarjeta.</p>
+                )}
+                {error && <p className="text-red-400 mb-3">{error}</p>}
+                {success && <p className="text-green-400 mb-3">{success}</p>}
+                <form id="subscription-card-form" ref={formRef} className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input id="form-cardholder-name" placeholder="Nombre del titular" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                    <input id="form-cardholder-email" placeholder="Email" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                  </div>
+                  <input id="form-card-number" placeholder="Número de tarjeta" className="p-3 rounded bg-[#2D2D2D] text-white w-full" />
+                  <div className="grid grid-cols-3 gap-3">
+                    <input id="form-security-code" placeholder="CVV" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                    <input id="form-doc-type" placeholder="Tipo doc (ej: RUT)" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                    <input id="form-doc-number" placeholder="N° documento" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input id="form-card-exp-month" placeholder="MM" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                    <input id="form-card-exp-year" placeholder="YYYY" className="p-3 rounded bg-[#2D2D2D] text-white" />
+                  </div>
+                  <button type="submit" disabled={loading || !publicKey} className="mt-4 w-full bg-[#00CED1] text-[#1E1E1E] font-semibold rounded-full py-3 disabled:opacity-50">
+                    {loading ? 'Procesando…' : 'Confirmar y pagar'}
+                  </button>
+                </form>
+              </motion.div>
+              )}
 
               {/* Botón Siguiente (Flecha) */}
               <motion.button
@@ -333,3 +458,6 @@ export const PlansSection: FC<Props> = ({ plans }) => {
     </section>
   )
 }
+
+// Load Mercado Pago SDK
+export const dynamic = 'force-dynamic'
