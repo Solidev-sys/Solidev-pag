@@ -14,25 +14,24 @@ module.exports = function createPaymentsRouter({
         try {
             const usuario_id = req.userId;
             const { suscripcion_id } = req.body;
-
-            if (!suscripcion_id) {
-                return res.status(400).json({ error: 'Falta suscripcion_id en el cuerpo de la petición' });
-            }
+            if (!suscripcion_id) return res.status(400).json({ message: 'Falta suscripcion_id', error_code: 'PAY_MISSING_SUBS' });
+            const accessToken = process.env.MP_ACCESS_TOKEN || process.env.Access_token;
+            if (!accessToken) return res.status(500).json({ message: 'Token de Mercado Pago no configurado', error_code: 'PAY_MP_TOKEN_MISSING' });
 
             const suscripcion = await Suscripcion.findByPk(suscripcion_id, {
                 include: [{ model: Plan }, { model: Usuario }]
             });
-
-            if (!suscripcion || suscripcion.usuario_id !== usuario_id) {
-                return res.status(404).json({ error: 'Suscripción no encontrada o no pertenece al usuario' });
-            }
+            if (!suscripcion || suscripcion.usuario_id !== usuario_id) return res.status(404).json({ message: 'Suscripción no encontrada o no pertenece al usuario', error_code: 'PAY_SUBS_NOT_FOUND' });
 
             const plan = await Plan.findByPk(suscripcion.plan_id);
             const usuario = await Usuario.findByPk(usuario_id);
-
-            if (!plan || !usuario) {
-                return res.status(404).json({ error: 'Datos de plan/usuario no disponibles' });
-            }
+            if (!plan || !usuario) return res.status(404).json({ message: 'Datos de plan/usuario no disponibles', error_code: 'PAY_DATA_MISSING' });
+            if (!plan.activo) return res.status(400).json({ message: 'El plan no está activo', error_code: 'PAY_PLAN_INACTIVE' });
+            if (!usuario.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuario.email)) return res.status(400).json({ message: 'Email del comprador inválido', error_code: 'PAY_EMAIL_INVALID' });
+            if (!plan.moneda || plan.moneda.length !== 3) return res.status(400).json({ message: 'Moneda inválida', error_code: 'PAY_CURRENCY_INVALID' });
+            const allowedCurrencies = new Set(['CLP','ARS','BRL','COP','MXN','USD']);
+            if (!allowedCurrencies.has((plan.moneda || '').toUpperCase())) return res.status(400).json({ message: 'Moneda no soportada por Mercado Pago', error_code: 'PAY_CURRENCY_UNSUPPORTED' });
+            if (!plan.precio_centavos || plan.precio_centavos <= 0) return res.status(400).json({ message: 'Monto inválido', error_code: 'PAY_AMOUNT_INVALID' });
 
             const items = [{
                 id: suscripcion_id.toString(),
@@ -95,8 +94,9 @@ module.exports = function createPaymentsRouter({
 
             res.json({ init_point: response.init_point });
         } catch (error) {
-            console.error('Error al crear preferencia:', error);
-            res.status(500).json({ error: 'Error al procesar el pago' });
+            const msg = error?.message || 'Error al procesar el pago';
+            const code = error?.code || 'PAY_PREFERENCE_FAILED';
+            res.status(error?.status || 500).json({ message: msg, error_code: code });
         }
     });
 

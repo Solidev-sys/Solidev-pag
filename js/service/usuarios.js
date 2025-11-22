@@ -51,6 +51,10 @@ async function getUserById(id) {
 
 async function createUser(data) {
   try {
+    if (!data || typeof data !== 'object') throw new Error('Datos inválidos')
+    if (!data.email) throw new Error('Email requerido')
+    if (!data.password) throw new Error('Password requerido')
+    if (String(data.password).length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres')
     if (data.email) {
       const exists = await Usuario.findOne({ where: { email: data.email } });
       if (exists) throw new Error('El email ya está registrado');

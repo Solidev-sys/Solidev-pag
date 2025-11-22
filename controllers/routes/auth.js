@@ -8,14 +8,15 @@ module.exports = function createAuthRouter() {
     try {
       const { username, email, password } = req.body || {}
       const loginEmail = email || username
-      if (!loginEmail || !password) return res.status(400).json({ message: 'Faltan credenciales' })
+      if (!loginEmail || !password) return res.status(400).json({ message: 'Faltan credenciales', error_code: 'AUTH_MISSING' })
       const user = await userService.validateUser({ email: loginEmail, password })
-      if (!user) return res.status(401).json({ message: 'Credenciales inválidas' })
+      if (!user) return res.status(401).json({ message: 'Credenciales inválidas', error_code: 'AUTH_INVALID' })
       req.session.auth = { userId: user.id, role: user.rol }
       const apiUser = { id: user.id, username: user.email, email: user.email, nombreCompleto: user.nombre_completo, rol: user.rol }
-      res.json({ message: 'Login exitoso', user: apiUser, redirectUrl: '/' })
+      const redirectUrl = (user.rol === 'admin') ? '/admin' : '/'
+      res.json({ message: 'Login exitoso', user: apiUser, redirectUrl })
     } catch (e) {
-      res.status(500).json({ message: 'Error de servidor' })
+      res.status(500).json({ message: 'Error de servidor', error_code: 'AUTH_SERVER' })
     }
   })
 

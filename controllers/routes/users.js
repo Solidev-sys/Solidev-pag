@@ -28,11 +28,17 @@ module.exports = function createUsersRouter({ ensureRole }) {
       const data = req.body || {}
       const email = data.email || data.username
       const password = data.password
-      if (!email || !password) return res.status(400).json({ message: 'Faltan email y password' })
+      if (!email || !password) return res.status(400).json({ message: 'Faltan email y password', error_code: 'USR_MISSING_FIELDS' })
       const created = await userService.createUser({ email, password, nombre_completo: data.nombreCompleto || null, telefono: data.telefono || null, rol: 'cliente', estado: 'activo' })
-      res.status(201).json({ message: 'Usuario creado', user: { id: created.id, username: created.email, email: created.email, nombreCompleto: created.nombre_completo, rol: created.rol } })
+      req.session.auth = { userId: created.id, role: created.rol }
+      res.status(201).json({ message: 'Usuario creado', user: { id: created.id, username: created.email, email: created.email, nombreCompleto: created.nombre_completo, rol: created.rol }, redirectUrl: '/' })
     } catch (e) {
-      res.status(400).json({ message: e.message || 'Error al crear usuario' })
+      const msg = e?.message || 'Error al crear usuario'
+      let code = 'USR_CREATE_FAILED'
+      if (/contraseña/i.test(msg)) code = 'USR_PASSWORD_WEAK'
+      else if (/El email ya está registrado/i.test(msg)) code = 'USR_EMAIL_EXISTS'
+      console.warn('Intento de registro fallido', { email: (req.body && (req.body.email || req.body.username)) || 'N/A', code })
+      res.status(400).json({ message: msg, error_code: code })
     }
   })
 

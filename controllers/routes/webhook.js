@@ -65,6 +65,25 @@ module.exports = function createWebhookRouter({ payment }) {
                     }
                 }
 
+                if (suscripcion_id && usuario_id) {
+                    const sub = await Suscripcion.findByPk(suscripcion_id);
+                    if (sub) {
+                        const plan = await require('../../js/Models').Plan.findByPk(sub.plan_id);
+                        if (plan) {
+                            const expectedAmount = plan.precio_centavos;
+                            const expectedCurrency = (plan.moneda || 'CLP').toUpperCase();
+                            if (expectedAmount && amountCent && expectedAmount !== amountCent) {
+                                if (whRow?.id) await webhookService.markWebhookProcessed(whRow.id, 'Monto no coincide');
+                                return res.status(400).json({ error: 'Monto no coincide', error_code: 'IPN_MISMATCH_AMOUNT' });
+                            }
+                            if (expectedCurrency !== moneda.toUpperCase()) {
+                                if (whRow?.id) await webhookService.markWebhookProcessed(whRow.id, 'Moneda no coincide');
+                                return res.status(400).json({ error: 'Moneda no coincide', error_code: 'IPN_MISMATCH_CURRENCY' });
+                            }
+                        }
+                    }
+                }
+
                 const created = await pagoService.createPayment({
                     suscripcion_id,
                     usuario_id,

@@ -89,6 +89,13 @@ module.exports = function createSuscripcionesRouter({ ensureAuth, ensureRole, pr
             const plan = await require('../../js/Models').Plan.findByPk(suscripcion.plan_id);
             const usuario = await require('../../js/Models').Usuario.findByPk(usuario_id);
             if (!plan || !usuario) return res.status(404).json({ error: 'Datos de plan/usuario no disponibles' });
+            const accessToken = process.env.MP_ACCESS_TOKEN || process.env.Access_token;
+            if (!accessToken) return res.status(500).json({ message: 'Token de Mercado Pago no configurado', error_code: 'SUB_MP_TOKEN_MISSING' });
+            if (!usuario.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuario.email)) return res.status(400).json({ message: 'Email del comprador inválido', error_code: 'SUB_EMAIL_INVALID' });
+            if (!plan.moneda || plan.moneda.length !== 3) return res.status(400).json({ message: 'Moneda inválida', error_code: 'SUB_CURRENCY_INVALID' });
+            const allowedCurrencies = new Set(['CLP','ARS','BRL','COP','MXN','USD']);
+            if (!allowedCurrencies.has((plan.moneda || '').toUpperCase())) return res.status(400).json({ message: 'Moneda no soportada por Mercado Pago', error_code: 'SUB_CURRENCY_UNSUPPORTED' });
+
             if (!plan.mp_preapproval_plan_id) {
                 if (!plan.nombre || !plan.codigo) return res.status(400).json({ error: 'Plan sin nombre o código' })
                 if (!plan.precio_centavos || plan.precio_centavos <= 0) return res.status(400).json({ error: 'Plan con precio inválido' })
