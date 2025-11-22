@@ -1,8 +1,60 @@
 "use client"
+import { useEffect, useState, useCallback } from "react" // Agregado useCallback
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 
 export default function AdminHome() {
+  // Estados para contadores de datos
+  const [planCount, setPlanCount] = useState<number | string>('--');
+  const [loadingPlans, setLoadingPlans] = useState(true);
+
+  const [userCount, setUserCount] = useState<number | string>('--');
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  // Función de fetching reutilizable para contadores
+  const fetchDataCount = useCallback(async (path: string, setCount: (count: number | string) => void, setLoading: (loading: boolean) => void) => {
+    // Definimos la ruta de la API base
+    const apiRoute = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/api/${path}`;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(apiRoute, { credentials: 'include' });
+      const data = await response.json();
+      
+      // Asume que la API devuelve un array, y se cuenta su longitud
+      const count = Array.isArray(data) ? data.length : 0;
+      setCount(count);
+    } catch (error) {
+      console.error(`Error al obtener el conteo de ${path}:`, error);
+      setCount('Error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // useEffect para cargar todos los contadores al montar el componente
+  useEffect(() => {
+    // 1. Cargar Usuarios (Ruta: /api/users)
+    fetchDataCount('users', setUserCount, setLoadingUsers);
+    
+    // 2. Cargar Planes (Ruta: /api/plans)
+    fetchDataCount('planes', setPlanCount, setLoadingPlans); 
+    // Nota: Usamos 'planes' como path basándonos en el patrón lógico.
+  }, [fetchDataCount]); // Dependencia del useCallback
+
+  // Helper para mostrar spinner o contador
+  const renderCount = (count: number | string, isLoading: boolean, color: string) => {
+    if (isLoading) {
+      return (
+        <div 
+           className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" 
+           style={{ borderColor: color, borderTopColor: 'transparent' }}
+         />
+      );
+    }
+    return count;
+  };
+
   return (
     <ProtectedRoute requireAdmin>
       <AdminSidebar />
@@ -33,7 +85,7 @@ export default function AdminHome() {
             Panel de control y gestión administrativa
           </p>
 
-          {/* Elementos decorativos flotantes */}
+          {/* Elementos decorativos flotantes (omitted for brevity) */}
           <div className="relative w-full h-32 mt-12">
             <div 
               className="absolute top-0 left-1/4 w-20 h-20 rounded-full blur-xl animate-bounce" 
@@ -80,6 +132,8 @@ export default function AdminHome() {
 
           {/* Cards de acceso rápido */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto">
+            
+            {/* 1. Card Planes (ACTUALIZADA) */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
               style={{
@@ -95,10 +149,13 @@ export default function AdminHome() {
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <div className="text-3xl font-bold text-emerald-400 mb-2">{/* Número dinámico */}--</div>
+              <div className="text-3xl font-bold text-emerald-400 mb-2">
+                {renderCount(planCount, loadingPlans, '#10B981')}
+              </div>
               <div className="text-sm text-slate-400">Planes</div>
             </div>
 
+            {/* Card Suscripciones (Aún estática) */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
               style={{
@@ -118,6 +175,7 @@ export default function AdminHome() {
               <div className="text-sm text-slate-400">Suscripciones</div>
             </div>
 
+            {/* Card Facturas (Aún estática) */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
               style={{
@@ -137,6 +195,7 @@ export default function AdminHome() {
               <div className="text-sm text-slate-400">Facturas</div>
             </div>
 
+            {/* 4. Card Usuarios (ACTUALIZADA) */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
               style={{
@@ -152,7 +211,9 @@ export default function AdminHome() {
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <div className="text-3xl font-bold text-cyan-400 mb-2">--</div>
+              <div className="text-3xl font-bold text-cyan-400 mb-2">
+                 {renderCount(userCount, loadingUsers, '#00d9ff')}
+              </div>
               <div className="text-sm text-slate-400">Usuarios</div>
             </div>
           </div>
