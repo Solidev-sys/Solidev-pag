@@ -20,46 +20,20 @@ export class BaseApiService {
     };
 
     try {
-      console.log('Enviando petición con config:', JSON.stringify(config));
       const response = await fetch(url, config);
-      console.log('Respuesta recibida:', response.status);
-      
       if (!response.ok) {
-        if (response.status === 401) {
-          console.error('Error de autenticación');
-          throw new Error('No autenticado');
-        }
-        
-        let errorMessage = `Error ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-          
-          // Log adicional para debugging
-          console.error('Error del servidor:', {
-            status: response.status,
-            url,
-            method: options.method || 'GET',
-            errorData
-          });
-          
-        } catch (parseError) {
-          // Si no se puede parsear el JSON, usar el mensaje por defecto
-          console.error('Error al parsear respuesta del servidor:', parseError);
-        }
-        
-        throw new Error(errorMessage);
+        let errorData: any = null;
+        try { errorData = await response.json(); } catch {}
+        const message = (errorData && (errorData.message || errorData.error)) || `Error ${response.status}`;
+        const err: any = new Error(message);
+        if (errorData && errorData.error_code) err.code = errorData.error_code;
+        err.status = response.status;
+        throw err;
       }
-
       const data = await response.json();
-      console.log('Datos recibidos:', data);
-      return data;
+      return data as T;
     } catch (error) {
-      console.error('Error en la petición:', error);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Error de conexión');
+      throw error;
     }
   }
 }

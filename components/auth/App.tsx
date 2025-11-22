@@ -21,9 +21,11 @@ export function LoginPage() {
 
   const [loginEmail, setLoginEmail] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
+  const [loginError, setLoginError] = useState<string | null>(null)
   const [regUsername, setRegUsername] = useState("")
   const [regEmail, setRegEmail] = useState("")
   const [regPassword, setRegPassword] = useState("")
+  const [regError, setRegError] = useState<string | null>(null)
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [loadingReg, setLoadingReg] = useState(false)
 
@@ -37,6 +39,7 @@ export function LoginPage() {
     const res = await login(loginEmail, loginPassword)
     setLoadingLogin(false)
     if (res.success) router.replace(res.redirectUrl || "/")
+    else setLoginError(res.message || "Credenciales inválidas")
   }
 
   const doRegister = async () => {
@@ -45,6 +48,7 @@ export function LoginPage() {
     const res = await register({ username: regUsername || regEmail, name: regUsername, email: regEmail, password: regPassword, rut: "", phone: "", address: "", comuna: "", region: "" })
     setLoadingReg(false)
     if (res.success) router.replace("/")
+    else setRegError(res.message || 'Error al registrar')
   }
 
   return (
@@ -65,6 +69,7 @@ export function LoginPage() {
               <input type="password" required value={loginPassword} onChange={(e)=>setLoginPassword(e.target.value)} />
               <label>Contraseña</label>
             </div>
+            {loginError && <p className="text-red-400 mb-2">{loginError}</p>}
             <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doLogin()}}>
               Entrar
             </button>
@@ -93,6 +98,7 @@ export function LoginPage() {
               <input type="password" required value={regPassword} onChange={(e)=>setRegPassword(e.target.value)} />
               <label>Contraseña</label>
             </div>
+            {regError && <p className="text-red-400 mb-2">{regError}</p>}
             <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doRegister()}}>
               Registrarse
             </button>

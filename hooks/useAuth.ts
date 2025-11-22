@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { apiService } from "@/lib/api"
 import type { User, AuthState } from "@/types"
 
@@ -10,11 +11,17 @@ export function useAuth() {
     isAuthenticated: false,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const pathname = typeof window !== 'undefined' ? usePathname() : null
 
-  // Verificar sesión al cargar
+  // Verificar sesión al cargar (evitar en /login y /register)
   useEffect(() => {
+    const skipPaths = ["/login", "/register"]
+    if (pathname && skipPaths.includes(pathname)) {
+      setIsLoading(false)
+      return
+    }
     checkSession()
-  }, [])
+  }, [pathname])
 
   const checkSession = async () => {
     try {
@@ -44,7 +51,7 @@ export function useAuth() {
     }
   }
 
-  const login = async (username: string, password: string): Promise<{ success: boolean; redirectUrl?: string }> => {
+  const login = async (username: string, password: string): Promise<{ success: boolean; redirectUrl?: string; message?: string }> => {
     try {
       const response = await apiService.login({ username, password })
       if (response.user) {
@@ -56,15 +63,12 @@ export function useAuth() {
           rol: response.user.rol,
         }
         setAuthState({ user, isAuthenticated: true })
-        return { 
-          success: true, 
-          redirectUrl: response.redirectUrl || '/' 
-        }
+        const isAdmin = user.rol === 'admin' || user.username === 'admin'
+        return { success: true, redirectUrl: response.redirectUrl || (isAdmin ? '/admin' : '/') }
       }
-      return { success: false }
-    } catch (error) {
-      console.error("Login error:", error)
-      return { success: false }
+      return { success: false, message: 'Credenciales inválidas' }
+    } catch (error: any) {
+      return { success: false, message: error?.message || 'Error al iniciar sesión' }
     }
   }
 
@@ -93,20 +97,15 @@ export function useAuth() {
       }
 
       const response = await apiService.register(registerData)
-      
       if (response.user) {
-        // Después del registro exitoso, hacer login automático
-        const loginResult = await login(userData.username, userData.password)
+        // Después del registro exitoso, hacer login automático usando email
+        const loginResult = await login(userData.email, userData.password)
         return { success: loginResult.success }
       }
       
       return { success: true }
     } catch (error: any) {
-      console.error("Registration error:", error)
-      return { 
-        success: false, 
-        message: error.message || "Error al registrar usuario" 
-      }
+      return { success: false, message: error?.message || "Error al registrar usuario" }
     }
   }
 
