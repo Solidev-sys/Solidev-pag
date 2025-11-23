@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState, useCallback } from "react" // Agregado useCallback
+import { useEffect, useState, useCallback } from "react" 
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 
@@ -39,8 +39,7 @@ export default function AdminHome() {
     
     // 2. Cargar Planes (Ruta: /api/plans)
     fetchDataCount('planes', setPlanCount, setLoadingPlans); 
-    // Nota: Usamos 'planes' como path basándonos en el patrón lógico.
-  }, [fetchDataCount]); // Dependencia del useCallback
+  }, [fetchDataCount]); 
 
   // Helper para mostrar spinner o contador
   const renderCount = (count: number | string, isLoading: boolean, color: string) => {
@@ -58,7 +57,7 @@ export default function AdminHome() {
   return (
     <ProtectedRoute requireAdmin>
       <AdminSidebar />
-      <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="min-h-screen flex items-center justify-center p-8 bg-home-dark-1"> 
         <div className="text-center space-y-6">
           {/* Título principal con efectos */}
           <div className="relative">
@@ -133,19 +132,16 @@ export default function AdminHome() {
           {/* Cards de acceso rápido */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto">
             
-            {/* 1. Card Planes (ACTUALIZADA) */}
+            {/* 1. Card Planes (ACTUALIZADA con estilos de paleta) */}
             <div 
-              className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
-              style={{
-                background: 'rgba(16, 185, 129, 0.05)',
-                borderColor: 'rgba(16, 185, 129, 0.2)'
-              }}
+              className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
+                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(16, 185, 129, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.2)'
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
@@ -155,19 +151,16 @@ export default function AdminHome() {
               <div className="text-sm text-slate-400">Planes</div>
             </div>
 
-            {/* Card Suscripciones (Aún estática) */}
+            {/* 2. Card Suscripciones (ACTUALIZADA con estilos de paleta) */}
             <div 
-              className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
-              style={{
-                background: 'rgba(0, 217, 255, 0.05)',
-                borderColor: 'rgba(0, 217, 255, 0.2)'
-              }}
+              className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
+                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 217, 255, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.2)'
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
@@ -175,19 +168,16 @@ export default function AdminHome() {
               <div className="text-sm text-slate-400">Suscripciones</div>
             </div>
 
-            {/* Card Facturas (Aún estática) */}
+            {/* 3. Card Facturas (ACTUALIZADA con estilos de paleta) */}
             <div 
-              className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
-              style={{
-                background: 'rgba(16, 185, 129, 0.05)',
-                borderColor: 'rgba(16, 185, 129, 0.2)'
-              }}
+              className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
+                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(16, 185, 129, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.2)'
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
@@ -195,19 +185,16 @@ export default function AdminHome() {
               <div className="text-sm text-slate-400">Facturas</div>
             </div>
 
-            {/* 4. Card Usuarios (ACTUALIZADA) */}
+            {/* 4. Card Usuarios (ACTUALIZADA con estilos de paleta) */}
             <div 
-              className="p-6 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer group"
-              style={{
-                background: 'rgba(0, 217, 255, 0.05)',
-                borderColor: 'rgba(0, 217, 255, 0.2)'
-              }}
+              className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
+                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 217, 255, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.2)'
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >

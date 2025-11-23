@@ -109,7 +109,7 @@ export default function AdminPlanes() {
   return (
     <ProtectedRoute requireAdmin>
       <AdminSidebar />
-      <div className="min-h-screen p-8 pt-28">
+      <div className="min-h-screen p-8 pt-28 bg-home-dark-1">
         {/* Header */}
         <div className="mb-8">
           <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-2">
@@ -128,39 +128,39 @@ export default function AdminPlanes() {
         )}
 
         {/* Create Plan Form */}
-        <form onSubmit={create} className="mb-8 bg-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6">
+        <form onSubmit={create} className="mb-8 bg-dark-surface backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6">
           <h3 className="text-xl font-bold text-emerald-400 mb-4">Crear Nuevo Plan</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <input
               value={form.codigo}
               onChange={e => setForm({ ...form, codigo: e.target.value })}
               placeholder="Código del plan"
-              className="p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
+              className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
             />
             <input
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
               placeholder="Nombre del plan"
-              className="p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
+              className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
             />
             <input
               type="number"
               value={form.precio}
               onChange={e => setForm({ ...form, precio: parseInt(e.target.value || '0') })}
               placeholder="Precio en CLP"
-              className="p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
+              className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
             />
             <select
               value={form.moneda}
               onChange={e => setForm({ ...form, moneda: e.target.value })}
-              className="p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
+              className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
             >
               <option value="CLP">CLP</option>
             </select>
             <select
               value={form.ciclo_fact}
               onChange={e => setForm({ ...form, ciclo_fact: e.target.value })}
-              className="p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
+              className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
             >
               <option value="mensual">Mensual</option>
               <option value="anual">Anual</option>
@@ -185,7 +185,8 @@ export default function AdminPlanes() {
             <div
               key={plan.id}
               onClick={() => setSelectedPlan(plan)}
-              className="group relative bg-slate-900/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-1"
+              // Ajuste de estilos base de la tarjeta
+              className="group relative bg-dark-surface backdrop-blur-sm border border-dark-card rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-1"
             >
               {/* Icon Header */}
               <div className="flex items-center justify-between mb-4">
@@ -260,7 +261,8 @@ export default function AdminPlanes() {
             onClick={() => setSelectedPlan(null)}
           >
             <div
-              className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              // Ajuste del fondo del modal
+              className="bg-dark-surface border border-emerald-500/30 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
               style={{
                 boxShadow: '0 0 60px rgba(16, 185, 129, 0.2)'
@@ -274,7 +276,8 @@ export default function AdminPlanes() {
                 </div>
                 <button
                   onClick={() => setSelectedPlan(null)}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+                  // Ajuste del botón de cierre
+                  className="p-2 rounded-xl bg-dark-secondary hover:bg-slate-700 transition-colors"
                 >
                   <X className="w-5 h-5 text-slate-400" />
                 </button>
@@ -282,7 +285,7 @@ export default function AdminPlanes() {
 
               {/* Details Grid */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-slate-800/50 rounded-xl p-4">
+                <div className="bg-dark-secondary rounded-xl p-4">
                   <p className="text-sm text-slate-400 mb-1">Precio</p>
                   {editMode === 'precio' ? (
                     <div className="flex gap-2">
@@ -290,7 +293,8 @@ export default function AdminPlanes() {
                         type="number"
                         value={editValue}
                         onChange={e => setEditValue(e.target.value)}
-                        className="flex-1 p-2 rounded-lg bg-slate-900 border border-emerald-500 text-white text-xl font-bold"
+                        // Ajuste del input
+                        className="flex-1 p-2 rounded-lg bg-dark-main border border-emerald-500 text-white text-xl font-bold"
                         autoFocus
                       />
                       <button onClick={saveEdit} className="p-2 rounded-lg bg-emerald-500 text-white">
@@ -307,17 +311,17 @@ export default function AdminPlanes() {
                   )}
                 </div>
 
-                <div className="bg-slate-800/50 rounded-xl p-4">
+                <div className="bg-dark-secondary rounded-xl p-4">
                   <p className="text-sm text-slate-400 mb-1">Ciclo</p>
                   <p className="text-xl font-bold text-white capitalize">{selectedPlan.ciclo_fact}</p>
                 </div>
 
-                <div className="bg-slate-800/50 rounded-xl p-4">
+                <div className="bg-dark-secondary rounded-xl p-4">
                   <p className="text-sm text-slate-400 mb-1">Moneda</p>
                   <p className="text-xl font-bold text-white">{selectedPlan.moneda}</p>
                 </div>
 
-                <div className="bg-slate-800/50 rounded-xl p-4">
+                <div className="bg-dark-secondary rounded-xl p-4">
                   <p className="text-sm text-slate-400 mb-1">Estado</p>
                   <p className={`text-xl font-bold ${selectedPlan.activo ? 'text-emerald-400' : 'text-slate-400'}`}>
                     {selectedPlan.activo ? 'Activo' : 'Inactivo'}
@@ -326,7 +330,7 @@ export default function AdminPlanes() {
               </div>
 
               {/* Name Edit Section */}
-              <div className="bg-slate-800/50 rounded-xl p-4 mb-6">
+              <div className="bg-dark-secondary rounded-xl p-4 mb-6">
                 <p className="text-sm text-slate-400 mb-2">Nombre del Plan</p>
                 {editMode === 'nombre' ? (
                   <div className="flex gap-2">
@@ -334,7 +338,8 @@ export default function AdminPlanes() {
                       type="text"
                       value={editValue}
                       onChange={e => setEditValue(e.target.value)}
-                      className="flex-1 p-2 rounded-lg bg-slate-900 border border-emerald-500 text-white text-lg font-semibold"
+                      // Ajuste del input
+                      className="flex-1 p-2 rounded-lg bg-dark-main border border-emerald-500 text-white text-lg font-semibold"
                       autoFocus
                     />
                     <button onClick={saveEdit} className="p-2 rounded-lg bg-emerald-500 text-white">
@@ -350,12 +355,10 @@ export default function AdminPlanes() {
               </div>
 
               {/* MercadoPago Info */}
-              {selectedPlan.mp_preapproval_plan_id && (
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
-                  <p className="text-sm text-yellow-400 font-medium mb-1">MercadoPago Plan ID</p>
-                  <p className="text-yellow-300 font-mono text-sm">{selectedPlan.mp_preapproval_plan_id}</p>
-                </div>
-              )}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+                <p className="text-sm text-yellow-400 font-medium mb-1">MercadoPago Plan ID</p>
+                <p className="text-yellow-300 font-mono text-sm">{selectedPlan.mp_preapproval_plan_id || 'N/A'}</p>
+              </div>
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3 mb-4">
