@@ -11,6 +11,12 @@ export default function AdminHome() {
   const [userCount, setUserCount] = useState<number | string>('--');
   const [loadingUsers, setLoadingUsers] = useState(true);
 
+  const [suscripcionCount, setSuscripcionCount] = useState<number | string>('--');
+  const [loadingSuscripciones, setLoadingSuscripciones] = useState(true);
+
+  const [facturaCount, setFacturaCount] = useState<number | string>('--');
+  const [loadingFacturas, setLoadingFacturas] = useState(true);
+
   // Función de fetching reutilizable para contadores
   const fetchDataCount = useCallback(async (path: string, setCount: (count: number | string) => void, setLoading: (loading: boolean) => void) => {
     // Definimos la ruta de la API base
@@ -37,8 +43,14 @@ export default function AdminHome() {
     // 1. Cargar Usuarios (Ruta: /api/users)
     fetchDataCount('users', setUserCount, setLoadingUsers);
     
-    // 2. Cargar Planes (Ruta: /api/plans)
-    fetchDataCount('planes', setPlanCount, setLoadingPlans); 
+    // 2. Cargar Planes (Ruta: /api/planes)
+    fetchDataCount('planes', setPlanCount, setLoadingPlans);
+
+    // 3. Cargar Suscripciones (Ruta: /api/suscripciones)
+    fetchDataCount('suscripciones', setSuscripcionCount, setLoadingSuscripciones);
+
+    // 4. Cargar Facturas (Ruta: /api/facturas)
+    fetchDataCount('facturas', setFacturaCount, setLoadingFacturas);
   }, [fetchDataCount]); 
 
   // Helper para mostrar spinner o contador
@@ -84,7 +96,7 @@ export default function AdminHome() {
             Panel de control y gestión administrativa
           </p>
 
-          {/* Elementos decorativos flotantes (omitted for brevity) */}
+          {/* Elementos decorativos flotantes */}
           <div className="relative w-full h-32 mt-12">
             <div 
               className="absolute top-0 left-1/4 w-20 h-20 rounded-full blur-xl animate-bounce" 
@@ -132,16 +144,15 @@ export default function AdminHome() {
           {/* Cards de acceso rápido */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto">
             
-            {/* 1. Card Planes (ACTUALIZADA con estilos de paleta) */}
+            {/* 1. Card Planes */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
-                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(16, 185, 129, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
@@ -151,50 +162,62 @@ export default function AdminHome() {
               <div className="text-sm text-slate-400">Planes</div>
             </div>
 
-            {/* 2. Card Suscripciones (ACTUALIZADA con estilos de paleta) */}
+            {/* 2. Card Suscripciones - ACTUALIZADA CON CONTADOR DINÁMICO */}
             <div 
-              className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
+              className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group relative overflow-hidden"
               onMouseEnter={(e) => {
-                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 217, 255, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <div className="text-3xl font-bold text-cyan-400 mb-2">--</div>
+              {/* Efecto de brillo animado para indicar actualización en tiempo real */}
+              {!loadingSuscripciones && (
+                <div 
+                  className="absolute top-0 right-0 w-2 h-2 rounded-full"
+                  style={{
+                    background: 'linear-gradient(135deg, #00d9ff, #10B981)',
+                    boxShadow: '0 0 10px rgba(0, 217, 255, 0.8)',
+                    animation: 'pulse 2s ease-in-out infinite'
+                  }}
+                />
+              )}
+              <div className="text-3xl font-bold text-cyan-400 mb-2">
+                {renderCount(suscripcionCount, loadingSuscripciones, '#00d9ff')}
+              </div>
               <div className="text-sm text-slate-400">Suscripciones</div>
             </div>
 
-            {/* 3. Card Facturas (ACTUALIZADA con estilos de paleta) */}
+            {/* 3. Card Facturas - ACTUALIZADA CON CONTADOR DINÁMICO */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
-                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(16, 185, 129, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <div className="text-3xl font-bold text-emerald-400 mb-2">--</div>
+              <div className="text-3xl font-bold text-emerald-400 mb-2">
+                {renderCount(facturaCount, loadingFacturas, '#10B981')}
+              </div>
               <div className="text-sm text-slate-400">Facturas</div>
             </div>
 
-            {/* 4. Card Usuarios (ACTUALIZADA con estilos de paleta) */}
+            {/* 4. Card Usuarios */}
             <div 
               className="p-6 rounded-2xl backdrop-blur-sm border bg-dark-surface border-dark-card transition-all duration-300 hover:scale-105 cursor-pointer group"
               onMouseEnter={(e) => {
-                // Mantenemos hover personalizado para el efecto de brillo acento
                 e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.5)'
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 217, 255, 0.2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--dark-border-card)' // Usar la variable de borde base
+                e.currentTarget.style.borderColor = 'var(--dark-border-card)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
