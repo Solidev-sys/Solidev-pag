@@ -1,4 +1,7 @@
+"use client"
 import React from 'react'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { MessageCircle } from 'lucide-react'
 
 export default function NosotrosPage() {
   const team = [
@@ -6,25 +9,29 @@ export default function NosotrosPage() {
       name: 'Matías',
       role: 'Socio fundador de Solidev. Titulado en Ingeniería en Informática.',
       color: 'from-cyan-500 to-cyan-400',
-      img: '/images/matias.png'
+      img: '/images/matias.png',
+      whatsapp: '+56 9 1234 5678'
     },
     {
       name: 'Raúl',
       role: 'Socio fundador de Solidev. Titulado en Ingeniería en Informática.',
       color: 'from-emerald-400 to-emerald-500',
-      img: '/images/raul.png'
+      img: '/images/raul.png',
+      whatsapp: '+56 9 2345 6789'
     },
     {
       name: 'Cris',
       role: 'Socio fundador de Solidev. Titulado en Ingeniería en Informática.',
       color: 'from-violet-500 to-violet-400',
-      img: '/images/cris.png'
+      img: '/images/cris.png',
+      whatsapp: '+56 9 3456 7890'
     },
     {
       name: 'Daniel',
       role: 'Socio fundador de Solidev. Titulado en Ingeniería en Informática.',
       color: 'from-rose-500 to-rose-400',
-      img: '/images/daniel.png'
+      img: '/images/daniel.png',
+      whatsapp: '+56 9 4567 8901'
     }
   ]
 
@@ -69,10 +76,42 @@ export default function NosotrosPage() {
                 </div>
 
                 <div className="mt-4">
-                  <button className={`w-full py-2 rounded-md bg-gradient-to-r ${member.color} text-white font-semibold shadow-md`}>Contáctame</button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className={`w-full py-2 rounded-md bg-gradient-to-r ${member.color} text-white font-semibold shadow-md flex items-center justify-center gap-2`}>
+                        <MessageCircle className="h-5 w-5" />
+                        Contáctame
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-gray-800 text-white border-home-light shadow-dark-soft">
+                      <DialogHeader>
+                        <DialogTitle>Contacto</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex items-start gap-4">
+                        <div className="w-20 h-20 rounded-md overflow-hidden border bg-gray-800">
+                          <img src={member.img} alt={member.name} className="w-full h-full object-contain bg-gray-800" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-300">{member.role}</p>
+                      <div className="mt-4 p-3 rounded-md border border-home-light bg-home-dark-3 shadow-dark-soft">
+                        <p className="text-sm text-home-white">WhatsApp: <span className="font-semibold">{member.whatsapp}</span></p>
+                        <div className="mt-2 h-1.5 w-full rounded bg-gradient-blue-2" />
+                        <a
+                          href={`https://wa.me/${member.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-md bg-home-green-whatsapp text-white font-semibold transition-colors hover:opacity-90"
+                        >
+                          <MessageCircle className="h-5 w-5" />
+                          Enviar WhatsApp
+                        </a>
+                      </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
-                {/* Floating plus icon */}
                 <div className="absolute top-3 right-3">
                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white border border-white/10">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
