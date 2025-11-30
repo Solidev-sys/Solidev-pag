@@ -321,11 +321,11 @@ export const PlansSection: FC<Props> = ({ plans }) => {
 
   useEffect(() => {
     if (checkoutOpen) {
-      if (!publicKey) { setError('Falta NEXT_PUBLIC_MP_PUBLIC_KEY para inicializar Mercado Pago'); return }
-      if (!sdkReady) { setError('SDK de Mercado Pago aún no está listo'); return }
-      if (!(window as any).MercadoPago) { setError('SDK de Mercado Pago no cargado'); return }
-      if (!formRef.current) { setError('Formulario de tarjeta no disponible'); return }
-      if (selectedIndex === null) { setError('Ningún plan seleccionado'); return }
+      if (!publicKey) { return }
+      if (!sdkReady) { return }
+      if (!(window as any).MercadoPago) { return }
+      if (!formRef.current) { return }
+      if (selectedIndex === null) { return }
     }
     if (checkoutOpen && sdkReady && (window as any).MercadoPago && formRef.current && selectedIndex !== null) {
       try {
@@ -380,7 +380,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
           }
         })
       } catch (e) {
-        setError('No se pudo inicializar Mercado Pago')
+        console.warn('MP SDK init warning:', e)
       }
     }
   }, [checkoutOpen, sdkReady, publicKey, selectedIndex, ordered])
