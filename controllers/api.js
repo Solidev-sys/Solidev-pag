@@ -108,7 +108,7 @@ app.use('/api', paginasRouter);
 const authRouter = createAuthRouter();
 app.use('/api', authRouter);
 
-const usersRouter = createUsersRouter({ ensureRole });
+const usersRouter = createUsersRouter({ ensureAuth, ensureRole });
 app.use('/api', usersRouter);
 
 const adminRouter = createAdminRouter({ ensureRole });
