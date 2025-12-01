@@ -7,6 +7,9 @@ import AdminSidebar from "@/components/admin/AdminSidebar"
 export default function AdminUsuarios() {
   const [list, setList] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [emailEdit, setEmailEdit] = useState<{ id: number|null; email: string }>(() => ({ id: null, email: '' }))
+  const [passEdit, setPassEdit] = useState<{ id: number|null; pass: string }>(() => ({ id: null, pass: '' }))
+  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/api/users`, { 
@@ -24,13 +27,52 @@ export default function AdminUsuarios() {
   }, [])
 
   const handleChangePassword = (userId: string, email: string) => {
-    console.log(`Cambiar contraseña para usuario ${userId} - ${email}`)
-    // Aquí irá la lógica para cambiar contraseña
+    setPassEdit({ id: Number(userId), pass: '' })
+    setMessage(null)
   }
 
   const handleChangeEmail = (userId: string, email: string) => {
-    console.log(`Cambiar correo para usuario ${userId} - ${email}`)
-    // Aquí irá la lógica para cambiar correo
+    setEmailEdit({ id: Number(userId), email })
+    setMessage(null)
+  }
+
+  const submitEmail = async () => {
+    if (!emailEdit.id) return
+    setMessage(null)
+    try {
+      const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/api/users/${emailEdit.id}/email`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_email: emailEdit.email })
+      })
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data?.message || 'Error al actualizar email')
+      setMessage('Email actualizado')
+      setList(prev => prev.map(u => u.id === emailEdit.id ? { ...u, email: emailEdit.email } : u))
+      setEmailEdit({ id: null, email: '' })
+    } catch (e:any) {
+      setMessage(e?.message || 'Error al actualizar email')
+    }
+  }
+
+  const submitPass = async () => {
+    if (!passEdit.id) return
+    setMessage(null)
+    try {
+      const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/api/users/${passEdit.id}/password`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_password: passEdit.pass })
+      })
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data?.message || 'Error al actualizar contraseña')
+      setMessage('Contraseña actualizada')
+      setPassEdit({ id: null, pass: '' })
+    } catch (e:any) {
+      setMessage(e?.message || 'Error al actualizar contraseña')
+    }
   }
 
   return (
@@ -197,6 +239,34 @@ export default function AdminUsuarios() {
                 />
               </div>
             ))}
+          </div>
+        )}
+
+        {(emailEdit.id !== null || passEdit.id !== null) && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={()=>{setEmailEdit({id:null,email:''}); setPassEdit({id:null,pass:''}); setMessage(null)}}>
+            <div className="w-full max-w-md bg-home-dark-2 border-2 border-teal-500 rounded-2xl p-6" onClick={e=>e.stopPropagation()}>
+              <h3 className="text-xl font-semibold text-white mb-4">{emailEdit.id!==null?'Cambiar correo':'Cambiar contraseña'}</h3>
+              {emailEdit.id!==null ? (
+                <>
+                  <input value={emailEdit.email} onChange={e=>setEmailEdit({...emailEdit,email:e.target.value})} placeholder="Nuevo correo" type="email" className="w-full mb-4 p-3 rounded bg-neutral-800 text-white" />
+                  {message && <p className={message.includes('actualiz')? 'text-green-400':'text-red-400'}>{message}</p>}
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={submitEmail} className="flex-1 py-2 rounded bg-teal-500 text-neutral-900 font-semibold">Guardar</button>
+                    <button onClick={()=>{setEmailEdit({id:null,email:''}); setMessage(null)}} className="flex-1 py-2 rounded border border-teal-500 text-teal-300">Cancelar</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <input value={passEdit.pass} onChange={e=>setPassEdit({...passEdit,pass:e.target.value})} placeholder="Nueva contraseña" type="password" className="w-full mb-4 p-3 rounded bg-neutral-800 text-white" />
+                  <p className="text-sm text-slate-400">Debe tener al menos 8 caracteres, con mayúsculas, minúsculas y números.</p>
+                  {message && <p className={message.includes('actualiz')? 'text-green-400':'text-red-400'}>{message}</p>}
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={submitPass} className="flex-1 py-2 rounded bg-teal-500 text-neutral-900 font-semibold">Guardar</button>
+                    <button onClick={()=>{setPassEdit({id:null,pass:''}); setMessage(null)}} className="flex-1 py-2 rounded border border-teal-500 text-teal-300">Cancelar</button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
 

@@ -57,6 +57,20 @@ export class ApiService extends BaseApiService {
     return this.request('/api/users/me');
   }
 
+  async changeEmail(payload: { currentPassword: string; newEmail: string }): Promise<{ message: string; user: import('@/types').ApiUser }> {
+    return this.request('/api/users/me/email', {
+      method: 'PUT',
+      body: JSON.stringify({ current_password: payload.currentPassword, new_email: payload.newEmail }),
+    });
+  }
+
+  async changePassword(payload: { currentPassword: string; newPassword: string }): Promise<{ message: string }> {
+    return this.request('/api/users/me/password', {
+      method: 'PUT',
+      body: JSON.stringify({ current_password: payload.currentPassword, new_password: payload.newPassword }),
+    });
+  }
+
   // Cart management - Fixed routes to match backend
   async getCart(): Promise<CartResponse> {
     return this.request('/api/carrito');
