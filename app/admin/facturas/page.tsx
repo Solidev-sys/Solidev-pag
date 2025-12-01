@@ -15,8 +15,10 @@ export default function AdminFacturas() {
   const [dateFilter, setDateFilter] = useState({ desde: "", hasta: "" })
   const [montoFilter, setMontoFilter] = useState({ min: "", max: "" })
 
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'
+
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/admin/facturas`, { 
+    fetch(`${API_BASE}/api/facturas`, { 
       credentials: 'include' 
     })
       .then(r => r.json())
@@ -81,13 +83,13 @@ export default function AdminFacturas() {
 
   const handleDownloadPdf = (rutaPdf: string, numero: string) => {
     const link = document.createElement('a')
-    link.href = rutaPdf
+    link.href = `${API_BASE}${rutaPdf}`
     link.download = `factura_${numero}.pdf`
     link.click()
   }
 
   const handlePreviewPdf = (rutaPdf: string) => {
-    setPreviewPdf(rutaPdf)
+    setPreviewPdf(`${API_BASE}${rutaPdf}`)
   }
 
   const clearFilters = () => {
