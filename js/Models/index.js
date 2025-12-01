@@ -31,7 +31,7 @@ Pago.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
 // Facturas y pagos
 Pago.hasOne(Factura, { foreignKey: 'pago_id', as: 'factura', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
-Factura.belongsTo(Pago, { foreignKey: 'pago_id' });
+Factura.belongsTo(Pago, { foreignKey: 'pago_id', as: 'pago' });
 
 // Notificaciones y usuarios
 Usuario.hasMany(Notificacion, { foreignKey: 'usuario_id', as: 'notificaciones', onUpdate: 'CASCADE', onDelete: 'CASCADE' });

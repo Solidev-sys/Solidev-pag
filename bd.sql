@@ -115,19 +115,19 @@ CREATE TABLE pagos (
 -- =========================================================
 -- Tabla: facturas
 -- =========================================================
-CREATE TABLE facturas (
-  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  pago_id     BIGINT UNSIGNED NOT NULL UNIQUE,
-  numero      VARCHAR(64)  NOT NULL,
-  ruta_pdf    VARCHAR(255) NOT NULL,
-  emitida_en  DATETIME     NOT NULL,
-  impuesto_cent INT UNSIGNED NOT NULL DEFAULT 0,
-  neto_cent     INT UNSIGNED NOT NULL,
-  total_cent    INT UNSIGNED NOT NULL,
-  CONSTRAINT fk_facturas_pago
-    FOREIGN KEY (pago_id) REFERENCES pagos(id)
-    ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB;
+  CREATE TABLE facturas (
+    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    pago_id     BIGINT UNSIGNED NOT NULL UNIQUE,
+    numero      VARCHAR(64)  NOT NULL,
+    ruta_pdf    VARCHAR(255) NOT NULL,
+    emitida_en  DATETIME     NOT NULL,
+    impuesto_cent INT UNSIGNED NOT NULL DEFAULT 0,
+    neto_cent     INT UNSIGNED NOT NULL,
+    total_cent    INT UNSIGNED NOT NULL,
+    CONSTRAINT fk_facturas_pago
+      FOREIGN KEY (pago_id) REFERENCES pagos(id)
+      ON UPDATE CASCADE ON DELETE CASCADE
+  ) ENGINE=InnoDB;
 
 -- Trigger opcional: impedir factura si el pago no está aprobado
 DELIMITER $$
