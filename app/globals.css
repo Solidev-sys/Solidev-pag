@@ -612,21 +612,19 @@ body {
 
 /* Webkit scrollbar (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 0;
+  height: 0;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: transparent;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #06b6d4 0%, #14b8a6 50%, #06b6d4 100%);
+  background: transparent;
   border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  background-size: 200% 100%;
-  animation: scrollbar-gradient 3s ease infinite;
-  transition: all 0.3s ease;
+  border: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -654,11 +652,17 @@ html {
   scroll-behavior: smooth;
 }
 
+html, body {
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Scroll snap para secciones (aplicar solo en páginas que lo necesiten) */
 .snap-container {
   scroll-snap-type: y mandatory;
-  overflow-y: scroll;
-  height: 100vh;
+  overflow-y: auto;
+  min-height: 100vh;
 }
 
 .snap-start {

@@ -267,3 +267,13 @@
   will-change: backdrop-filter;
 }
 
+.snap-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.snap-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
