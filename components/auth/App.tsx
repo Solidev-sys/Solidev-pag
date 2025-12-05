@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, FormEvent } from "react"
+import { useState, FormEvent, useMemo } from "react"
 import "./LoginStyles.css"
 import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
@@ -19,6 +19,22 @@ export function LoginPage() {
   const { login, register } = useAuth()
   const router = useRouter()
 
+  // Generar burbujas de forma determinística
+  const bubbles = useMemo(() => {
+    return Array.from({ length: 40 }, (_, i) => {
+      // Distribuir uniformemente por toda la anchura (0-100%)
+      const left = (i / 40) * 100 + (Math.sin(i * 0.5) * 5); // Distribución horizontal uniforme con pequeña variación
+      return {
+        id: i,
+        left: left,
+        size: 20 + ((i * 2.3) % 70), // Entre 20px y 90px
+        delay: ((i * 0.2) % 3), // Delays escalonados
+        duration: 8 + ((i * 0.4) % 6), // Entre 8 y 14 segundos
+        opacity: 0.04 + ((i % 4) * 0.03), // Opacidades más bajas: 0.04 a 0.13
+      }
+    })
+  }, [])
+
   const [loginEmail, setLoginEmail] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -31,6 +47,11 @@ export function LoginPage() {
 
   const toggleForm = () => {
     setIsLoginActive(!isLoginActive)
+  }
+
+  const handleReturnHome = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    router.push("/")
   }
 
   const doLogin = async () => {
@@ -53,8 +74,31 @@ export function LoginPage() {
 
   return (
     <div className="login-screen">
-      {/* Botón fuera del contenedor con estilo .btn */}
-      <Link href="/" className="btn return-btn">Volver al inicio</Link>
+      {/* Fondo animado con gradiente (igual al de nosotros) */}
+      <div className="login-background-animated">
+        {/* Gradiente principal */}
+        <div className="login-gradient-main" />
+        
+        {/* Gradiente secundario animado con blur */}
+        <div className="login-gradient-secondary" />
+        
+        {/* Burbujas flotantes que suben desde abajo - normales */}
+        {bubbles.map((bubble) => (
+          <div
+            key={bubble.id}
+            className="bubble-float"
+            style={{
+              left: `${bubble.left}%`,
+              width: `${bubble.size}px`,
+              height: `${bubble.size}px`,
+              animationDelay: `${bubble.delay}s`,
+              animationDuration: `${bubble.duration}s`,
+              opacity: bubble.opacity,
+            }}
+          />
+        ))}
+      </div>
+
       <div className={`container ${isLoginActive ? "login-active" : "signup-active"}`}>
         <div className="form-container">
         {/* LOGIN */}
@@ -73,12 +117,15 @@ export function LoginPage() {
             <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doLogin()}}>
               Entrar
             </button>
-            <p className="toggle-text">
-              ¿No tienes cuenta?{" "}
-              <span className="toggle-link" onClick={toggleForm}>
-                Crear cuenta
-              </span>
+            <p className="toggle-wrap">
+              <span className="toggle-text">¿No tienes cuenta? </span>
+              <span className="toggle-link" onClick={toggleForm}>Crear cuenta</span>
             </p>
+            <div className="return-btn-wrap">
+              <Link href="/" className="btn form-return-btn" onClick={handleReturnHome} title="Volver al inicio">
+                Inicio
+              </Link>
+            </div>
           </form>
         </div>
 
@@ -102,12 +149,15 @@ export function LoginPage() {
             <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doRegister()}}>
               Registrarse
             </button>
-            <p className="toggle-text">
-              ¿Ya tienes cuenta?{" "}
-              <span className="toggle-link" onClick={toggleForm}>
-                Iniciar sesión
-              </span>
+            <p className="toggle-wrap">
+              <span className="toggle-text">¿Ya tienes cuenta? </span>
+              <span className="toggle-link" onClick={toggleForm}>Iniciar sesión</span>
             </p>
+            <div className="return-btn-wrap">
+              <Link href="/" className="btn form-return-btn" onClick={handleReturnHome} title="Volver al inicio">
+                Inicio
+              </Link>
+            </div>
           </form>
         </div>
         </div>

@@ -2,7 +2,7 @@
   box-sizing: border-box;
  } /* IMPORTANTE: evitar estilos globales en body para que no afecten otras páginas. Usamos un contenedor específico para la pantalla de login. */
 .login-screen {
-  background-color: #191819; /* bg-home-dark-3 - fondo gris de la página */
+  position: relative;
   margin: 0;
   padding: 0;
   font-family: "Poppins", sans-serif;
@@ -11,19 +11,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background: transparent;
 }
 .container {
   position: relative;
   width: 800px;
   height: 500px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: transparent; /* transparente hasta hover */
+  backdrop-filter: none;
   border-radius: 20px;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   display: flex;
-  transition: all 0.8s ease-in-out;
-} /* --- FORM CONTAINER --- */
+  transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+}
+
+/* Mostrar fondo y blur únicamente cuando el botón 'volver' está activo (clase .return-hover) */
+/* Ahora esta clase se elimina ya que no se activa el contenedor desde el botón */
+/* --- FORM CONTAINER --- */
 .form-container {
   position: relative;
   width: 100%;
@@ -210,9 +215,219 @@
 .btn.launch {
   animation: launch 1s ease-out;
 } /* Botón de volver al inicio, fuera del contenedor */
-.return-btn {
+/* El botón ahora se muestra dentro de cada formulario; la clase .return-btn global se elimina */
+
+/* Botón ubicado debajo del texto toggle dentro del formulario. Se anima al mostrar/ocultar */
+.form-return-btn {
+  /* Botón de texto "Inicio" */
+  width: auto;
+  height: auto;
+  padding: 0.5em 1.2em;
+  border-radius: 8px;
+  background: transparent;
+  color: #06b6d4;
+  border: 2px solid #06b6d4;
+  position: relative;
+  z-index: 12;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* On hover: glow effect */
+.form-return-btn:hover,
+.form-return-btn:focus {
+  background: rgba(6, 182, 212, 0.1);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  outline: none;
+}
+
+.form-return-btn:active {
+  transform: scale(0.98);
+}
+
+/* Cuando el form no está activo lo escondemos con animacion */
+.form-box:not(.active) .form-return-btn {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+  pointer-events: none;
+}
+.form-box.active .form-return-btn {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  /* Espera a que termine la animación del panel (0.8s) antes de aparecer */
+  transition-delay: 0.85s;
+}
+
+/* Ajustes para que el toggle y botón queden alineados */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-direction: row;
+  text-align: center;
+}
+
+.return-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* Make img use the button sizing */
+.form-return-btn img.return-btn-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* Remove old svg hover effect */
+
+/* ==========================================
+   BURBUJAS DE SALIDA (EXPLOSIÓN)
+   ========================================== */
+
+@keyframes bubble-exit {
+  0% {
+    opacity: 0;
+    transform: scale(0) translate(0, 0);
+  }
+  5% {
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translate(var(--end-x), var(--end-y));
+  }
+}
+
+.bubble-exit {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(34, 211, 238, 0.6),
+    rgba(20, 184, 166, 0.3),
+    rgba(102, 126, 234, 0.1)
+  );
+  border: 2px solid rgba(34, 211, 238, 0.3);
+  filter: blur(1px);
+  animation: bubble-exit 4.5s ease-out forwards;
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 100;
+}
+
+/* ==========================================
+   FONDO ANIMADO CON BURBUJAS (como nosotros)
+   ========================================== */
+
+.login-background-animated {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #080a0b;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.login-gradient-main {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 20;
+  inset: 0;
+  /* Gradiente exacto como en nosotros con opacidad 0.3 */
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 25%, #667eea 50%, #764ba2 75%, #06b6d4 100%);
+  opacity: 0.3;
+  animation: gradient-flow-login 15s ease infinite;
+}
+
+/* Gradiente secundario con blur - como en nosotros */
+.login-gradient-secondary {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 50%, #4facfe 0%, transparent 50%), 
+              radial-gradient(circle at 70% 50%, #00f2fe 0%, transparent 50%);
+  opacity: 0.21;
+  filter: blur(60px);
+  animation: gradient-rotate-secondary 20s ease-in-out infinite;
+}
+
+@keyframes gradient-flow-login {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gradient-rotate-secondary {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(90deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Burbujas que flotan hacia arriba */
+.bubble-float {
+  position: fixed;
+  bottom: -120px;
+  border-radius: 50%;
+  /* Colores del gradiente nosotros: cyan, teal, purple */
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(6, 182, 212, 0.4),
+    rgba(20, 184, 166, 0.2),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  filter: blur(1px);
+  animation: bubble-rise linear infinite;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+@keyframes bubble-rise {
+  0% {
+    bottom: -100px;
+    opacity: 0;
+    transform: translateX(0) scale(1);
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 110vh;
+    opacity: 0;
+    transform: translateX(0) scale(0.8);
+  }
+}
+
+/* Hacemos el contenedor relativo para que las burbujas estén en contexto */
+.container {
+  position: relative;
+  z-index: 10;
 }

@@ -160,7 +160,7 @@ const PlanCard: FC<PlanCardProps> = ({
         variants={isStatic ? undefined : fadeInUpCard}
         onClick={finalOnClick}
         className={`
-          w-full h-full bg-[#1E1E1E] border-2 border-[#00CED1] rounded-[18px] p-8
+          w-full h-full bg-[#1E1E1E]/20 backdrop-blur-lg border-2 border-[#00CED1]/30 rounded-[18px] p-8
           ${finalCursor}
           ${disabled ? "opacity-60" : ""}
         `}
@@ -516,7 +516,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               {/* Checkout Suscripción */}
               {showCheckout && (
               <motion.div
-                className="w-full md:w-1/2 bg-[#1E1E1E] border-2 border-[#00CED1] rounded-2xl p-6 relative"
+                className="w-full md:w-1/2 bg-[#1E1E1E]/60 backdrop-blur-md border-2 border-[#00CED1]/50 rounded-2xl p-6 relative"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}

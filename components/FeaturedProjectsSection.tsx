@@ -95,7 +95,7 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
               return (
                 <motion.div 
                   key={p.id} 
-                  className="bg-neutral-800 rounded-md overflow-hidden"
+                  className="bg-neutral-800/15 backdrop-blur-lg rounded-md overflow-hidden border border-cyan-500/20"
                   variants={fadeInUp}
                 >
                   {img ? (
@@ -111,7 +111,7 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
             })}
           </motion.div>
           <motion.div 
-            className="bg-neutral-800 rounded-md overflow-hidden"
+            className="bg-neutral-800/15 backdrop-blur-lg rounded-md overflow-hidden border border-cyan-500/20"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: false, margin: "-100px" }} // 👈 Animación reversible según scroll
