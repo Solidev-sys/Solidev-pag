@@ -14,7 +14,7 @@ const values = [
     gradient: 'from-emerald-500 to-cyan-500',
     shortDescription: 'Nuestro propósito',
     fullDescription: 'En SOLIDEV, nuestra misión es transformar la presencia digital de cada negocio en una máquina de crecimiento. No solo creamos páginas web; construimos ecosistemas digitales que convierten visitantes en clientes leales y transforman ideas en resultados tangibles. Cada proyecto que desarrollamos está diseñado para impulsar tu negocio hacia el éxito, utilizando las últimas tecnologías y estrategias de conversión probadas.',
-    position: { top: '10%', left: '50%', transform: 'translate(-50%, 0)' },
+    position: { top: '10%', left: '40%', transform: 'translate(-50%, -50%)' },
     angle: 0
   },
   {
@@ -34,7 +34,7 @@ const values = [
     gradient: 'from-violet-500 to-rose-500',
     shortDescription: 'Nuestros principios',
     fullDescription: 'Creemos en la excelencia como estándar, no como excepción. Cada línea de código que escribimos refleja nuestro compromiso con la calidad, la innovación y el éxito de nuestros clientes. Valoramos la transparencia en cada interacción, la pasión por crear soluciones extraordinarias, y la dedicación a superar expectativas. En SOLIDEV, no solo entregamos proyectos; construimos relaciones duraderas basadas en confianza, resultados y crecimiento mutuo.',
-    position: { bottom: '15%', right: '10%' },
+    position: { bottom: '15%', right: '0%' },
     angle: 25
   }
 ]
@@ -62,7 +62,7 @@ export function ValuesSection() {
         <div className="relative w-full h-full">
           {/* Centro: ¿Qué creemos? */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+            className="absolute top-1/2 left-[40%] -translate-x-1/2 -translate-y-1/2 z-30"
             initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
             whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
             viewport={ANIMATION_CONFIG.viewport}
@@ -165,12 +165,18 @@ export function ValuesSection() {
           {values.map((value, index) => {
             const Icon = value.icon
             const isExpanded = expandedCard === value.id
+            const anyExpanded = expandedCard !== null
 
             return (
               <motion.div
                 key={value.id}
                 className="absolute z-30"
-                style={value.position}
+                style={{
+                  ...(value.position as any),
+                  zIndex: isExpanded ? 50 : 20,
+                  pointerEvents: isExpanded ? 'auto' : anyExpanded ? 'none' : 'auto'
+                }}
+                animate={!isExpanded && anyExpanded ? { opacity: 0 } : { opacity: 1 }}
                 initial={{ 
                   opacity: 0, 
                   scale: 0,
@@ -241,9 +247,8 @@ export function ValuesSection() {
                           {value.shortDescription}
                         </p>
 
-                        {/* Indicador de clic */}
                         <motion.div
-                          className="absolute bottom-4 left-1/2 -translate-x-1/2 text-cyan-400 text-xs font-semibold relative z-10"
+                          className="mt-3 text-cyan-400 text-xs font-semibold text-center relative z-10"
                           animate={{
                             opacity: [0.5, 1, 0.5],
                             y: [0, -5, 0],
