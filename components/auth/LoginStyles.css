@@ -169,7 +169,7 @@
   color: white;
 }
 .toggle-link {
-  color: #4facfe; /* Azul de la paleta (home-blue-3) */
+  color: #00cc99; /* Verde solicitado */
   cursor: pointer;
   text-decoration: underline;
 } /* --- SLIDER PANEL con gradiente de la paleta --- */
@@ -181,9 +181,9 @@
   height: 100%;
   background: linear-gradient(
     135deg,
-    #4facfe,
-    #00f2fe
-  ); /* Gradiente azul-verde de la paleta */
+    #3cc1f3,
+    #00cc99
+  ); /* Gradiente celeste-verde */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,6 +191,88 @@
   text-align: center;
   transition: all 0.8s ease-in-out;
   z-index: 5;
+  overflow: hidden;
+}
+
+/* Gradientes difuminados animados para el panel */
+.slider-panel::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(60, 193, 243, 0.8),
+    transparent 50%
+  ),
+  radial-gradient(
+    circle at 70% 70%,
+    rgba(0, 204, 153, 0.8),
+    transparent 50%
+  );
+  filter: blur(60px);
+  animation: panel-gradient-move 8s ease-in-out infinite;
+  z-index: -1;
+}
+
+.slider-panel::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at 70% 30%,
+    rgba(0, 204, 153, 0.6),
+    transparent 50%
+  ),
+  radial-gradient(
+    circle at 30% 70%,
+    rgba(60, 193, 243, 0.6),
+    transparent 50%
+  );
+  filter: blur(60px);
+  animation: panel-gradient-move-reverse 10s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes panel-gradient-move {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(25%, 25%) rotate(90deg);
+  }
+  50% {
+    transform: translate(50%, 0) rotate(180deg);
+  }
+  75% {
+    transform: translate(25%, -25%) rotate(270deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+@keyframes panel-gradient-move-reverse {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-25%, -25%) rotate(-90deg);
+  }
+  50% {
+    transform: translate(-50%, 0) rotate(-180deg);
+  }
+  75% {
+    transform: translate(-25%, 25%) rotate(-270deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(-360deg);
+  }
 }
 .panel-content {
   padding: 30px;
@@ -270,7 +352,7 @@
 /* Ajustes para que el toggle y botón queden alineados */
 .toggle-wrap {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
   gap: 8px;
   margin-top: 10px;

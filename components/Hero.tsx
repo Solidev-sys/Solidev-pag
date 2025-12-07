@@ -2,11 +2,42 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import HeroI from "./images/hero.jpg"
 
-export function Hero() {
+type HeroProps = {
+  onShowPlans?: () => void
+  showPlans?: boolean
+}
+
+export function Hero({ onShowPlans, showPlans = false }: HeroProps) {
   return (
-    // CAMBIO: Se reemplazó bg-[#2A2A2A] por bg-[#292929]
-    <header className="bg-[#292929] text-white min-h-screen flex items-center">
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-16 xl:px-20 py-12 md:py-16 lg:py-20">
+    <header className="text-white min-h-screen flex items-center relative overflow-hidden">
+      {/* Fondo azul-verde con difuminado animado */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, #3cc1f3 0%, #00cc99 100%)",
+            opacity: 0.15,
+          }}
+        />
+        {/* Gradientes difuminados animados */}
+        <div 
+          className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%]"
+          style={{
+            background: "radial-gradient(circle at 30% 30%, rgba(60, 193, 243, 0.4), transparent 50%), radial-gradient(circle at 70% 70%, rgba(0, 204, 153, 0.4), transparent 50%)",
+            filter: "blur(60px)",
+            animation: "panel-gradient-move 8s ease-in-out infinite",
+          }}
+        />
+        <div 
+          className="absolute -top-1/2 -right-1/2 w-[200%] h-[200%]"
+          style={{
+            background: "radial-gradient(circle at 70% 30%, rgba(0, 204, 153, 0.3), transparent 50%), radial-gradient(circle at 30% 70%, rgba(60, 193, 243, 0.3), transparent 50%)",
+            filter: "blur(60px)",
+            animation: "panel-gradient-move-reverse 10s ease-in-out infinite",
+          }}
+        />
+      </div>
+      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-16 xl:px-20 py-12 md:py-16 lg:py-20 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
           
           {/* Columna Izquierda - Texto */}
@@ -54,13 +85,27 @@ export function Hero() {
             {/* Botón CTA */}
             <div className="pt-2 lg:pt-4">
               <Button
-                asChild
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (onShowPlans) {
+                    onShowPlans()
+                    // Scroll suave a la sección de planes solo si se están mostrando
+                    if (!showPlans) {
+                      setTimeout(() => {
+                        const planesSection = document.getElementById('planes')
+                        if (planesSection) {
+                          planesSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        }
+                      }, 100)
+                    }
+                  }
+                }}
                 className="text-white font-semibold py-5 lg:py-6 px-8 lg:px-10 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animated-gradient"
                 style={{
                   background: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
                 }}
               >
-                <a href="#planes">Ver Planes</a>
+                {showPlans ? 'Ocultar Planes' : 'Ver Planes'}
               </Button>
             </div>
           </div>

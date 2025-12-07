@@ -160,7 +160,7 @@ const PlanCard: FC<PlanCardProps> = ({
         variants={isStatic ? undefined : fadeInUpCard}
         onClick={finalOnClick}
         className={`
-          w-full h-full bg-[#1E1E1E]/20 backdrop-blur-lg border-2 border-[#00CED1]/30 rounded-[18px] p-8
+          w-full h-full border-2 border-white/30 rounded-[18px] p-8
           ${finalCursor}
           ${disabled ? "opacity-60" : ""}
         `}
@@ -178,6 +178,9 @@ const PlanCard: FC<PlanCardProps> = ({
           mass: 0.5
         }}
         style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           transformStyle: "preserve-3d",
           willChange: !disabled ? 'transform' : 'auto',
           backfaceVisibility: 'hidden',
@@ -389,9 +392,35 @@ export const PlansSection: FC<Props> = ({ plans }) => {
     <section 
       id="planes" 
       className={`py-12 relative w-full overflow-hidden ${selectedIndex !== null && !showCheckout ? 'cursor-pointer' : ''}`}
-      style={{ backgroundColor: "#2D2D2D" }}
       onClick={selectedIndex !== null && !showCheckout ? handleClose : undefined}
     >
+      {/* Fondo azul-verde con difuminado animado */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, #3cc1f3 0%, #00cc99 100%)",
+            opacity: 0.15,
+          }}
+        />
+        {/* Gradientes difuminados animados */}
+        <div 
+          className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%]"
+          style={{
+            background: "radial-gradient(circle at 30% 30%, rgba(60, 193, 243, 0.4), transparent 50%), radial-gradient(circle at 70% 70%, rgba(0, 204, 153, 0.4), transparent 50%)",
+            filter: "blur(60px)",
+            animation: "panel-gradient-move 8s ease-in-out infinite",
+          }}
+        />
+        <div 
+          className="absolute -top-1/2 -right-1/2 w-[200%] h-[200%]"
+          style={{
+            background: "radial-gradient(circle at 70% 30%, rgba(0, 204, 153, 0.3), transparent 50%), radial-gradient(circle at 30% 70%, rgba(60, 193, 243, 0.3), transparent 50%)",
+            filter: "blur(60px)",
+            animation: "panel-gradient-move-reverse 10s ease-in-out infinite",
+          }}
+        />
+      </div>
       <Script src="https://sdk.mercadopago.com/js/v2" strategy="afterInteractive" onLoad={() => setSdkReady(true)} />
       
       {/* Backdrop blur cuando showCheckout está activo */}
@@ -410,7 +439,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
 
       <div 
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
-        style={{ zIndex: showCheckout ? 50 : 'auto' }}
+        style={{ zIndex: showCheckout ? 50 : 10 }}
         onClick={selectedIndex !== null && !showCheckout ? (e) => e.stopPropagation() : undefined}
       >
         

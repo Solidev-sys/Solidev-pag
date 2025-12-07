@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { Instagram, Linkedin, MessageCircle } from "lucide-react"
 
@@ -27,6 +27,87 @@ const fadeInUp = {
       duration: 0.6,
     },
   },
+}
+
+// Componente de icono social con efecto 3D tilt
+function SocialIcon({ href, icon }: { href: string; icon: React.ReactNode }) {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+  const iconRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!iconRef.current) return
+
+    const rect = iconRef.current.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+
+    const mouseX = e.clientX - centerX
+    const mouseY = e.clientY - centerY
+
+    const maxTilt = 10
+    const tiltX = (mouseY / (rect.height / 2)) * -maxTilt
+    const tiltY = (mouseX / (rect.width / 2)) * maxTilt
+
+    setTilt({ x: tiltX, y: tiltY })
+  }
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 })
+    setIsHovered(false)
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const shadowIntensity = isHovered ? 0.4 : 0.15
+  const shadowX = Math.round(tilt.y * 1.5)
+  const shadowY = Math.round(tilt.x * 1.5) + (isHovered ? 12 : 0)
+  const shadowBlur = 20 + Math.abs(shadowY) * 0.5
+
+  return (
+    <div
+      ref={iconRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      style={{
+        perspective: "1000px",
+        transformStyle: "preserve-3d"
+      }}
+    >
+      <motion.a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center cursor-pointer"
+        animate={{
+          rotateX: tilt.x,
+          rotateY: tilt.y,
+          scale: isHovered ? 1.1 : 1,
+          y: isHovered ? -12 : 0,
+          z: isHovered ? 50 : 0
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 25,
+          mass: 0.5
+        }}
+        style={{
+          transformStyle: "preserve-3d",
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+          boxShadow: `${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 206, 209, ${shadowIntensity}), 0 0 ${shadowBlur * 0.5}px rgba(0, 206, 209, ${shadowIntensity * 0.3})`
+        }}
+      >
+        {icon}
+      </motion.a>
+    </div>
+  )
 }
 
 export default function ContactoPage() {
@@ -186,38 +267,22 @@ export default function ContactoPage() {
               viewport={{ once: false }}
               variants={fadeInUp}
             >
-              <a
+              <SocialIcon
                 href="https://instagram.com/solidev_cl"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
-              >
-                <Instagram className="w-20 h-20 text-white" />
-              </a>
-              <a
+                icon={<Instagram className="w-20 h-20 text-white" />}
+              />
+              <SocialIcon
                 href="https://wa.me/+56976506320"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
-              >
-                <MessageCircle className="w-20 h-20 text-white" />
-              </a>
-              <a
+                icon={<MessageCircle className="w-20 h-20 text-white" />}
+              />
+              <SocialIcon
                 href="https://www.tiktok.com/@solidev_cl"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
-              >
-                <TikTokIcon className="w-20 h-20 text-white" />
-              </a>
-              <a
+                icon={<TikTokIcon className="w-20 h-20 text-white" />}
+              />
+              <SocialIcon
                 href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-44 h-44 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
-              >
-                <Linkedin className="w-20 h-20 text-white" />
-              </a>
+                icon={<Linkedin className="w-20 h-20 text-white" />}
+              />
             </motion.div>
           </div>
         </div>

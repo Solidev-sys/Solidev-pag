@@ -50,6 +50,7 @@ export function HomePage() {
   const [apiError, setApiError] = useState<string | null>(null)
   const [plans, setPlans] = useState<import('@/types/indexNew').BackendPlan[]>([])
   const [projects, setProjects] = useState<import('@/types/indexNew').BackendPaginaSitio[]>([])
+  const [showPlans, setShowPlans] = useState(false)
 
   // Generar partículas de fondo de forma determinística (igual a nosotros)
   const particles = useMemo(() => {
@@ -162,7 +163,7 @@ export function HomePage() {
       <div className="relative z-10">
         {/* Hero y ApiStatus */}
         <div className="relative">
-          <Hero />
+          <Hero onShowPlans={() => setShowPlans(!showPlans)} showPlans={showPlans} />
           
           {/* ApiStatus animado con fade in desde arriba */}
           <motion.div 
@@ -178,11 +179,10 @@ export function HomePage() {
         </div>
 
         {/* Sección de Planes con animación de entrada */}
-        {plans.length > 0 && (
+        {showPlans && plans.length > 0 && (
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, margin: "-100px" }}
+            animate="visible"
             variants={fadeInUp}
           >
             <PlansSection plans={plans} />
@@ -203,12 +203,40 @@ export function HomePage() {
 
         {/* Testimonios */}
         <motion.section 
-          className="py-12 text-center"
+          className="py-12 text-center relative overflow-hidden"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false, margin: "-50px" }}
           variants={staggerContainer}
         >
+          {/* Fondo azul-verde con difuminado animado */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(135deg, #3cc1f3 0%, #00cc99 100%)",
+                opacity: 0.15,
+              }}
+            />
+            {/* Gradientes difuminados animados */}
+            <div 
+              className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%]"
+              style={{
+                background: "radial-gradient(circle at 30% 30%, rgba(60, 193, 243, 0.4), transparent 50%), radial-gradient(circle at 70% 70%, rgba(0, 204, 153, 0.4), transparent 50%)",
+                filter: "blur(60px)",
+                animation: "panel-gradient-move 8s ease-in-out infinite",
+              }}
+            />
+            <div 
+              className="absolute -top-1/2 -right-1/2 w-[200%] h-[200%]"
+              style={{
+                background: "radial-gradient(circle at 70% 30%, rgba(0, 204, 153, 0.3), transparent 50%), radial-gradient(circle at 30% 70%, rgba(60, 193, 243, 0.3), transparent 50%)",
+                filter: "blur(60px)",
+                animation: "panel-gradient-move-reverse 10s ease-in-out infinite",
+              }}
+            />
+          </div>
+          <div className="relative z-10">
           <motion.h2 
             className="text-2xl font-bold text-teal-300 mb-6"
             variants={fadeInUp}
@@ -227,6 +255,7 @@ export function HomePage() {
           >
             MI MAMI
           </motion.p>
+          </div>
         </motion.section>
         
         {/* Footer con animación sutil */}

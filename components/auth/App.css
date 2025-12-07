@@ -124,7 +124,7 @@
 
 .toggle-link,
 .switch-text span {
-  color: #03a9f4;
+  color: #00cc99;
   cursor: pointer;
   font-weight: 500;
   text-decoration: none;
@@ -133,7 +133,7 @@
 
 .toggle-link:hover,
 .switch-text span:hover {
-  color: #0288d1;
+  color: #00b386;
   text-decoration: underline;
 }
 
