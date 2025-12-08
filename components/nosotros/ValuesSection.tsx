@@ -24,7 +24,7 @@ const values = [
     gradient: 'from-cyan-500 to-teal-500',
     shortDescription: 'Nuestro futuro',
     fullDescription: 'Visualizamos un mundo donde cada empresa, sin importar su tamaño, tenga acceso a una presencia digital de clase mundial. Aspiramos a ser el socio tecnológico de confianza que impulsa el crecimiento de miles de negocios, creando experiencias web que no solo se ven increíbles, sino que generan resultados reales. Nuestra visión es liderar la revolución del desarrollo web, estableciendo nuevos estándares de excelencia y transformación digital.',
-    position: { bottom: '15%', left: '10%' },
+    position: { bottom: '15%', left: '0%' },
     angle: -25
   },
   {
