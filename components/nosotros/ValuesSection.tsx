@@ -130,36 +130,7 @@ export function ValuesSection() {
             </motion.div>
           </motion.div>
 
-          {/* Líneas conectoras animadas - optimizado */}
-          <motion.svg
-            className="absolute inset-0 w-full h-full pointer-events-none z-20"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ delay: 0.8, duration: 1 }}
-          >
-            <defs>
-              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.5" />
-              </linearGradient>
-            </defs>
-            {values.map((value, index) => (
-              <motion.line
-                key={`line-${value.id}`}
-                x1="50%"
-                y1="50%"
-                x2={value.position.left === '50%' ? '50%' : value.position.left === '10%' ? '20%' : '80%'}
-                y2={value.position.top ? '20%' : '80%'}
-                stroke="url(#lineGradient)"
-                strokeWidth="2"
-                initial={{ pathLength: 0, opacity: 0 }}
-                whileInView={{ pathLength: 1, opacity: 0.4 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.5, delay: 1 + index * 0.2 }}
-              />
-            ))}
-          </motion.svg>
+          
 
           {/* Cartas de valores */}
           {values.map((value, index) => {
