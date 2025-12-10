@@ -42,10 +42,11 @@ export class ApiService extends BaseApiService {
     direccion: string;
     ciudad: string;
     region: string;
+    rol?: string;
   }): Promise<RegisterResponse> {
     return this.request('/api/users', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify({ ...userData, rol: userData.rol ?? 'cliente' }),
     });
   }
 

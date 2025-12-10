@@ -72,10 +72,11 @@ class ApiService {
     direccion: string;
     ciudad: string;
     region: string;
+    rol?: string;
   }): Promise<RegisterResponse> {
     return this.request<RegisterResponse>('/api/users', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify({ ...userData, rol: userData.rol ?? 'cliente' }),
     });
   }
 

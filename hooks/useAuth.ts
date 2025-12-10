@@ -94,6 +94,7 @@ export function useAuth() {
         direccion: userData.address,
         ciudad: userData.comuna,
         region: userData.region,
+        rol: 'cliente',
       }
 
       const response = await apiService.register(registerData)

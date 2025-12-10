@@ -41,6 +41,7 @@ export function LoginPage() {
   const [regUsername, setRegUsername] = useState("")
   const [regEmail, setRegEmail] = useState("")
   const [regPassword, setRegPassword] = useState("")
+  const [regConfirm, setRegConfirm] = useState("")
   const [regError, setRegError] = useState<string | null>(null)
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [loadingReg, setLoadingReg] = useState(false)
@@ -66,6 +67,13 @@ export function LoginPage() {
   const doRegister = async () => {
     if (loadingReg) return
     setLoadingReg(true)
+    setRegError(null)
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)
+    const passOk = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(regPassword)
+    if (!regUsername.trim()) { setRegError("Ingresa un nombre de usuario"); setLoadingReg(false); return }
+    if (!emailOk) { setRegError("Ingresa un correo válido"); setLoadingReg(false); return }
+    if (!passOk) { setRegError("La contraseña debe tener 8+ caracteres, mayúscula, minúscula y número"); setLoadingReg(false); return }
+    if (regPassword !== regConfirm) { setRegError("Las contraseñas no coinciden"); setLoadingReg(false); return }
     const res = await register({ username: regUsername || regEmail, name: regUsername, email: regEmail, password: regPassword, rut: "", phone: "", address: "", comuna: "", region: "" })
     setLoadingReg(false)
     if (res.success) router.replace("/")
@@ -141,11 +149,15 @@ export function LoginPage() {
               <input type="email" required value={regEmail} onChange={(e)=>setRegEmail(e.target.value)} />
               <label>Correo electrónico</label>
             </div>
-            <div className="input-box">
-              <input type="password" required value={regPassword} onChange={(e)=>setRegPassword(e.target.value)} />
-              <label>Contraseña</label>
-            </div>
-            {regError && <p className="text-red-400 mb-2">{regError}</p>}
+          <div className="input-box">
+            <input type="password" required value={regPassword} onChange={(e)=>setRegPassword(e.target.value)} />
+            <label>Contraseña</label>
+          </div>
+          <div className="input-box">
+            <input type="password" required value={regConfirm} onChange={(e)=>setRegConfirm(e.target.value)} />
+            <label>Confirmar contraseña</label>
+          </div>
+          {regError && <p className="text-red-400 mb-2">{regError}</p>}
             <button type="submit" className="btn" onClick={(e)=>{handleRocket(e); doRegister()}}>
               Registrarse
             </button>
