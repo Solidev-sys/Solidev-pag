@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { apiService } from "@/lib/api"
+import { showNotification } from "@/lib/notifications"
 import type { User, AuthState } from "@/types"
 
 export function useAuth() {
@@ -63,11 +64,13 @@ export function useAuth() {
           rol: response.user.rol,
         }
         setAuthState({ user, isAuthenticated: true })
+        try { showNotification(response.message || 'Sesión guardada', 'success') } catch {}
         const isAdmin = user.rol === 'admin' || user.username === 'admin'
-        return { success: true, redirectUrl: response.redirectUrl || (isAdmin ? '/admin' : '/') }
+        return { success: true, redirectUrl: response.redirectUrl || (isAdmin ? '/admin' : '/'), message: response.message || 'Sesión guardada' }
       }
       return { success: false, message: 'Credenciales inválidas' }
     } catch (error: any) {
+      try { showNotification(error?.message || 'Error al iniciar sesión', 'error') } catch {}
       return { success: false, message: error?.message || 'Error al iniciar sesión' }
     }
   }

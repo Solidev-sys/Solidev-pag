@@ -56,10 +56,15 @@ class ApiService {
   }
 
   async login(credentials: { username: string; password: string }): Promise<LoginResponse> {
+    const email = String(credentials.username || '').trim().toLowerCase()
+    const password = String(credentials.password || '')
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !password) throw new Error('Faltan credenciales')
+    if (!emailRegex.test(email)) throw new Error('Email inválido')
     return this.request<LoginResponse>('/api/login', {
       method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+      body: JSON.stringify({ username: email, email, password }),
+    })
   }
 
   async register(userData: {
