@@ -8,7 +8,9 @@ const sequelize = new Sequelize(
   process.env.DB_PASS,
   {
     host: process.env.DB_HOST,
-    dialect: "mysql"
+    dialect: "mysql",
+    logging: process.env.SQL_DEBUG === 'true' ? (msg) => console.debug(msg) : false,
+    logQueryParameters: false
   }
 );
 

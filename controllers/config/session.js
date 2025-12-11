@@ -50,6 +50,15 @@ function setupSession(app) {
             maxAge: 1000 * 60 * 60 * 2 // 2 horas
         }
     }));
+
+    if (process.env.SESSION_DEBUG === 'true') {
+        console.debug('AUTH DEBUG: session configured', {
+            NODE_ENV,
+            cookieSecure,
+            cookieSameSite,
+            store: sessionStore ? 'redis' : 'memory'
+        });
+    }
 }
 
 module.exports = { setupSession };
