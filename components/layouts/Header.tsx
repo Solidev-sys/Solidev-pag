@@ -20,16 +20,16 @@ export function Header() {
     <header className="w-full bg-neutral-900 border-b border-teal-500/20 sticky top-0 z-50">
       <nav className="w-full mx-auto px-8 md:px-12 h-20 flex items-center justify-between">
         {/* Logo y texto Solidev */}
-        <Link href="/" className="flex items-end gap-2 group">
+        <Link href="/" className="flex items-center gap-3 group">
           <Image 
             src={logoSVG}
             alt="Logo de Solidev"
-            width={40}
-            height={40}
+            width={56}
+            height={56}
             className="transition-opacity duration-300 group-hover:opacity-80"
           />
-          <span className="text-4xl font-bold bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent transition-all duration-300 group-hover:opacity-80 leading-none">
-            Solidev
+          <span className="text-[32px] md:text-[40px] font-semibold font-inter bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent transition-all duration-300 group-hover:opacity-80 leading-none">
+            Solidev-Tech
           </span>
         </Link>
         {/* 2. Navegación (Derecha) */}
