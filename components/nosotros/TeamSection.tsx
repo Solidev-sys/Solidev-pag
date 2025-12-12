@@ -928,7 +928,7 @@ export function TeamSection() {
                   backgroundSize: "200% 200%",
                 }}
               >
-                SOLIDEV
+                EQUIPO SOLIDEV-TECH
               </motion.span>
             </motion.h3>
 

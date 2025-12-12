@@ -132,7 +132,7 @@ export function HeroPage() {
             >
               <Link href="/#planes">
                 <motion.button
-                  className="hero-button hero-button-primary relative overflow-hidden"
+                  className="hero-button hero-button-primary relative overflow-hidden cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -142,9 +142,9 @@ export function HeroPage() {
                 </motion.button>
               </Link>
               
-              <Link href="/portafolio">
+              <Link href="#">
                 <motion.button
-                  className="hero-button px-8 py-4 rounded-lg font-bold text-home-white border-2 border-cyan-500/50 hover:border-cyan-400 hover:bg-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                  className="hero-button px-8 py-4 rounded-lg font-bold text-home-white border-2 border-cyan-500/50 hover:border-cyan-400 hover:bg-cyan-500/10 transition-all duration-300 backdrop-blur-sm cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
