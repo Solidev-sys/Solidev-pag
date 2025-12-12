@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { MessageCircle, Github, ChevronLeft, ChevronRight, X, Sparkles, Linkedin } from 'lucide-react'
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion'
@@ -118,16 +119,47 @@ const ExpandedMemberModal = ({
   onClose: () => void 
 }) => {
   const [isContactExpanded, setIsContactExpanded] = useState(false)
+  const scrollYRef = useRef(0)
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      const y = window.scrollY || window.pageYOffset
+      scrollYRef.current = y
+      const bodyStyle = document.body.style
+      const htmlStyle = document.documentElement.style
+      bodyStyle.position = 'fixed'
+      bodyStyle.top = `-${y}px`
+      bodyStyle.left = '0'
+      bodyStyle.right = '0'
+      bodyStyle.width = '100%'
+      bodyStyle.overflow = 'hidden'
+      htmlStyle.overflow = 'hidden'
+      htmlStyle.overscrollBehavior = 'none'
     } else {
-      document.body.style.overflow = 'unset'
-      setIsContactExpanded(false) // Resetear estado al cerrar
+      const bodyStyle = document.body.style
+      const htmlStyle = document.documentElement.style
+      bodyStyle.position = ''
+      bodyStyle.top = ''
+      bodyStyle.left = ''
+      bodyStyle.right = ''
+      bodyStyle.width = ''
+      bodyStyle.overflow = ''
+      htmlStyle.overflow = ''
+      htmlStyle.overscrollBehavior = ''
+      window.scrollTo(0, scrollYRef.current)
+      setIsContactExpanded(false)
     }
     return () => {
-      document.body.style.overflow = 'unset'
+      const bodyStyle = document.body.style
+      const htmlStyle = document.documentElement.style
+      bodyStyle.position = ''
+      bodyStyle.top = ''
+      bodyStyle.left = ''
+      bodyStyle.right = ''
+      bodyStyle.width = ''
+      bodyStyle.overflow = ''
+      htmlStyle.overflow = ''
+      htmlStyle.overscrollBehavior = ''
     }
   }, [isOpen])
 
@@ -158,25 +190,25 @@ const ExpandedMemberModal = ({
   if (!member || !isOpen) return null
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Fondo difuminado mejorado con efectos */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            onClick={onClose}
-          >
-            {/* Fondo con gradiente animado */}
-            <motion.div
-              className="absolute inset-0 bg-home-black"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
+    typeof window !== 'undefined'
+      ? createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+                  onClick={onClose}
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-home-black"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
               <motion.div
                 className="absolute inset-0 opacity-40 animated-gradient"
                 style={{
@@ -239,7 +271,7 @@ const ExpandedMemberModal = ({
               {/* Botón de cerrar mejorado */}
               <motion.button
                 onClick={onClose}
-                className="absolute top-6 right-6 z-50 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/80 transition-all border-2 shadow-lg"
+                className="absolute top-6 right-6 z-50 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/80 transition-all border-2 shadow-lg cursor-pointer"
                 style={{ borderColor: member.shadowColor }}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
@@ -316,7 +348,7 @@ const ExpandedMemberModal = ({
                         }}
                       />
                       
-                      <div className="w-full h-full rounded-3xl overflow-hidden border-4 border-white/30 bg-home-dark-3 shadow-2xl relative z-10">
+                      <div className="w-full h-full rounded-3xl overflow-hidden border-4 border-white bg-home-dark-3 shadow-2xl relative z-10" style={{ borderColor: '#ffffff' }}>
                         <img 
                           src={member.img} 
                           alt={member.name} 
@@ -368,7 +400,7 @@ const ExpandedMemberModal = ({
                         {!isContactExpanded ? (
                           <motion.button
                             key="contact-button"
-                            className="w-full py-4 rounded-xl font-bold shadow-xl flex items-center justify-center gap-2 relative overflow-hidden group"
+                            className="w-full py-4 rounded-xl font-bold shadow-xl flex items-center justify-center gap-2 relative overflow-hidden group cursor-pointer"
                             style={{
                               background: member.buttonGradient,
                               color: '#FFFFFF',
@@ -393,7 +425,7 @@ const ExpandedMemberModal = ({
                         ) : (
                           <motion.div
                             key="contact-buttons"
-                            className="flex flex-col gap-4"
+                            className="flex flex-col gap-4 cursor-pointer"
                             initial={{ opacity: 0, scale: 0.5 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
@@ -489,7 +521,7 @@ const ExpandedMemberModal = ({
                             {/* Botón para volver */}
                             <motion.button
                               onClick={() => setIsContactExpanded(false)}
-                              className="w-full py-2 rounded-lg font-semibold text-home-gray-ui-2 hover:text-home-white border-2 border-home-light/30 hover:border-home-light/50 transition-all duration-300 backdrop-blur-sm"
+                              className="w-full py-2 rounded-lg font-semibold text-home-gray-ui-2 hover:text-home-white border-2 border-home-light/30 hover:border-home-light/50 transition-all duration-300 backdrop-blur-sm cursor-pointer"
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.3 }}
@@ -518,11 +550,13 @@ const ExpandedMemberModal = ({
                   </div>
                 </div>
               </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+          </>
+        )}
+      </AnimatePresence>,
+      document.body
+    ) : null
   )
 }
 
@@ -745,7 +779,7 @@ const MemberCard = ({
             }}
           />
           
-          <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-white/30 bg-home-dark-4 shadow-2xl relative z-10">
+          <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-white bg-home-dark-4 shadow-2xl relative z-10" style={{ borderColor: '#ffffff' }}>
             <img 
               src={member.img} 
               alt={member.name} 
