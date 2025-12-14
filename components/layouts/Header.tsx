@@ -6,11 +6,24 @@ import Image from "next/image"; // 1. IMPORTAR Image
 import { User, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { UserDropdown } from "@/components/UserDropdown";
 import logoSVG from "../images/SVG.svg"; // Importar la imagen como módulo 
 
 export function Header() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const userRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!userRef.current) return;
+      if (!userRef.current.contains(e.target as Node)) setDropdownOpen(false);
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
   
   // Ocultar el Header en la página de login
   if (pathname === "/login") {
@@ -68,19 +81,21 @@ export function Header() {
           </div>
           
           {/* Icono de Usuario (Login) con animación de desplazamiento y nombre */}
-          <div className="relative group flex items-center">
-            <Link 
-              href="/login"
+          <div ref={userRef} className="relative group flex items-center">
+            <button 
+              type="button"
+              onClick={() => setDropdownOpen(v => !v)}
               className="text-teal-400 hover:text-teal-300 transition-colors"
               title={isAuthenticated ? (user?.name || user?.username || 'Mi cuenta') : 'Iniciar sesión'}
             >
               <User className="w-7 h-7" />
-            </Link>
-            <span 
-              className="absolute left-full ml-2 px-2 py-0.5 rounded text-sm whitespace-nowrap bg-neutral-800 border border-teal-500/40 text-teal-300 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
-            >
-              {isAuthenticated ? (user?.name || user?.username) : 'Iniciar sesión'}
-            </span>
+            </button>
+            <UserDropdown 
+              isOpen={dropdownOpen}
+              onClose={() => setDropdownOpen(false)}
+              user={user}
+              isAuthenticated={isAuthenticated}
+            />
           </div>
 
           {/* Botón de Menú Móvil (Visible solo en móvil) */}

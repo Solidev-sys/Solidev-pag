@@ -121,14 +121,17 @@ export function UserDropdown({ isOpen, onClose, user, isAuthenticated }: UserDro
           </div>
 
           <div className="space-y-1">
-            <Button
-              onClick={() => handleNavigation("/history")}
-              variant="ghost"
-              className="w-full justify-start gap-2 text白 hover:bg-gray-50"
-            >
-              <ShoppingBag size={16} />
-              Historial de Pedidos
-            </Button>
+            {/* Deshabilitado por solicitud: Historial de Pedidos */}
+            {false && (
+              <Button
+                onClick={() => handleNavigation("/history")}
+                variant="ghost"
+                className="w-full justify-start gap-2 text白 hover:bg-gray-50"
+              >
+                <ShoppingBag size={16} />
+                Historial de Pedidos
+              </Button>
+            )}
             <Button
               onClick={() => handleNavigation("/account/security")}
               variant="ghost"
