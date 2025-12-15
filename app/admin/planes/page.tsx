@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Package, DollarSign, Calendar, Zap, Edit2, Trash2, RefreshCw, X, Check } from "lucide-react"
+import { Package, DollarSign, Calendar, Zap, Edit2, Trash2, RefreshCw, X, Check, FileText } from "lucide-react"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import { adminApiService } from "@/lib/api"
@@ -10,7 +10,7 @@ export default function AdminPlanes() {
   const [form, setForm] = useState({ codigo: '', nombre: '', precio: 0, moneda: 'CLP', ciclo_fact: 'mensual', activo: true })
   const [error, setError] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
-  const [editMode, setEditMode] = useState<'nombre' | 'precio' | null>(null)
+  const [editMode, setEditMode] = useState<'nombre' | 'precio' | 'resumen' | null>(null)
   const [editValue, setEditValue] = useState<string>('')
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function AdminPlanes() {
     }
   }
 
-  const startEdit = (type: 'nombre' | 'precio', currentValue: string) => {
+  const startEdit = (type: 'nombre' | 'precio' | 'resumen', currentValue: string) => {
     setEditMode(type)
     setEditValue(currentValue)
   }
@@ -77,29 +77,27 @@ export default function AdminPlanes() {
   }
 
   const saveEdit = async () => {
-    if (!selectedPlan || !editMode || !editValue) return
+    if (!selectedPlan || !editMode) return
 
     try {
       setError(null)
-      // Aquí irá la lógica para actualizar el plan
-      console.log(`Actualizando ${editMode} del plan ${selectedPlan.id} a: ${editValue}`)
-      // TODO: Implementar endpoint de actualización
-      // await adminApiService.updatePlan(selectedPlan.id, { [editMode]: editValue })
-      
-      // Simulación temporal
-      const updatedList = list.map(p => {
-        if (p.id === selectedPlan.id) {
-          if (editMode === 'nombre') {
-            return { ...p, nombre: editValue }
-          } else if (editMode === 'precio') {
-            return { ...p, precio_centavos: Math.round(parseFloat(editValue) * 100) }
-          }
-        }
-        return p
-      })
-      setList(updatedList)
-      setSelectedPlan(updatedList.find(p => p.id === selectedPlan.id))
-      
+      const payload: any = {}
+      if (editMode === 'precio') {
+        const amount = Math.round(parseFloat(editValue || '0') * 100)
+        if (!amount || amount <= 0) throw new Error('Ingresa un precio válido')
+        payload.precio_centavos = amount
+      } else if (editMode === 'nombre') {
+        payload.nombre = editValue
+      } else if (editMode === 'resumen') {
+        payload.resumen = editValue
+      }
+
+      await adminApiService.updatePlan(selectedPlan.id, payload)
+      const x = await adminApiService.getPlans()
+      const updated = Array.isArray(x) ? x : []
+      setList(updated)
+      setSelectedPlan(updated.find((p: any) => p.id === selectedPlan.id) || null)
+
       cancelEdit()
     } catch (err: any) {
       setError(err?.message || 'Error al actualizar')
@@ -354,6 +352,30 @@ export default function AdminPlanes() {
                 )}
               </div>
 
+              <div className="bg-dark-secondary rounded-xl p-4 mb-6">
+                <p className="text-sm text-slate-400 mb-2">Descripción del Plan</p>
+                {editMode === 'resumen' ? (
+                  <div className="flex gap-2">
+                    <textarea
+                      value={editValue}
+                      onChange={e => setEditValue(e.target.value)}
+                      className="flex-1 p-2 rounded-lg bg-dark-main border border-emerald-500 text-white text-sm min-h-[100px]"
+                      autoFocus
+                    />
+                    <div className="flex flex-col gap-2">
+                      <button onClick={saveEdit} className="p-2 rounded-lg bg-emerald-500 text-white">
+                        <Check className="w-5 h-5" />
+                      </button>
+                      <button onClick={cancelEdit} className="p-2 rounded-lg bg-slate-700 text-white">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-300 whitespace-pre-line">{selectedPlan.resumen || 'Sin descripción'}</p>
+                )}
+              </div>
+
               {/* MercadoPago Info */}
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
                 <p className="text-sm text-yellow-400 font-medium mb-1">MercadoPago Plan ID</p>
@@ -361,7 +383,7 @@ export default function AdminPlanes() {
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-3 gap-3 mb-4">
                 <button
                   onClick={() => startEdit('nombre', selectedPlan.nombre)}
                   disabled={editMode !== null}
@@ -378,6 +400,15 @@ export default function AdminPlanes() {
                 >
                   <DollarSign className="w-4 h-4" />
                   Cambiar Precio
+                </button>
+
+                <button
+                  onClick={() => startEdit('resumen', selectedPlan.resumen || '')}
+                  disabled={editMode !== null}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-indigo-600/20 border border-indigo-500/50 text-indigo-300 hover:bg-indigo-600/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileText className="w-4 h-4" />
+                  Cambiar Descripción
                 </button>
               </div>
 

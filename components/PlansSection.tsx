@@ -521,7 +521,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 onClick={(e) => e.stopPropagation()}
               >
                 {(() => {
-                  const s = ordered[selectedIndex].enlace_imagen || "/images/premium_photo-1664474834472-6c7d1e3198e2.jpeg"
+                  const s = ordered[selectedIndex].enlace_imagen || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFNbSjKa1rI8nojhMTjAgdqpDnVaThocgIIA&s"
                   return s.startsWith("http")
                     ? (
                       <img

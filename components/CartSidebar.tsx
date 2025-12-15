@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { X, ShoppingCart, Minus, Plus, Trash2, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/hooks/useCart"
@@ -18,6 +18,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, updateQuantity, removeItem, getTotal, clearCart, loadCart } = useCart()
   const { isAuthenticated } = useAuth()
   const router = useRouter()
+  const [isPaying, setIsPaying] = useState(false)
 
   // Refresh cart when sidebar opens
   useEffect(() => {
@@ -45,6 +46,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   const handleCheckout = async () => {
     try {
+      if (isPaying) return
       // Verificar que el usuario esté autenticado
       if (!isAuthenticated) {
         showNotification('Debes iniciar sesión para realizar una compra', 'error')
@@ -59,16 +61,30 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       }
 
       showNotification('Procesando pago...', 'info')
+      setIsPaying(true)
+      console.log('[CHECKOUT] start', {
+        url: '/api/pago',
+        payload: { items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price })), total: getTotal() }
+      })
       
-      // Llamar a la API para crear la preferencia de pago
-      const response = await apiService.createPayment()
+      // Llamar a la API para crear la preferencia de pago (modo carrito)
+      const response = await apiService.createPayment({
+        items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price })),
+        total: getTotal()
+      })
+      console.log('[CHECKOUT] preference created', response)
       
       // Redirigir a MercadoPago
       window.location.href = response.init_point
       
-    } catch (error) {
-      console.error('Error al procesar el pago:', error)
-      showNotification('Error al procesar el pago. Inténtalo de nuevo.', 'error')
+    } catch (error: any) {
+      const msg = error?.message || 'Error al procesar el pago. Inténtalo de nuevo.'
+      const code = error?.code || error?.status || 'UNKNOWN'
+      console.error('[CHECKOUT] error', { message: msg, code })
+      showNotification(`${msg} (${code})`, 'error')
+    }
+    finally {
+      setIsPaying(false)
     }
   }
 
@@ -220,8 +236,8 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           <div className="text-center mb-4">
             <span className="text-xl font-bold text-white">Total: ${getTotal().toFixed(2)}</span>
           </div>
-          <Button onClick={handleCheckout} className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3">
-            Proceder al Pago
+          <Button onClick={handleCheckout} disabled={isPaying} className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3">
+            {isPaying ? 'Procesando…' : 'Proceder al Pago'}
           </Button>
         </div>
       )}

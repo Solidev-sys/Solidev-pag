@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { XCircle, ArrowLeft, RefreshCw } from "lucide-react"
 
 export function PaymentFailedPage() {
+  const reason = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('reason') : null
   const handleRetry = () => {
     // Redirigir al carrito o proceso de pago
     window.location.href = "/"
@@ -21,6 +22,9 @@ export function PaymentFailedPage() {
 
           <h1 className="text-2xl font-bold text-red-800 mb-2">Pago Fallido</h1>
           <p className="text-red-600 mb-6">Hubo un problema al procesar tu pago. Por favor, intenta nuevamente.</p>
+          {reason && (
+            <p className="text-red-500 mb-4">Detalle: {reason}</p>
+          )}
 
           {/* Error Details */}
           <div className="bg-red-50 rounded-lg p-4 mb-6 text-left">

@@ -24,19 +24,22 @@ export function PaymentSuccessPage() {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
 
   useEffect(() => {
-    // Simular carga de detalles del pedido
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+    const orderId = params.get('order_id') || 'ORD-' + Date.now()
+    const itemName = params.get('item_name') || 'Producto'
+    const subtotalStr = params.get('subtotal') || '0'
+    const subtotal = parseFloat(subtotalStr) || 0
     const mockOrder: OrderDetails = {
-      id: "ORD-2024-001234",
+      id: orderId,
       items: [
-        { name: "Laptop Gaming Pro", quantity: 1, price: 8000 },
-        { name: "Secadora Industrial", quantity: 1, price: 322222 },
+        { name: itemName, quantity: 1, price: subtotal },
       ],
-      subtotal: 330222,
-      shipping: 500,
-      taxes: 52835.52,
-      total: 383557.52,
-      deliveryAddress: "Av. Principal 123, Col. Centro\nCiudad de México, CP 01000",
-      estimatedDelivery: "3-5 días hábiles",
+      subtotal,
+      shipping: 0,
+      taxes: 0,
+      total: subtotal,
+      deliveryAddress: "",
+      estimatedDelivery: ""
     }
     setOrderDetails(mockOrder)
   }, [])

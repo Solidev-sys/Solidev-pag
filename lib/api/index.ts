@@ -105,9 +105,10 @@ export class ApiService extends BaseApiService {
   }
 
   // Payment methods
-  async createPayment(): Promise<PaymentResponse> {
+  async createPayment(payload?: { items: Array<{ id: number|string; name: string; quantity: number; price: number; currency_id?: string }>; total: number }): Promise<PaymentResponse> {
     return this.request('/api/pago', {
       method: 'POST',
+      body: JSON.stringify(payload || {}),
     });
   }
 
