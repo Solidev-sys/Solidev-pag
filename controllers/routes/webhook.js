@@ -12,24 +12,33 @@ module.exports = function createWebhookRouter({ payment }) {
     const router = express.Router();
 
     router.post('/webhook-mercadopago', express.raw({ type: 'application/json' }), async (req, res) => {
+        const ts = new Date().toISOString();
         const webhookEnabled = process.env.WEBHOOK_ENABLED !== 'false';
         const requiredToken = process.env.WEBHOOK_TOKEN;
         if (!webhookEnabled) {
+            console.log(`[${ts}] WEBHOOK disabled`);
             return res.status(200).json({ status: 'disabled', message: 'Webhook temporalmente desactivado' });
         }
         if (requiredToken && req.query.token !== requiredToken) {
+            console.warn(`[${ts}] WEBHOOK token inválido desde ${req.ip}`);
             return res.status(401).json({ error: 'Token inválido' });
         }
 
         let payload;
         try {
-            payload = JSON.parse(req.body.toString('utf8'));
+            const raw = req.body;
+            if (Buffer.isBuffer(raw)) payload = JSON.parse(raw.toString('utf8'));
+            else if (typeof raw === 'string') payload = JSON.parse(raw);
+            else if (raw && typeof raw === 'object') payload = raw;
+            else throw new Error('invalid');
         } catch (e) {
+            console.warn(`[${ts}] WEBHOOK payload inválido`);
             return res.status(400).json({ error: 'Payload inválido' });
         }
 
         const topico = payload.type || payload.action || payload.topic || 'desconocido';
         const externoId = payload?.data?.id ? String(payload.data.id) : null;
+        console.log(`[${ts}] WEBHOOK recibido`, { topico, externoId, ip: req.ip });
         let whRow;
         try {
             whRow = await webhookService.createWebhook({
@@ -52,7 +61,7 @@ module.exports = function createWebhookRouter({ payment }) {
                 const moneda = info.currency_id || 'CLP';
                 const amountCent = Math.round((info.transaction_amount || 0) * 100);
                 const extRef = info.external_reference || '';
-                const [usuario_id, suscripcion_id] = extRef.includes(':') ? extRef.split(':').map(v => Number(v)) : [null, null];
+        let [usuario_id, suscripcion_id] = extRef.includes(':') ? extRef.split(':').map(v => Number(v)) : [null, null];
 
                 if (!suscripcion_id || !usuario_id) {
                     const preId = info.preapproval_id;
@@ -112,9 +121,11 @@ module.exports = function createWebhookRouter({ payment }) {
             }
 
             if (whRow?.id) await webhookService.markWebhookProcessed(whRow.id, null);
+            console.log(`[${ts}] WEBHOOK procesado OK`);
             res.status(200).send('OK');
         } catch (err) {
             if (whRow?.id) await webhookService.markWebhookProcessed(whRow.id, err.message);
+            console.error(`[${ts}] WEBHOOK error`, { error: err?.message });
             res.status(500).json({ error: 'Error procesando webhook' });
         }
     });
