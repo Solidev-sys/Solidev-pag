@@ -41,7 +41,7 @@ export function Header() {
             height={56}
             className="transition-opacity duration-300 group-hover:opacity-80"
           />
-          <span className="text-[32px] md:text-[40px] font-semibold font-inter bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent transition-all duration-300 group-hover:opacity-80 leading-none">
+          <span className="text-[32px] md:text-[40px] font-bold font-inter bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent transition-all duration-300 group-hover:opacity-80 leading-none">
             Solidev-Tech
           </span>
         </Link>
