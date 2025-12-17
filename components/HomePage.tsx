@@ -128,35 +128,7 @@ export function HomePage() {
           }}
         />
 
-        {/* Partículas flotantes optimizadas */}
-        {animatedParticles.map((particle) => (
-          <div
-            key={particle.id}
-            className="particle-optimized absolute rounded-full"
-            style={{
-              width: particle.width,
-              height: particle.height,
-              left: `${particle.left}%`,
-              top: `${particle.top}%`,
-              background: `radial-gradient(circle, rgba(${particle.color}, ${particle.opacity}) 0%, transparent 70%)`,
-              animationDelay: `${particle.delay}s`,
-              animationDuration: `${particle.duration}s`,
-            }}
-          />
-        ))}
 
-        {/* Partículas pequeñas decorativas */}
-        {particles.map((particle) => (
-          <motion.div
-            key={`small-${particle.id}`}
-            className="absolute w-2 h-2 rounded-full bg-cyan-500/20 floating-particle"
-            style={{
-              left: `${particle.left}%`,
-              top: `${particle.top}%`,
-              animationDelay: `${particle.delay}s`,
-            }}
-          />
-        ))}
       </div>
 
       {/* Contenido principal */}
