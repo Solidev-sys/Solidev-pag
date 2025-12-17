@@ -277,6 +277,8 @@
 .panel-content {
   padding: 30px;
 }
+.panel-content h2 { font-size: 28px; line-height: 1.2; font-weight: 800; }
+.panel-content p { font-size: 16px; line-height: 1.6; font-weight: 500; }
 .panel-content h2 {
   font-size: 28px;
   line-height: 1.2;
@@ -304,6 +306,66 @@
 @keyframes emblem-float {
   0%,100% { transform: translateY(0) scale(1); opacity: 0.95; }
   50%     { transform: translateY(-8px) scale(1.03); opacity: 1; }
+}
+
+/* Mobile-first */
+@media (max-width: 640px) {
+  .container {
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .form-container {
+    flex-direction: column;
+  }
+  .form-box {
+    position: relative;
+    width: 100%;
+    padding: 24px;
+    opacity: 1;
+    transform: none;
+  }
+  .input-box input {
+    padding: 14px;
+    font-size: 16px;
+    border-bottom-width: 2px;
+  }
+  .btn {
+    padding: 0.8em 1.4em;
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .toggle-text,
+  .toggle-link {
+    font-size: 16px;
+  }
+  .return-btn-wrap {
+    margin-top: 10px;
+  }
+  .form-return-btn {
+    padding: 0.6em 1.2em;
+    font-size: 15px;
+    min-height: 40px;
+  }
+  .login-box, .signup-box { display: none; }
+  .container.login-active .login-box { display: block; }
+  .container.signup-active .signup-box { display: block; }
+  .slider-panel {
+    position: relative;
+    right: 0;
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    margin-top: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    animation: mobile-glow 6s ease-in-out infinite;
+  }
+}
+@keyframes mobile-glow {
+  0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+  50%     { box-shadow: 0 12px 36px rgba(0,0,0,0.45); }
 }
 .container.signup-active .slider-panel {
   right: 50%;

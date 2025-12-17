@@ -156,6 +156,16 @@
   overflow: hidden;
   will-change: transform;
 }
+@media (max-width: 640px) {
+  .values-section {
+    height: auto;
+    padding: 1rem;
+  }
+  .values-center-card {
+    width: 14rem;
+    height: 14rem;
+  }
+}
 
 .values-center-card {
   position: absolute;

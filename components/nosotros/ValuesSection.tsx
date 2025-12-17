@@ -1,6 +1,6 @@
 "use client"
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Target, Rocket, Heart, Sparkles, X } from 'lucide-react'
 import { AnimatedBackground } from './AnimatedBackground'
 import { ANIMATION_CONFIG, PARTICLE_CONFIG } from './constants'
@@ -41,6 +41,13 @@ const values = [
 
 export function ValuesSection() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const update = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth < 640)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   const handleCardClick = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId)
@@ -62,7 +69,11 @@ export function ValuesSection() {
         <div className="relative w-full h-full">
           {/* Centro: ¿Qué creemos? */}
           <motion.div
-            className="absolute top-1/2 left-[40%] -translate-x-1/2 -translate-y-1/2 z-30"
+            className={
+              isMobile
+                ? "relative mx-auto my-6 z-30"
+                : "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+            }
             initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
             whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
             viewport={ANIMATION_CONFIG.viewport}
@@ -141,9 +152,9 @@ export function ValuesSection() {
             return (
               <motion.div
                 key={value.id}
-                className="absolute z-30"
+                className={isMobile ? "relative z-20 my-4" : "absolute z-30"}
                 style={{
-                  ...(value.position as any),
+                  ...(isMobile ? {} : (value.position as any)),
                   zIndex: isExpanded ? 50 : 20,
                   pointerEvents: isExpanded ? 'auto' : anyExpanded ? 'none' : 'auto'
                 }}
