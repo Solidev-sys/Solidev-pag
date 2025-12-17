@@ -277,6 +277,34 @@
 .panel-content {
   padding: 30px;
 }
+.panel-content h2 {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.panel-content p {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+.panel-emblem {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 14px auto;
+  border-radius: 20px;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  animation: emblem-float 4s ease-in-out infinite;
+}
+@keyframes emblem-float {
+  0%,100% { transform: translateY(0) scale(1); opacity: 0.95; }
+  50%     { transform: translateY(-8px) scale(1.03); opacity: 1; }
+}
 .container.signup-active .slider-panel {
   right: 50%;
 } /* --- ANIMACIÓN DEL COHETE --- */

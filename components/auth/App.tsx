@@ -6,6 +6,8 @@ import "./LoginStyles.css"
 import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
+import panelPNG from "../images/PNG.png"
 
 const handleRocket = (e: FormEvent<HTMLButtonElement>) => {
   e.preventDefault()
@@ -179,13 +181,21 @@ export function LoginPage() {
           <div className="panel-content">
           {isLoginActive ? (
             <>
+              <div className="panel-emblem">
+                <Image src={panelPNG} alt="Emblema" width={80} height={80} className="rounded-2xl" />
+              </div>
               <h2>¡Hola de nuevo!</h2>
-              <p>Accede con tus credenciales para continuar.</p>
+              <p>Listo para crear tu sueño, aqui lo puedes hacer realidad.</p>
+              <p>Accede con tus credenciales para comenzar.</p>
             </>
           ) : (
             <>
+              <div className="panel-emblem">
+                <Image src={panelPNG} alt="Emblema" width={80} height={80} className="rounded-2xl" />
+              </div>
               <h2>¡Bienvenido!</h2>
-              <p>Regístrate para unirte a nuestra comunidad.</p>
+              <p>Regístrate para unirte y poner tu creatividad a volar.</p>
+              <p>Tus sueños son posibles y con nosotros se hacen realidad.</p>
             </>
           )}
           </div>
