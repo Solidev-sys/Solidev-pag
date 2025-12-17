@@ -71,6 +71,13 @@ export class ApiService extends BaseApiService {
       body: JSON.stringify({ current_password: payload.currentPassword, new_password: payload.newPassword }),
     });
   }
+  
+  async changePhone(newPhone: string): Promise<{ message: string }> {
+    return this.request('/api/users/me/telefono', {
+      method: 'PUT',
+      body: JSON.stringify({ new_phone: newPhone }),
+    });
+  }
 
   // Cart management - Fixed routes to match backend
   async getCart(): Promise<CartResponse> {
