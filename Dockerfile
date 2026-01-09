@@ -9,8 +9,18 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copiar .env.local ANTES del build
+COPY .env.local .env.local
+
+# Los ARG son opcionales pero útiles para override
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_MP_PUBLIC_KEY
+
+# Si no vienen por ARG, se usan del .env.local
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_MP_PUBLIC_KEY=${NEXT_PUBLIC_MP_PUBLIC_KEY}
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p public
@@ -21,7 +31,6 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-# Puerto del servidor Next.js (coincide con package.json: 3001)
 ENV PORT=3001
 
 # Solo deps de producción para un runtime mínimo
@@ -36,7 +45,7 @@ COPY --from=builder /app/next.config.js ./next.config.js
 # Exponer el puerto del servidor Next
 EXPOSE 3001
 
-# Opcional: ejecutar como usuario no root
+# Ejecutar como usuario no root
 USER node
 
 # Arranque del frontend (usa PORT=3001)
