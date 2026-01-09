@@ -1,36 +1,41 @@
-# Etapa 1: Final con TODO el repositorio
-FROM node:18-alpine AS final
+# Etapa de dependencias
+FROM node:20-alpine AS deps
 WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY package*.json ./
+RUN npm ci
 
-# Instalar bash y git
-RUN apk add --no-cache bash git
+# Etapa de build
+FROM node:20-alpine AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copiar TODO el repositorio
+# API URL HARDCODEADA
+ENV NEXT_PUBLIC_API_URL=https://solidevtech.cloud
+
+# MP PUBLIC KEY desde build arg
+ARG NEXT_PUBLIC_MP_PUBLIC_KEY
+ENV NEXT_PUBLIC_MP_PUBLIC_KEY=${NEXT_PUBLIC_MP_PUBLIC_KEY}
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p public
+RUN npm run build
 
-# IMPORTANTE: Instalar dependencias en el ORDEN correcto
-
-# 1. Primero instalar el frontend (para que exista 'next')
-WORKDIR /app/frontend
-RUN npm ci --prefer-offline --no-audit
-
-# 2. Luego instalar el backend (SIN ejecutar postinstall)
-WORKDIR /app/backend
-RUN npm ci --prefer-offline --no-audit --ignore-scripts
-
-# 3. Por último instalar la raíz (SIN ejecutar postinstall)
+# Etapa de runtime
+FROM node:20-alpine AS runner
 WORKDIR /app
-RUN npm install --ignore-scripts
-
-# Crear usuario sin privilegios
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN chown -R appuser:appgroup /app
-USER appuser
-
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3001
 
-# Exponer puertos
-EXPOSE 3000 3001 3002
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-CMD ["tail", "-f", "/dev/null"]
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.js ./next.config.js
+
+EXPOSE 3001
+USER node
+CMD ["npm", "run", "start"]
