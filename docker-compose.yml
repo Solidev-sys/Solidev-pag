@@ -5,19 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: "https://solidevtech.cloud"
-        NEXT_PUBLIC_MP_PUBLIC_KEY: "${NEXT_PUBLIC_MP_PUBLIC_KEY}"
     image: solidev-frontend:latest
     container_name: solidev-frontend
-    env_file:
-      - ./.env.local
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
       - PORT=3001
-      - NEXT_PUBLIC_API_URL=https://solidevtech.cloud
-      - NEXT_PUBLIC_MP_PUBLIC_KEY=${NEXT_PUBLIC_MP_PUBLIC_KEY}
     ports:
       - "3001:3001"
     restart: always
@@ -36,8 +29,6 @@ services:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
       - PORT=3001
-      - NEXT_PUBLIC_API_URL=https://solidevtech.cloud
-      - NEXT_PUBLIC_MP_PUBLIC_KEY=${NEXT_PUBLIC_MP_PUBLIC_KEY}
     command: sh -c "npm install && npm run dev"
     ports:
       - "3001:3001"
