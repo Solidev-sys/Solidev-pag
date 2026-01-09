@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}  
+        NEXT_PUBLIC_API_URL: "https://solidevtech.cloud/api"
     image: solidev-frontend:latest
     container_name: solidev-frontend
     env_file:
@@ -15,13 +15,12 @@ services:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
       - PORT=3001
+      - NEXT_PUBLIC_API_URL=https://solidevtech.cloud/api
     ports:
       - "3001:3001"
     restart: always
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
-      - SoliDevNet
+      - backend-network
 
   frontend-dev:
     profiles:
@@ -35,17 +34,16 @@ services:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
       - PORT=3001
+      - NEXT_PUBLIC_API_URL=https://solidevtech.cloud/api
     command: sh -c "npm install && npm run dev"
     ports:
       - "3001:3001"
     volumes:
       - .:/app
       - /app/node_modules
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
-      - SoliDevNet
-      
+      - backend-network
+
 networks:
-  SoliDevNet:
-    driver: bridge
+  backend-network:
+    external: true
