@@ -19,6 +19,7 @@ const createPaginasRouter = require('./routes/paginas');
 const createAuthRouter = require('./routes/auth');
 const createUsersRouter = require('./routes/users');
 const createAdminRouter = require('./routes/admin');
+const createTestRouter = require('./routes/test');
 
 const app = express();
 const HTTP_PORT = process.env.HTTP_PORT || 3002; 
@@ -114,6 +115,5 @@ app.use('/api', usersRouter);
 const adminRouter = createAdminRouter({ ensureRole });
 app.use('/api', adminRouter);
 
-app.get('/test', (req, res) => {
-  res.json({ q: 'pex' });
-});
+const testRouter = createTestRouter();
+app.use('/api', testRouter);
