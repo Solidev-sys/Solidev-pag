@@ -68,7 +68,7 @@ const preference = new Preference(client);
 const preapproval = new PreApproval(client);
 const preapprovalPlan = new PreApprovalPlan(client);
 const payment = new Payment(client);
-const ngrok = process.env.URL_HTTPS;
+const ngrok = process.env.Dominio_H;
 
 const paymentsRouter = createPaymentsRouter({
     ensureAuth,
