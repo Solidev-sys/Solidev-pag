@@ -153,7 +153,7 @@ export class ApiService extends BaseApiService {
   
   // Endpoint de verificación/health: devuelve { q: 'pex' }
   async getApiTest(): Promise<{ q: string }> {
-      return this.request('/test');
+      return this.request('/api/test');
   }
 }
 export const apiService = new ApiService();
