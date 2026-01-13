@@ -1,22 +1,83 @@
-# Dependencias y caches
+# ============================================
+# DOCKERIGNORE SEGURO - SOLIDEV FRONTEND
+# Excluir todo lo innecesario y sensible
+# ============================================
+
+# Dependencias (se instalan fresh)
 node_modules
 .pnpm-store
-.cache
+package-lock.json.bak
 
-# Artefactos de Next/Tailwind
+# Cache y builds anteriores
 .next
 out
+.cache
+*.tsbuildinfo
 
 # Logs y temporales
+*.log
 npm-debug.log*
 yarn-error.log*
-*.log
 *.tmp
 *.swp
-.DS_Store
+*.bak
+*~
 
-# Configuración de editor/VCS
+# Sistema operativo
+.DS_Store
+Thumbs.db
+*.pid
+
+# Editor y VCS
 .vscode
 .idea
 .git
 .gitignore
+.gitattributes
+
+# SEGURIDAD: Archivos sensibles (NUNCA incluir)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+*.secret
+
+# Docker (evitar recursión)
+Dockerfile*
+docker-compose*.yml
+.docker
+.dockerignore
+
+# Testing y desarrollo
+__tests__
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+coverage
+.nyc_output
+jest.config.*
+
+# Documentación
+*.md
+!README.md
+docs
+LICENSE
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+.circleci
+
+# Otros
+.husky
+.eslintcache
+.stylelintcache
