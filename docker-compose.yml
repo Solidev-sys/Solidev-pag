@@ -1,3 +1,7 @@
+# ============================================
+# DOCKER-COMPOSE SEGURO - SOLIDEV FRONTEND
+# Hardened para producción
+# ============================================
 version: "3.8"
 
 services:
@@ -9,18 +13,69 @@ services:
         NEXT_PUBLIC_MP_PUBLIC_KEY: ${NEXT_PUBLIC_MP_PUBLIC_KEY}
     image: solidev-frontend:latest
     container_name: solidev-frontend
+    
+    # Variables de entorno
     env_file:
       - ./.env.local
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
       - PORT=3001
-    ports:
-      - "3001:3001"
-    restart: always
+    
+    # SEGURIDAD: Solo exponer internamente (NO ports:)
+    expose:
+      - "3001"
+    
+    # Reinicio automático
+    restart: unless-stopped
+    
+    # SEGURIDAD: Limitar recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # SEGURIDAD: Opciones de seguridad del contenedor
+    security_opt:
+      - no-new-privileges:true
+    
+    # SEGURIDAD: Solo lectura del sistema de archivos (excepto cache)
+    read_only: true
+    tmpfs:
+      - /app/.next/cache:mode=770,uid=1001,gid=1001
+      - /tmp:mode=1777
+    
+    # SEGURIDAD: Eliminar capacidades innecesarias
+    cap_drop:
+      - ALL
+    
+    # SEGURIDAD: Sin acceso privilegiado
+    privileged: false
+    
+    # SEGURIDAD: Logging limitado
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Red interna
     networks:
-      - backend-network
+      - solidevNet
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
+  # Perfil de desarrollo (solo para dev local)
   frontend-dev:
     profiles:
       - dev
@@ -35,14 +90,15 @@ services:
       - PORT=3001
       - NEXT_PUBLIC_API_URL=http://localhost:3002
     command: sh -c "npm install && npm run dev"
+    # En dev sí puede usar ports (solo local)
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     volumes:
       - .:/app
       - /app/node_modules
     networks:
-      - backend-network
+      - solidevNet
 
 networks:
-  backend-network:
+  solidevNet:
     external: true
