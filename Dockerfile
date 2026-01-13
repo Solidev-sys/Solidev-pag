@@ -8,11 +8,9 @@ FROM node:20-slim AS builder
 WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copiar manifiestos e instalar TODAS las dependencias
 COPY package*.json ./
 RUN npm ci && npm cache clean --force
 
-# Copiar código fuente
 COPY controllers/ ./controllers/
 COPY js/ ./js/
 
@@ -20,7 +18,6 @@ COPY js/ ./js/
 FROM node:20-slim AS runtime
 WORKDIR /app
 
-# Variables de entorno
 ENV NODE_ENV=production
 ENV BIND=0.0.0.0
 ENV HTTP_PORT=3002
@@ -31,14 +28,15 @@ RUN groupadd -r -g 1001 nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.npm
 
-# Copiar todo desde builder
+# Copiar todo desde builder CON el usuario correcto
 COPY --from=builder --chown=backend:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=backend:nodejs /app/controllers ./controllers
 COPY --from=builder --chown=backend:nodejs /app/js ./js
 COPY --chown=backend:nodejs package*.json ./
 
-# Permisos restrictivos
-RUN chmod -R 550 /app
+# Permisos: owner puede leer y ejecutar
+RUN chmod -R 750 /app && \
+    chown -R backend:nodejs /app
 
 EXPOSE 3002
 
