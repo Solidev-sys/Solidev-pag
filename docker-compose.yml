@@ -1,3 +1,7 @@
+# ============================================
+# DOCKER-COMPOSE SEGURO - SOLIDEV BACKEND
+# Hardened para producción
+# ============================================
 version: "3.8"
 
 services:
@@ -7,21 +11,67 @@ services:
       dockerfile: Dockerfile
     image: solidev-backend:latest
     container_name: solidev-backend
+    
+    # Variables de entorno
     env_file:
       - ./.env
     environment:
       - NODE_ENV=production
       - BIND=0.0.0.0
       - SSL_ENABLE=true
-      # Si no está en .env, puedes forzar:
-      # - HTTP_PORT=3002
-    ports:
-      - "${HTTP_PORT:-3002}"
-    # Usamos secrets en lugar de bind mounts para certificados
-    restart: always
+    
+    # SEGURIDAD: Solo exponer internamente (NO ports:)
+    expose:
+      - "3002"
+    
+    # Reinicio automático
+    restart: unless-stopped
+    
+    # SEGURIDAD: Limitar recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # SEGURIDAD: Opciones de seguridad del contenedor
+    security_opt:
+      - no-new-privileges:true
+    
+    # SEGURIDAD: Solo lectura del sistema de archivos
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    
+    # SEGURIDAD: Eliminar capacidades innecesarias
+    cap_drop:
+      - ALL
+    
+    # SEGURIDAD: Sin acceso privilegiado
+    privileged: false
+    
+    # SEGURIDAD: Logging limitado
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Red interna
     networks:
-      - SoliDevNet
+      - solidevNet
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
-  SoliDevNet:
-    driver: bridge
+  solidevNet:
+    external: true
