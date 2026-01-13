@@ -1,33 +1,85 @@
-# Dependencias y caches
+# ============================================
+# DOCKERIGNORE SEGURO - SOLIDEV BACKEND
+# Excluir todo lo innecesario y sensible
+# ============================================
+
+# Dependencias (se instalan fresh)
 node_modules
+.pnpm-store
+package-lock.json.bak
+
+# Cache
+.cache
+.npm
+
+# Logs y temporales
+*.log
 npm-debug.log*
 yarn-error.log*
-pnpm-lock.yaml
-.pnpm-store
-.cache
-
-# Control de versiones y editor
-.git
-.gitignore
-.vscode
-.idea
-
-# Entornos y secretos
-.env
-.env.*
-key.pem
-cert.pem
-*.pem
-*.crt
-*.key
-
-# Archivos temporales
-*.log
 *.tmp
 *.swp
-.DS_Store
+*.bak
+*~
 
-# Otros no necesarios en la imagen
-bd.sql
+# Sistema operativo
+.DS_Store
+Thumbs.db
+*.pid
+
+# Editor y VCS
+.vscode
+.idea
+.git
+.gitignore
+.gitattributes
+
+# SEGURIDAD: Archivos sensibles (NUNCA incluir)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+key.pem
+cert.pem
+secrets/
+credentials/
+*.secret
+
+# Docker (evitar recursión)
+Dockerfile*
+docker-compose*.yml
+.docker
+.dockerignore
+
+# Base de datos y backups
+*.sql
+*.dump
+*.bak
+backups/
+
+# Testing
+__tests__
+*.test.js
+*.spec.js
+coverage
+.nyc_output
+
+# Documentación
+*.md
 README
 README.md
+docs
+LICENSE
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Otros
+.husky
+.eslintcache
