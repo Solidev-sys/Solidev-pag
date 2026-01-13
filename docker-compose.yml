@@ -12,7 +12,6 @@ services:
     image: solidev-backend:latest
     container_name: solidev-backend
     
-    # Variables de entorno
     env_file:
       - ./.env
     environment:
@@ -20,14 +19,11 @@ services:
       - BIND=0.0.0.0
       - SSL_ENABLE=true
     
-    # SEGURIDAD: Solo exponer internamente (NO ports:)
     expose:
       - "3002"
     
-    # Reinicio automático
     restart: unless-stopped
     
-    # SEGURIDAD: Limitar recursos
     deploy:
       resources:
         limits:
@@ -37,34 +33,27 @@ services:
           cpus: '0.25'
           memory: 128M
     
-    # SEGURIDAD: Opciones de seguridad del contenedor
     security_opt:
       - no-new-privileges:true
     
-    # SEGURIDAD: Solo lectura del sistema de archivos
     read_only: true
     tmpfs:
       - /tmp:mode=1777
     
-    # SEGURIDAD: Eliminar capacidades innecesarias
     cap_drop:
       - ALL
     
-    # SEGURIDAD: Sin acceso privilegiado
     privileged: false
     
-    # SEGURIDAD: Logging limitado
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
     
-    # Red interna
     networks:
       - solidevNet
     
-    # Healthcheck
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
