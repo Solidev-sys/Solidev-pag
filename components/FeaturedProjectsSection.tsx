@@ -73,16 +73,27 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
   return (
     <section className="py-12">
       <div className="max-w-6xl mx-auto px-4">
-        <motion.h2 
-          className="text-2xl md:text-3xl font-bold text-teal-300 mb-8 text-center"
+        <motion.div
+          className="text-center mb-8 md:mb-12"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, margin: "-50px" }} // 👈 Animación reversible según scroll
+          viewport={{ once: false, margin: "-50px" }}
           variants={fadeInUp}
         >
-          PROYECTOS DESTACADOS
-        </motion.h2>
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold text-teal-300 mb-4"
+            variants={fadeInUp}
+          >
+            Proyectos Que Generan Resultados
+          </motion.h2>
+          <motion.p
+            className="text-teal-200 text-lg md:text-xl max-w-2xl mx-auto px-4"
+            variants={fadeInUp}
+          >
+            Cada proyecto es una historia de éxito. Páginas web que <strong className="text-teal-400">convierten visitantes en clientes</strong> y transforman negocios.
+          </motion.p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
           <motion.div 
             className="grid grid-cols-2 gap-4"
             initial="hidden"
@@ -144,15 +155,15 @@ export const FeaturedProjectsSection: FC<Props> = ({ projects }) => {
           viewport={{ once: false, margin: "-50px" }} // 👈 Animación reversible según scroll
           variants={fadeInUp}
         >
-          <Button
-            asChild
-            className="text-white font-semibold py-5 lg:py-6 px-8 lg:px-10 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animated-gradient"
+          <Link
+            href="/portafolio"
+            className="inline-block text-white font-bold py-4 md:py-5 lg:py-6 px-8 md:px-10 lg:px-12 text-[16px] md:text-[18px] rounded-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.05] active:scale-[0.98] animated-gradient"
             style={{
               background: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
             }}
           >
-            <Link href="/history">Ver Portafolio</Link>
-          </Button>
+            🚀 Ver Portafolio Completo
+          </Link>
         </motion.div>
       </div>
     </section>

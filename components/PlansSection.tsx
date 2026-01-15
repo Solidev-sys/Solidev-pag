@@ -537,19 +537,29 @@ export const PlansSection: FC<Props> = ({ plans }) => {
         onClick={selectedIndex !== null && !showCheckout ? (e) => e.stopPropagation() : undefined}
       >
         
-        {/* Título con animación */}
-        <motion.h2
+        {/* Título con animación mejorado */}
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false, margin: "-50px" }}
           variants={titleAnimation}
-          className={`
-            text-center text-3xl md:text-4xl font-bold text-[#00CED1] mb-12 uppercase tracking-wider
-            ${selectedIndex !== null && !showCheckout ? 'transition-opacity hover:opacity-80' : ''}
-          `}
+          className={`text-center mb-8 md:mb-12 ${selectedIndex !== null && !showCheckout ? 'transition-opacity hover:opacity-80' : ''}`}
         >
-          NUESTROS PLANES
-        </motion.h2>
+          <motion.h2
+            className="text-3xl md:text-5xl font-bold text-[#00CED1] mb-4 uppercase tracking-wider"
+            variants={titleAnimation}
+          >
+            Elige Tu Plan Perfecto
+          </motion.h2>
+          <motion.p
+            className="text-teal-200 text-lg md:text-xl max-w-2xl mx-auto px-4"
+            variants={titleAnimation}
+          >
+            Páginas web desarrolladas con <strong className="text-teal-400">React</strong>, 
+            <strong className="text-teal-400"> alojadas en nuestros servidores</strong> y con 
+            <strong className="text-teal-400"> soporte incluido de 8 AM a 11 PM</strong>
+          </motion.p>
+        </motion.div>
 
         {/* AnimatePresence gestiona el cambio entre la cuadrícula y la vista de detalle */}
         <AnimatePresence mode="wait">
@@ -564,7 +574,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               whileInView="visible"
               viewport={{ once: false, margin: "-100px" }}
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
             >
               {ordered.map((plan, i) => (
                 <PlanCard 
@@ -797,16 +807,19 @@ export const PlansSection: FC<Props> = ({ plans }) => {
               </motion.div>
               )}
 
-              {/* Botón Siguiente (Flecha) - Solo visible cuando NO está el checkout */}
+              {/* Botón Siguiente (Flecha) - Solo visible cuando NO está el checkout - Mejorado para mobile */}
               {!showCheckout && (
                 <motion.button
                   onClick={(e) => {
                     e.stopPropagation()
                     handleNext()
                   }}
-                  className="absolute -right-4 md:right-0 lg:right-4 text-6xl text-[#00CED1] hover:text-white transition-colors z-10"
+                  className="absolute -right-2 md:right-0 lg:right-4 text-4xl md:text-6xl text-[#00CED1] hover:text-white transition-colors z-10 p-2 md:p-0"
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Siguiente plan"
                 >
                   →
                 </motion.button>

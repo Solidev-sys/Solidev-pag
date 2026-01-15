@@ -37,11 +37,11 @@ export function Hero({ onShowPlans, showPlans = false }: HeroProps) {
           }}
         />
       </div>
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-16 xl:px-20 py-12 md:py-16 lg:py-20 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-16 xl:px-20 py-8 sm:py-12 md:py-16 lg:py-20 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 xl:gap-16 items-center">
           
           {/* Columna Izquierda - Texto */}
-          <div className="space-y-6 lg:space-y-8">
+          <div className="space-y-5 sm:space-y-6 lg:space-y-8">
             {/* Título Principal */}
             <h1 className="text-white leading-[1.1]">
               <span className="block text-[40px] md:text-[48px] lg:text-[56px] xl:text-[64px] font-bold tracking-tight uppercase">
@@ -61,35 +61,38 @@ export function Hero({ onShowPlans, showPlans = false }: HeroProps) {
               </span>
             </h1>
 
-            {/* Subtítulo */}
+            {/* Subtítulo con neuroventas */}
             <p className="text-[16px] md:text-[18px] lg:text-[20px] text-gray-300 leading-relaxed max-w-[520px]">
-              Páginas webs sólidas que se ajustan a tus ideas y a tu negocio.
+              Transformamos tu negocio en una <span className="text-teal-400 font-semibold">máquina de ventas digital</span>. Páginas web desarrolladas con React, alojadas en nuestros servidores y diseñadas para convertir visitantes en clientes.
             </p>
 
-            {/* Lista de características */}
-            <ul className="space-y-3 text-[16px] md:text-[18px] text-gray-300">
-              <li className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-[#02CC9C] rounded-full flex-shrink-0"></span>
-                Precios claros
+            {/* Lista de características mejorada con neuroventas */}
+            <ul className="space-y-3 text-[15px] md:text-[17px] text-gray-300">
+              <li className="flex items-center gap-3 group">
+                <span className="w-2 h-2 bg-[#02CC9C] rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"></span>
+                <span><strong className="text-teal-400">Soporte 24/7:</strong> Estamos contigo de 8 AM a 11 PM, todos los días</span>
               </li>
-              <li className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-[#02CC9C] rounded-full flex-shrink-0"></span>
-                Soporte
+              <li className="flex items-center gap-3 group">
+                <span className="w-2 h-2 bg-[#02CC9C] rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"></span>
+                <span><strong className="text-teal-400">Alojamiento incluido:</strong> Tu página web ya alojada en nuestros servidores</span>
               </li>
-              <li className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 bg-[#02CC9C] rounded-full flex-shrink-0"></span>
-                Seguridad
+              <li className="flex items-center gap-3 group">
+                <span className="w-2 h-2 bg-[#02CC9C] rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"></span>
+                <span><strong className="text-teal-400">Tecnología de punta:</strong> Desarrollado con React para máxima velocidad</span>
+              </li>
+              <li className="flex items-center gap-3 group">
+                <span className="w-2 h-2 bg-[#02CC9C] rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"></span>
+                <span><strong className="text-teal-400">Sin complicaciones:</strong> Nos encargamos de todo, tú solo disfrutas los resultados</span>
               </li>
             </ul>
 
-            {/* Botón CTA */}
-            <div className="pt-2 lg:pt-4">
+            {/* Botones CTA mejorados con neuroventas */}
+            <div className="pt-4 lg:pt-6 flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={(e) => {
                   e.preventDefault()
                   if (onShowPlans) {
                     onShowPlans()
-                    // Scroll suave a la sección de planes solo si se están mostrando
                     if (!showPlans) {
                       setTimeout(() => {
                         const planesSection = document.getElementById('planes')
@@ -100,28 +103,67 @@ export function Hero({ onShowPlans, showPlans = false }: HeroProps) {
                     }
                   }
                 }}
-                className="text-white font-semibold py-5 lg:py-6 px-8 lg:px-10 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animated-gradient"
+                className="text-white font-bold py-4 lg:py-6 px-8 lg:px-12 text-[16px] lg:text-[18px] rounded-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.05] active:scale-[0.98] animated-gradient"
                 style={{
                   background: 'linear-gradient(90deg, #02CC9C 0%, #3AC1F0 100%)',
                 }}
               >
-                {showPlans ? 'Ocultar Planes' : 'Ver Planes'}
+                {showPlans ? 'Ocultar Planes' : '🚀 Comenzar Ahora - Ver Planes'}
               </Button>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault()
+                  const contactoSection = document.getElementById('contacto') || document.querySelector('a[href="/contacto"]')
+                  if (contactoSection) {
+                    if (contactoSection instanceof HTMLElement) {
+                      contactoSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    } else {
+                      window.location.href = '/contacto'
+                    }
+                  } else {
+                    window.location.href = '/contacto'
+                  }
+                }}
+                className="text-teal-400 font-semibold py-4 lg:py-6 px-8 lg:px-12 text-[16px] lg:text-[18px] rounded-full border-2 border-teal-400/50 bg-transparent hover:bg-teal-400/10 hover:border-teal-400 transition-all duration-300 hover:scale-[1.05] active:scale-[0.98]"
+              >
+                💬 Hablar con un Experto
+              </Button>
+            </div>
+            
+            {/* Badge de confianza móvil */}
+            <div className="pt-4 flex items-center gap-3 text-sm text-gray-400">
+              <div className="flex items-center gap-1">
+                <span className="text-teal-400">✓</span>
+                <span>Sin compromiso</span>
+              </div>
+              <span className="text-gray-600">•</span>
+              <div className="flex items-center gap-1">
+                <span className="text-teal-400">✓</span>
+                <span>Respuesta en minutos</span>
+              </div>
             </div>
           </div>
 
           {/* Columna Derecha - Imagen */}
-          <div className="relative">
-            <div className="relative w-full aspect-[4/3] lg:aspect-[5/4] rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative order-first lg:order-last">
+            <div className="relative w-full aspect-[4/3] lg:aspect-[5/4] rounded-xl md:rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
               {/* Imagen de fondo */}
               <Image 
                 src={HeroI}
                 alt="Security - Desarrollo web seguro"
                 className="absolute inset-0 w-full h-full object-cover"
+                priority
               />
               
               {/* Overlay oscuro para mejorar legibilidad */}
               <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/60"></div>
+              
+              {/* Badge móvil sobre la imagen */}
+              <div className="absolute top-4 left-4 right-4 lg:hidden">
+                <div className="bg-teal-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full inline-block">
+                  ⚡ Desarrollo con React • 🚀 Alojado • 💬 Soporte 8AM-11PM
+                </div>
+              </div>
             </div>
           </div>
 
