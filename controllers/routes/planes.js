@@ -57,7 +57,8 @@ module.exports = function createPlanesRouter({ ensureAuth, ensureRole, preapprov
 
     router.post('/planes/:id/sync-mercadopago', ensureRole('admin'), async (req, res) => {
         try {
-            const backUrl = (ngrok || '') + '/api/suscripcion-exitosa';
+            const baseUrl = ngrok || process.env.URL_HTTPS || `http://localhost:${process.env.HTTP_PORT || 3002}`;
+            const backUrl = `${baseUrl}/api/suscripcion-exitosa`;
             const id = await planService.syncMercadoPagoPlan({ planId: req.params.id, preapprovalPlan, backUrl });
             res.status(201).json({ message: 'Plan sincronizado con Mercado Pago', preapproval_plan_id: id });
         } catch (err) {

@@ -3,6 +3,7 @@
  * Nota: Usa `express.raw({ type: 'application/json' })` en la ruta.
  */
 const express = require('express');
+const { verifyMpWebhookSignature } = require('../utils/mercadopagoSecurity');
 const webhookService = require('../../js/service/webhook');
 const pagoService = require('../../js/service/pago');
 const facturaService = require('../../js/service/factura');
@@ -15,6 +16,7 @@ module.exports = function createWebhookRouter({ payment }) {
         const ts = new Date().toISOString();
         const webhookEnabled = process.env.WEBHOOK_ENABLED !== 'false';
         const requiredToken = process.env.WEBHOOK_TOKEN;
+        const mpWebhookSecret = String(process.env.MP_WEBHOOK_SECRET || '').trim();
         if (!webhookEnabled) {
             console.log(`[${ts}] WEBHOOK disabled`);
             return res.status(200).json({ status: 'disabled', message: 'Webhook temporalmente desactivado' });
@@ -38,7 +40,19 @@ module.exports = function createWebhookRouter({ payment }) {
 
         const topico = payload.type || payload.action || payload.topic || 'desconocido';
         const externoId = payload?.data?.id ? String(payload.data.id) : null;
-        console.log(`[${ts}] WEBHOOK recibido`, { topico, externoId, ip: req.ip });
+        const requestId = String(req.get('x-request-id') || '').trim() || null;
+        const signatureHeader = req.get('x-signature');
+        const verification = verifyMpWebhookSignature({
+            secret: mpWebhookSecret,
+            signatureHeader,
+            requestId,
+            dataId: externoId || String(req.query['data.id'] || '').trim() || null
+        });
+        if (!verification.ok) {
+            console.warn(`[${ts}] WEBHOOK firma inválida`, { topico, externoId, requestId });
+            return res.status(401).json({ error: 'Firma inválida' });
+        }
+        console.log(`[${ts}] WEBHOOK recibido`, { topico, externoId });
         let whRow;
         try {
             whRow = await webhookService.createWebhook({
@@ -61,7 +75,21 @@ module.exports = function createWebhookRouter({ payment }) {
                 const moneda = info.currency_id || 'CLP';
                 const amountCent = Math.round((info.transaction_amount || 0) * 100);
                 const extRef = info.external_reference || '';
-        let [usuario_id, suscripcion_id] = extRef.includes(':') ? extRef.split(':').map(v => Number(v)) : [null, null];
+                let usuario_id = null;
+                let suscripcion_id = null;
+                if (extRef) {
+                    if (String(extRef).includes(':')) {
+                        const [u, s] = String(extRef).split(':');
+                        usuario_id = Number(u);
+                        suscripcion_id = Number(s);
+                    } else {
+                        try {
+                            const parsed = JSON.parse(String(extRef));
+                            usuario_id = Number(parsed?.u);
+                            suscripcion_id = parsed?.s != null ? Number(parsed.s) : null;
+                        } catch {}
+                    }
+                }
 
                 if (!suscripcion_id || !usuario_id) {
                     const preId = info.preapproval_id;

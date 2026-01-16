@@ -1,6 +1,7 @@
 // Módulo: createPaymentsRouter
 const express = require('express');
 const { Usuario, Suscripcion, Plan, Pago } = require('../../js/Models');
+const { getMercadoPagoAccessToken } = require('../services/mercadopago');
 
 module.exports = function createPaymentsRouter({
     ensureAuth,
@@ -9,17 +10,22 @@ module.exports = function createPaymentsRouter({
 }) {
     const router = express.Router();
     const frontUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const sanitizeEmail = (value) => String(value || '').replace(/[\r\n]/g, '').trim();
+    const nowIso = () => new Date().toISOString();
 
     // POST /api/pago: crea preferencia para una suscripción específica
     router.post('/pago', ensureAuth, async (req, res) => {
         try {
             const usuario_id = req.userId;
             const { suscripcion_id, items: clientItems, total } = req.body || {};
-            const accessToken = process.env.MP_ACCESS_TOKEN || process.env.Access_token;
+            const accessToken = getMercadoPagoAccessToken();
             if (!accessToken) return res.status(500).json({ message: 'Token de Mercado Pago no configurado', error_code: 'PAY_MP_TOKEN_MISSING' });
             const usuario = await Usuario.findByPk(usuario_id);
             if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado', error_code: 'PAY_USER_NOT_FOUND' });
-            if (!usuario.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usuario.email)) return res.status(400).json({ message: 'Email del comprador inválido', error_code: 'PAY_EMAIL_INVALID' });
+            const envTestPayer = sanitizeEmail(process.env.MP_TEST_PAYER_EMAIL);
+            const payerEmail = (!isProduction && envTestPayer && envTestPayer.includes('@')) ? envTestPayer : sanitizeEmail(usuario.email);
+            if (!payerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail)) return res.status(400).json({ message: 'Email del comprador inválido', error_code: 'PAY_EMAIL_INVALID' });
 
             let items = [];
             let currency = 'CLP';
@@ -68,7 +74,7 @@ module.exports = function createPaymentsRouter({
             const payer = {
                 name: usuario.nombre_completo || '',
                 surname: '',
-                email: usuario.email,
+                email: payerEmail,
                 phone: { area_code: '57', number: usuario.telefono || '0000000' },
                 identification: { type: 'CC', number: 'N/A' },
                 address: { street_name: 'N/A', street_number: 0, zip_code: '000000' }
@@ -76,7 +82,7 @@ module.exports = function createPaymentsRouter({
 
             const baseUrl = (ngrok && typeof ngrok === 'string' && ngrok.length > 0)
                 ? ngrok
-                : `http://localhost:${process.env.HTTP_PORT || 3002}`;
+                : (process.env.URL_HTTPS || `http://localhost:${process.env.HTTP_PORT || 3002}`);
             const frontUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
 
             const preferenceData = {
@@ -88,7 +94,13 @@ module.exports = function createPaymentsRouter({
                     pending: baseUrl + "/api/pago-pendiente"
                 },
                 auto_return: "approved",
-                external_reference: suscripcion_id ? `${usuario_id}:${suscripcion_id}` : `${usuario_id}:carrito`,
+                external_reference: JSON.stringify({
+                    u: usuario_id,
+                    s: suscripcion_id || null,
+                    p: priceCentavos,
+                    m: currency,
+                    n: planNombre
+                }),
                 payment_methods: {
                     excluded_payment_methods: [],
                     excluded_payment_types: [],
@@ -100,100 +112,106 @@ module.exports = function createPaymentsRouter({
                 notification_url: ngrok ? (ngrok + "/api/webhook-mercadopago") : undefined
             };
 
-            console.log('PAYMENT preference.create body', {
-                usuario_id,
-                suscripcion_id: suscripcion_id || null,
-                items,
-                back_urls: preferenceData.back_urls,
-                notification_url: preferenceData.notification_url || null
-            });
+            const t0 = Date.now();
             const response = await preference.create({ body: preferenceData });
-            console.log('PAYMENT preference.create response', { init_point: response?.init_point, id: response?.id || response?.preference_id });
+            const ms = Date.now() - t0;
+            if (process.env.REQUEST_LOG === 'true') {
+                console.log('MP preference.create OK', { request_id: req.requestId || null, ms, at: nowIso() });
+            }
 
-            // Guarda contexto mínimo en la sesión para las rutas de retorno
-            req.session.mercadoPagoCtx = {
-                suscripcion_id: suscripcion_id || null,
-                precio_centavos: priceCentavos,
-                moneda: currency,
-                plan_nombre: planNombre
-            };
+            const initPoint = response?.init_point || null;
+            const sandboxInitPoint = response?.sandbox_init_point || null;
+            const preferSandbox = !isProduction && String(accessToken || '').startsWith('TEST-');
+            const chosen = (preferSandbox ? (sandboxInitPoint || initPoint) : (initPoint || sandboxInitPoint)) || null;
 
-            res.json({ init_point: response.init_point });
+            if (!chosen) {
+                return res.status(502).json({ message: 'Respuesta inválida de Mercado Pago', error_code: 'PAY_INIT_POINT_MISSING' });
+            }
+
+            res.json({ init_point: chosen, init_point_prod: initPoint, init_point_test: sandboxInitPoint });
         } catch (error) {
             const msg = error?.message || 'Error al procesar el pago';
             const code = error?.code || 'PAY_PREFERENCE_FAILED';
-            console.error('PAYMENT preference error', { message: msg, code, error });
+            console.error('PAYMENT preference error', { request_id: req.requestId || null, message: msg, code, status: error?.status || error?.statusCode || null, mp: error?.cause || error?.response?.data || null });
             res.status(error?.status || 500).json({ message: msg, error_code: code });
         }
     });
 
     // GET /api/pago-exitoso: registra pago aprobado y redirige
     router.get('/pago-exitoso', async (req, res) => {
-        const { payment_id } = req.query;
-        const usuario_id = req.userId;
-
-        if (!payment_id) {
-            return res.redirect('/payment/failed?reason=ID%20de%20pago%20no%20encontrado');
+        const { payment_id, external_reference } = req.query;
+        // userId puede venir de req.userId si hay cookie, pero mejor confiar en external_reference
+        
+        if (!payment_id || !external_reference) {
+            return res.redirect(`${frontUrl}/payment/failed?reason=Datos%20de%20pago%20incompletos`);
         }
 
         try {
+            // Recuperar contexto desde external_reference (stateless)
+            let ctx;
+            try {
+                ctx = JSON.parse(external_reference);
+            } catch (e) {
+                console.error('Error parseando external_reference:', e);
+                return res.redirect(`${frontUrl}/payment/failed?reason=Error%20de%20datos`);
+            }
+
+            const usuario_id = ctx.u;
+
             const existing = await Pago.findOne({ where: { mp_payment_id: payment_id } });
             if (existing) {
                 const params = new URLSearchParams({
                     order_id: payment_id,
-                    user_id: usuario_id,
+                    user_id: String(usuario_id),
                     subtotal: (existing.monto_centavos / 100).toFixed(2),
-                    items: JSON.stringify([{ nombre: 'Pago registrado previamente', cantidad: 1, precio: (existing.monto_centavos / 100).toFixed(2) }])
+                    payment_id: payment_id,
+                    item_name: ctx.n || 'Compra'
                 });
-                return res.redirect(`/payments/payment-success.html?${params.toString()}`);
-            }
-
-            const ctx = req.session.mercadoPagoCtx;
-            if (!ctx) {
-                return res.redirect('/payment/failed?reason=Contexto%20de%20pago%20no%20encontrado');
+                return res.redirect(`${frontUrl}/payment/success?${params.toString()}`);
             }
 
             const nuevoPago = await Pago.create({
-                suscripcion_id: ctx.suscripcion_id,
-                usuario_id,
+                suscripcion_id: ctx.s,
+                usuario_id: usuario_id,
                 mp_payment_id: payment_id,
                 estado: 'aprobado',
-                monto_centavos: ctx.precio_centavos,
-                moneda: ctx.moneda || 'CLP',
+                monto_centavos: ctx.p,
+                moneda: ctx.m || 'CLP',
                 pagado_en: new Date()
             });
 
             const params = new URLSearchParams({
                 order_id: payment_id,
-                user_id: usuario_id,
+                user_id: String(usuario_id),
                 payment_id: payment_id,
-                subtotal: (ctx.precio_centavos / 100).toFixed(2),
-                item_name: ctx.plan_nombre
+                subtotal: (ctx.p / 100).toFixed(2),
+                item_name: ctx.n
             });
 
             res.redirect(`${frontUrl}/payment/success?${params.toString()}`);
         } catch (error) {
             console.error("Error en pago-exitoso:", error);
-            res.redirect('/payment/failed?reason=Error%20interno%20del%20servidor');
+            res.redirect(`${frontUrl}/payment/failed?reason=Error%20interno%20del%20servidor`);
         }
     });
 
     // GET /api/pago-fallido: registra intento fallido y redirige
     router.get('/pago-fallido', async (req, res) => {
         const payment_id = req.query.payment_id;
-
-        console.log('Pago fallido recibido:', { userId: req.userId, payment_id });
-
+        const external_reference = req.query.external_reference;
+        let ctx = null;
+        if (external_reference) {
+            try { ctx = JSON.parse(external_reference); } catch {}
+        }
         try {
-            const ctx = req.session.mercadoPagoCtx;
-            if (payment_id && ctx) {
+            if (payment_id && ctx?.u) {
                 await Pago.create({
-                    suscripcion_id: ctx.suscripcion_id,
-                    usuario_id: req.userId,
+                    suscripcion_id: ctx.s,
+                    usuario_id: ctx.u,
                     mp_payment_id: payment_id,
                     estado: 'rechazado',
-                    monto_centavos: ctx.precio_centavos,
-                    moneda: ctx.moneda || 'CLP',
+                    monto_centavos: ctx.p,
+                    moneda: ctx.m || 'CLP',
                     motivo_fallo: 'Pago rechazado por la entidad financiera'
                 });
             }
@@ -212,26 +230,28 @@ module.exports = function createPaymentsRouter({
     // GET /api/pago-pendiente: registra intento pendiente y redirige
     router.get('/pago-pendiente', async (req, res) => {
         const payment_id = req.query.payment_id;
-
-        console.log('Pago pendiente:', { userId: req.userId, payment_id });
+        const external_reference = req.query.external_reference;
+        let ctx = null;
+        if (external_reference) {
+            try { ctx = JSON.parse(external_reference); } catch {}
+        }
 
         try {
-            const ctx = req.session.mercadoPagoCtx;
-            if (payment_id && ctx) {
+            if (payment_id && ctx?.u) {
                 await Pago.create({
-                    suscripcion_id: ctx.suscripcion_id,
-                    usuario_id: req.userId,
+                    suscripcion_id: ctx.s,
+                    usuario_id: ctx.u,
                     mp_payment_id: payment_id,
                     estado: 'pendiente',
-                    monto_centavos: ctx.precio_centavos,
-                    moneda: ctx.moneda || 'CLP'
+                    monto_centavos: ctx.p,
+                    moneda: ctx.m || 'CLP'
                 });
             }
 
             const params = new URLSearchParams({
                 status: 'pending',
                 order_id: `ORD-${Date.now()}`,
-                amount: (ctx ? (ctx.precio_centavos / 100) : 0),
+                amount: (ctx ? (ctx.p / 100) : 0),
                 payment_id: payment_id || 'N/A'
             });
 

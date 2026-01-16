@@ -4,9 +4,9 @@
   "description": "Backend API para ecommerce",
   "main": "controllers/api.js",
   "scripts": {
-    "start": "node controllers/api.js",
-    "dev": "nodemon controllers/api.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "set NODE_ENV=production&& node controllers/api.js",
+    "dev": "set NODE_ENV=development&& nodemon controllers/api.js",
+    "test": "node --test \"tests/*.test.js\""
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

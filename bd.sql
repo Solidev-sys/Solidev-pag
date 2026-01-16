@@ -17,6 +17,7 @@ CREATE TABLE planes (
   nombre          VARCHAR(64)  NOT NULL,
   precio_centavos INT UNSIGNED NOT NULL,             -- precio en centavos
   moneda          CHAR(3)      NOT NULL DEFAULT 'CLP',
+  dias_prueba_gratis INT NOT NULL DEFAULT 0,
   ciclo_fact      ENUM('mensual','anual') NOT NULL DEFAULT 'mensual',
   mp_preapproval_plan_id VARCHAR(64) NULL UNIQUE,
   activo          TINYINT(1)   NOT NULL DEFAULT 1,

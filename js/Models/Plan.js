@@ -15,6 +15,12 @@ const Plan = sequelize.define('Plan', {
     defaultValue: 'CLP',
     validate: { len: [3, 3] }
   },
+  dias_prueba_gratis: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    validate: { min: 0 }
+  },
   ciclo_fact: {
     type: DataTypes.ENUM('mensual', 'anual'),
     allowNull: false,

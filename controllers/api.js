@@ -20,6 +20,12 @@ const createAuthRouter = require('./routes/auth');
 const createUsersRouter = require('./routes/users');
 const createAdminRouter = require('./routes/admin');
 const createTestRouter = require('./routes/test');
+const { requestContext } = require('./middleware/requestContext');
+
+if (!process.env.NODE_ENV) {
+    const lifecycle = String(process.env.npm_lifecycle_event || '').toLowerCase();
+    process.env.NODE_ENV = lifecycle === 'start' ? 'production' : 'development';
+}
 
 const app = express();
 const HTTP_PORT = process.env.HTTP_PORT || 3002; 
@@ -59,6 +65,7 @@ const corsOptions = {
 
 // Body parser y configuración modular
 app.use(express.json());
+app.use(requestContext());
 setupCors(app);
 setupSession(app);
 

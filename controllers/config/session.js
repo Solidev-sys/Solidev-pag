@@ -34,8 +34,22 @@ function setupSession(app) {
     }
 
     // Nota: si tu frontend está en otro dominio, usa sameSite='none' y secure=true
-    const cookieSameSite = (process.env.SESSION_SAMESITE || (NODE_ENV === 'production' ? 'lax' : 'lax')).toLowerCase();
-    const cookieSecure = NODE_ENV === 'production';
+    let cookieSameSite = String(process.env.SESSION_SAMESITE || 'lax').toLowerCase();
+    if (!['lax', 'strict', 'none'].includes(cookieSameSite)) cookieSameSite = 'lax';
+
+    const secureOverrideRaw = process.env.SESSION_COOKIE_SECURE;
+    let cookieSecure;
+    if (typeof secureOverrideRaw === 'string' && secureOverrideRaw.trim().length > 0) {
+        cookieSecure = secureOverrideRaw.trim().toLowerCase() === 'true';
+    } else if (NODE_ENV === 'production') {
+        cookieSecure = 'auto';
+    } else {
+        cookieSecure = false;
+    }
+
+    if (cookieSameSite === 'none' && cookieSecure === false) {
+        cookieSameSite = 'lax';
+    }
 
     app.use(session({
         name: 'sid',

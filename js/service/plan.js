@@ -1,4 +1,5 @@
 const { Plan, CaracteristicaPlan } = require('../Models');
+const { Op } = require('sequelize');
 
 async function isConnected() {
   try {
@@ -41,6 +42,11 @@ async function createPlan(data) {
     if (typeof data.precio_centavos !== 'number' || data.precio_centavos <= 0) throw new Error('precio_centavos debe ser número > 0')
     if (typeof data.moneda !== 'string' || data.moneda.length !== 3) throw new Error('moneda debe ser código de 3 letras')
     if (!['mensual','anual'].includes(data.ciclo_fact)) throw new Error('ciclo_fact debe ser mensual o anual')
+    if (data.dias_prueba_gratis !== undefined) {
+      const v = Number(data.dias_prueba_gratis);
+      if (!Number.isFinite(v) || v < 0 || v > 365) throw new Error('dias_prueba_gratis debe ser un número entre 0 y 365');
+      data.dias_prueba_gratis = Math.trunc(v);
+    }
     if (data.codigo) {
       const exists = await Plan.findOne({ where: { codigo: data.codigo } });
       if (exists) throw new Error('El código de plan ya existe');
@@ -55,9 +61,14 @@ async function createPlan(data) {
 
 async function updatePlan(id, data) {
   try {
+    if (data.dias_prueba_gratis !== undefined) {
+      const v = Number(data.dias_prueba_gratis);
+      if (!Number.isFinite(v) || v < 0 || v > 365) throw new Error('dias_prueba_gratis debe ser un número entre 0 y 365');
+      data.dias_prueba_gratis = Math.trunc(v);
+    }
     if (data.codigo) {
       const existing = await Plan.findOne({
-        where: { codigo: data.codigo, id: { [Plan.sequelize.Op.ne]: id } }
+        where: { codigo: data.codigo, id: { [Op.ne]: id } }
       });
       if (existing) throw new Error('El código de plan ya está en uso por otro plan');
     }
@@ -83,7 +94,7 @@ async function deletePlan(id) {
   const connected = await isConnected();
   console.log(connected ? '🟢 DB conectada para Planes' : '🔴 DB desconectada para Planes');
   if (connected) {
-    try { await ensureMpPlanColumn(); } catch {}
+    try { await ensurePlanColumns(); } catch {}
   }
 })();
 
@@ -97,14 +108,32 @@ async function ensureMpPlanColumn() {
   } catch (error) {}
 }
 
-async function syncMercadoPagoPlan({ planId, preapprovalPlan, backUrl }) {
+async function ensureTrialDaysColumn() {
+  try {
+    const qi = Plan.sequelize.getQueryInterface();
+    const desc = await qi.describeTable('planes');
+    if (!desc.dias_prueba_gratis) {
+      await Plan.sequelize.query("ALTER TABLE planes ADD COLUMN dias_prueba_gratis INT NOT NULL DEFAULT 0");
+    }
+  } catch (error) {}
+}
+
+async function ensurePlanColumns() {
   await ensureMpPlanColumn();
+  await ensureTrialDaysColumn();
+}
+
+async function syncMercadoPagoPlan({ planId, preapprovalPlan, backUrl }) {
+  await ensurePlanColumns();
   const plan = await Plan.findByPk(planId);
   if (!plan) throw new Error('Plan no encontrado');
   if (!plan.nombre || !plan.codigo) throw new Error('Plan sin nombre o código');
   if (!plan.precio_centavos || plan.precio_centavos <= 0) throw new Error('Plan con precio inválido');
   if (!plan.moneda || plan.moneda.length !== 3) throw new Error('Plan con moneda inválida');
   if (!['mensual','anual'].includes(plan.ciclo_fact)) throw new Error('Plan con ciclo inválido');
+  const freeTrialDays = Number.isFinite(Number(plan.dias_prueba_gratis))
+    ? Number(plan.dias_prueba_gratis)
+    : Number(process.env.MP_FREE_TRIAL_DAYS || 0);
   const body = {
     reason: plan.nombre || `Plan ${plan.codigo}`,
     auto_recurring: {
@@ -115,6 +144,9 @@ async function syncMercadoPagoPlan({ planId, preapprovalPlan, backUrl }) {
     },
     back_url: backUrl || ''
   };
+  if (Number.isFinite(freeTrialDays) && freeTrialDays > 0) {
+    body.auto_recurring.free_trial = { frequency: freeTrialDays, frequency_type: 'days' };
+  }
   try {
     console.info('Sincronizando plan con Mercado Pago', { planId, body })
     const resp = await preapprovalPlan.create({ body });
@@ -138,5 +170,7 @@ module.exports = {
   updatePlan,
   deletePlan,
   syncMercadoPagoPlan,
-  ensureMpPlanColumn
+  ensureMpPlanColumn,
+  ensureTrialDaysColumn,
+  ensurePlanColumns
 };
