@@ -8,6 +8,7 @@ export function PaymentPendingPage() {
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
   const paymentId = params?.get('payment_id') || 'N/A'
   const amount = params?.get('amount') || '0'
+  const preapprovalId = params?.get('preapproval_id') || null
   const handleRefresh = () => {
     window.location.reload()
   }
@@ -21,15 +22,19 @@ export function PaymentPendingPage() {
             <Clock className="h-8 w-8 text-yellow-600" />
           </div>
 
-          <h1 className="text-2xl font-bold text-yellow-800 mb-2">Pago Pendiente</h1>
-          <p className="text-yellow-700 mb-6">Tu pago está siendo procesado. Esto puede tomar unos minutos.</p>
+          <h1 className="text-2xl font-bold text-yellow-800 mb-2">{preapprovalId ? 'Suscripción Pendiente' : 'Pago Pendiente'}</h1>
+          <p className="text-yellow-700 mb-6">
+            {preapprovalId ? 'Tu suscripción está siendo procesada. Esto puede tomar unos minutos.' : 'Tu pago está siendo procesado. Esto puede tomar unos minutos.'}
+          </p>
 
           {/* Status Info */}
           <div className="bg-yellow-50 rounded-lg p-4 mb-6 text-left">
             <h3 className="font-semibold text-yellow-800 mb-2">Estado actual:</h3>
             <div className="flex items-center gap-2 text-sm text-yellow-700">
               <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-              <span>Verificando con el banco... (ID: {paymentId}, monto: {amount})</span>
+              <span>
+                {preapprovalId ? `Verificando autorización... (ID: ${preapprovalId})` : `Verificando con el banco... (ID: ${paymentId}, monto: ${amount})`}
+              </span>
             </div>
             <p className="text-xs text-yellow-600 mt-2">Tiempo estimado: 2-5 minutos</p>
           </div>

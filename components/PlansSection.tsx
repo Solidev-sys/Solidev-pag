@@ -1,6 +1,6 @@
 "use client"
 
-import { FC, useEffect, useRef, useState } from "react"
+import { FC, useEffect, useRef, useState, useCallback, useMemo } from "react"
 import type { BackendPlan } from "@/types/indexNew"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
@@ -90,6 +90,7 @@ const PlanCard: FC<PlanCardProps> = ({
   const disabled = !plan.activo
   const precioFormateado = formatMoneyFromCentavos(plan.precio_centavos, plan.moneda)
   const esAnual = plan.ciclo_fact === "anual"
+  const trialDays = Math.max(0, Math.trunc(Number(plan.dias_prueba_gratis || 0)))
 
   // Estados para el efecto 3D tilt
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
@@ -212,6 +213,9 @@ const PlanCard: FC<PlanCardProps> = ({
         )}
         {plan.mensaje_seguro && (
           <span className="text-xs px-3 py-1 rounded-full bg-[#00CED1] text-[#1E1E1E]">seguro</span>
+        )}
+        {trialDays > 0 && (
+          <span className="text-xs px-3 py-1 rounded-full bg-[#02CC9C] text-[#1E1E1E]">{trialDays} días gratis</span>
         )}
       </div>
 
@@ -339,24 +343,33 @@ export const PlansSection: FC<Props> = ({ plans }) => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [cardType, setCardType] = useState<string | null>(null)
+  const [formKey, setFormKey] = useState(0)
+  const [cardFormReady, setCardFormReady] = useState(false)
   
   const formRef = useRef<HTMLFormElement | null>(null)
   const mpReadyRef = useRef(false)
-  const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || ""
-  const [sdkReady, setSdkReady] = useState(false)
+  const publicKey = process.env.NODE_ENV === 'production' 
+    ? (process.env.NEXT_PUBLIC_MP_PUBLIC_KEY_PROD || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY)
+    : (process.env.NEXT_PUBLIC_MP_PUBLIC_KEY_TEST || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY);
 
-  // Refs para auto-focus
-  const cardNumRef = useRef<HTMLInputElement>(null)
-  const expMonthRef = useRef<HTMLInputElement>(null)
-  const expYearRef = useRef<HTMLInputElement>(null)
-  const cvvRef = useRef<HTMLInputElement>(null)
-  const docRef = useRef<HTMLInputElement>(null)
+  const [sdkReady, setSdkReady] = useState(false)
+  const cardFormRef = useRef<any>(null)
+  const mpRef = useRef<any>(null)
+  const initializingRef = useRef(false)
+
+  // Verificar si el script ya estaba cargado de una visita anterior (SPA navigation)
+  useEffect(() => {
+    if ((window as any).MercadoPago) {
+      setSdkReady(true)
+    }
+  }, [])
 
   if (!plans || plans.length === 0) return null
 
-  const ordered = [...plans].sort(
-    (a, b) => (a.precio_centavos ?? 0) - (b.precio_centavos ?? 0)
-  )
+  // Usar useMemo para evitar re-cálculos innecesarios que puedan causar re-renders
+  const ordered = useMemo(() => {
+    return [...plans].sort((a, b) => (a.precio_centavos ?? 0) - (b.precio_centavos ?? 0))
+  }, [plans])
 
   const handleSelect = (index: number) => setSelectedIndex(index)
   const handleNext = () => {
@@ -364,92 +377,212 @@ export const PlansSection: FC<Props> = ({ plans }) => {
     setSelectedIndex((selectedIndex + 1) % ordered.length)
   }
   const handleClose = () => {
+    const globalState = (window as any).__soliMpState
+    if (globalState?.cardForm?.unmount) {
+      try { globalState.cardForm.unmount() } catch {}
+      globalState.cardForm = null
+    }
+
+    if (cardFormRef.current?.unmount) {
+      try { cardFormRef.current.unmount() } catch {}
+    }
     setSelectedIndex(null)
     setShowCheckout(false)
     setCheckoutOpen(false)
+    setCardFormReady(false)
+    
+    cardFormRef.current = null
+    initializingRef.current = false
+    mpReadyRef.current = false
   }
+
+  useEffect(() => {
+    return () => {
+      const globalState = (window as any).__soliMpState
+      if (globalState?.cardForm?.unmount) {
+        try { globalState.cardForm.unmount() } catch {}
+        globalState.cardForm = null
+      }
+
+      if (cardFormRef.current?.unmount) {
+        try { cardFormRef.current.unmount() } catch {}
+      }
+    }
+  }, [])
 
   useEffect(() => {
     setCheckoutOpen(false)
     setShowCheckout(false)
     setError(null)
     setSuccess(null)
+    setCardFormReady(false)
+    const globalState = (window as any).__soliMpState
+    if (globalState?.cardForm?.unmount) {
+      try { globalState.cardForm.unmount() } catch {}
+      globalState.cardForm = null
+    }
+
+    if (cardFormRef.current?.unmount) {
+      try { cardFormRef.current.unmount() } catch {}
+      cardFormRef.current = null
+    }
+    initializingRef.current = false
   }, [selectedIndex])
 
-  const mpRef = useRef<any>(null)
+  const initMercadoPago = useCallback(() => {
+    if (!publicKey || !(window as any).MercadoPago) return null
+    if (selectedIndex === null) return null
+    if (initializingRef.current) return null // Evitar llamadas paralelas
+    
+    const formEl = document.getElementById(`subscription-card-form-${formKey}`)
+    const inputEl = document.getElementById(`form-card-number-${formKey}`)
+    if (!formEl || !inputEl) {
+        if (checkoutOpen) {}
+        return null
+    }
 
-  useEffect(() => {
-    if (checkoutOpen) {
-      if (!publicKey) { return }
-      if (!sdkReady) { return }
-      if (!(window as any).MercadoPago) { return }
-      if (!formRef.current) { return }
-      if (selectedIndex === null) { return }
-    }
-    if (checkoutOpen && sdkReady && (window as any).MercadoPago && formRef.current && selectedIndex !== null) {
-      try {
-        const mp = new (window as any).MercadoPago(publicKey, { locale: 'es-CL' })
-        mpRef.current = mp // Guardar referencia para uso manual
-        
-        mp.cardForm({
-          amount: String((ordered[selectedIndex].precio_centavos ?? 0) / 100),
-          autoMount: true,
-          form: {
-            id: '#subscription-card-form',
-            cardholderName: { id: 'form-cardholder-name' },
-            cardNumber: { id: 'form-card-number' },
-            cardExpirationMonth: { id: 'form-card-exp-month' },
-            cardExpirationYear: { id: 'form-card-exp-year' },
-            securityCode: { id: 'form-security-code' },
-            identificationType: { id: 'form-doc-type' },
-            identificationNumber: { id: 'form-doc-number' },
-            cardholderEmail: { id: 'form-cardholder-email' }
-          },
-          callbacks: {
-            onFormMounted: (error: any) => {
-              if (error) setError('Error al montar el formulario de tarjeta')
-              else mpReadyRef.current = true
-            },
-            // Eliminamos onSubmit del SDK para manejarlo manualmente
-            onSubmit: (e: any) => { e.preventDefault() } 
-          }
-        })
-      } catch (e) {
-        console.warn('MP SDK init warning:', e)
+    if (cardFormRef.current) return cardFormRef.current
+
+    try {
+      initializingRef.current = true
+      mpReadyRef.current = false
+      setCardFormReady(false)
+      const globalState = (window as any).__soliMpState || ((window as any).__soliMpState = {})
+      if (globalState.cardForm?.unmount) {
+        try { globalState.cardForm.unmount() } catch {}
+        globalState.cardForm = null
       }
+
+      if (!globalState.mp || globalState.publicKey !== publicKey) {
+        globalState.mp = new (window as any).MercadoPago(publicKey, { locale: 'es-CL' })
+        globalState.publicKey = publicKey
+      }
+
+      const mp = globalState.mp
+      mpRef.current = mp
+      
+      const cardFormInstance = mp.cardForm({
+        amount: String((ordered[selectedIndex].precio_centavos ?? 0) / 100),
+        autoMount: true,
+        iframe: true,
+        form: {
+          id: `subscription-card-form-${formKey}`,
+          cardholderName: { id: `form-cardholder-name-${formKey}` },
+          cardholderEmail: { id: `form-cardholder-email-${formKey}` },
+          cardNumber: { id: `form-card-number-${formKey}`, placeholder: "Número de tarjeta" },
+          expirationDate: { id: `form-card-expiration-date-${formKey}`, placeholder: "MM/AA" },
+          securityCode: { id: `form-security-code-${formKey}`, placeholder: "CVC" },
+          issuer: { id: `form-issuer-${formKey}` },
+          installments: { id: `form-installments-${formKey}` },
+          identificationType: { id: `form-doc-type-${formKey}` },
+          identificationNumber: { id: `form-doc-number-${formKey}` }
+        },
+        callbacks: {
+          onFormMounted: (error: any) => {
+            initializingRef.current = false // Liberar lock
+            if (error) {
+              setCardFormReady(false)
+              if (error.toString().includes('already exists')) {
+                 try { cardFormInstance?.unmount?.() } catch {}
+                 const gs = (window as any).__soliMpState
+                 if (gs) gs.cardForm = null
+                 setFormKey(prev => prev + 1)
+                 setError('Recargando sistema de seguridad... Por favor espera un momento.')
+              } else {
+                 setError(`Error al conectar con el sistema de pagos: ${String((error as any)?.message || error)}`)
+              }
+            } else {
+              mpReadyRef.current = true
+              setCardFormReady(false)
+            }
+          },
+          onReady: () => {
+            setCardFormReady(true)
+          },
+          onBinChange: (bin: string) => {
+            const clean = String(bin || '').replace(/\D/g, '')
+            setCardType(detectCardType(clean))
+          },
+          onInstallmentsReceived: (_error: any, _data: any) => {
+            try {
+              const el = document.getElementById(`form-installments-${formKey}`) as HTMLSelectElement | null
+              if (el && !el.value && el.options && el.options.length > 0) el.value = el.options[0].value
+            } catch {}
+          },
+          onSubmit: (e: any) => { e.preventDefault() } 
+        }
+      })
+      cardFormRef.current = cardFormInstance
+      ;(window as any).__soliMpState.cardForm = cardFormInstance
+      return cardFormInstance
+    } catch (e) {
+      initializingRef.current = false
+      return null
     }
-  }, [checkoutOpen, sdkReady, publicKey, selectedIndex, ordered])
+  }, [publicKey, ordered, selectedIndex, checkoutOpen, formKey])
+
+  const setFormRef = useCallback((node: HTMLFormElement | null) => {
+    formRef.current = node
+    if (node && checkoutOpen && sdkReady && !cardFormRef.current && !initializingRef.current) {
+        setTimeout(() => {
+             if (!cardFormRef.current && !initializingRef.current) {
+                 const inputCheck = document.getElementById(`form-card-number-${formKey}`)
+                 if (inputCheck) {
+                    initMercadoPago()
+                 } else {
+                    setTimeout(() => initMercadoPago(), 200)
+                 }
+             }
+        }, 100)
+    }
+  }, [checkoutOpen, sdkReady, initMercadoPago, formKey])
+
+  // Effect secundario por si sdkReady cambia después de montar el form
+  useEffect(() => {
+    if (checkoutOpen && sdkReady && formRef.current && !cardFormRef.current && !initializingRef.current) {
+      initMercadoPago()
+    }
+  }, [checkoutOpen, sdkReady, initMercadoPago])
 
   const handleManualPayment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (selectedIndex === null) return
-    if (!mpRef.current) {
-        setError('El sistema de pagos no está listo. Intenta recargar.')
-        return
-    }
+
+    if (!cardFormRef.current) {
+          // Intentar recuperación segura solo si no estamos inicializando
+          if (!initializingRef.current) {
+              setFormKey(k => k + 1) // Esto limpiará los iframes viejos y reiniciará el proceso
+              setError('Reiniciando formulario seguro... Por favor espera unos segundos e intenta nuevamente.')
+          } else {
+              setError('Iniciando sistema de pagos... Espera un momento.')
+              // Reintento manual rápido
+              setTimeout(() => {
+                  if (cardFormRef.current) {
+                      setError(null)
+                      // No llamamos recursivamente, el usuario debe dar click de nuevo
+                  }
+              }, 1000)
+          }
+          return
+     }
 
     setLoading(true)
     setError(null)
 
     try {
-        // Usamos la instancia guardada para crear el token
-        const tokenResult = await mpRef.current.cardForm.createCardToken()
-        const token = tokenResult?.token
-        
-        if (!token) {
-            // Si falla createCardToken, a veces devuelve error en el objeto, o simplemente null
-            // Intentamos obtener datos del form por si acaso
-            const formData = mpRef.current.cardForm.getCardFormData()
-            if (formData?.token) {
-                 // Recuperación exitosa
-            } else {
-                 throw new Error('No se pudo generar el token. Revisa los datos de la tarjeta.')
-            }
-        }
-        
-        const finalToken = token || mpRef.current.cardForm.getCardFormData()?.token
+        if (!cardFormReady) throw new Error('El formulario seguro aún no está listo. Espera 1-2 segundos e intenta nuevamente.')
+        const nameEl = document.getElementById(`form-cardholder-name-${formKey}`) as HTMLInputElement | null
+        const docEl = document.getElementById(`form-doc-number-${formKey}`) as HTMLInputElement | null
+        if (!String(nameEl?.value || '').trim()) throw new Error('Ingresa el nombre del titular.')
+        if (!String(docEl?.value || '').trim()) throw new Error('Ingresa el número de documento.')
 
-        if (!finalToken) throw new Error('Token de tarjeta inválido')
+        const tokenResult = await cardFormRef.current.createCardToken()
+        const finalToken = tokenResult?.token || cardFormRef.current.getCardFormData?.()?.token
+
+        if (!finalToken) {
+          const reason = tokenResult?.error?.message || tokenResult?.message || 'No se pudo generar el token de la tarjeta.'
+          throw new Error(reason)
+        }
 
         const plan = ordered[selectedIndex]
         
@@ -467,14 +600,12 @@ export const PlansSection: FC<Props> = ({ plans }) => {
             }, 1500)
             
         } catch (backendError: any) {
-            console.error('Error de procesamiento:', backendError)
             const reason = backendError?.message || 'Error al procesar el pago'
             window.location.href = `/payment/failed?reason=${encodeURIComponent(reason)}`
             return
         }
 
     } catch (e: any) {
-        console.error("Error manual payment:", e)
         setError(e?.message || 'Fallo al procesar la solicitud. Revisa los datos.')
     } finally {
         if (!success) setLoading(false)
@@ -662,13 +793,19 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                 )}
                 {error && <p className="text-red-400 mb-3">{error}</p>}
                 {success && <p className="text-green-400 mb-3">{success}</p>}
-                <form id="subscription-card-form" ref={formRef} className="space-y-4" onSubmit={handleManualPayment}>
+                <form 
+                  key={formKey}
+                  id={`subscription-card-form-${formKey}`} 
+                  ref={setFormRef} 
+                  className="space-y-4" 
+                  onSubmit={handleManualPayment}
+                >
                   {/* Nombre y Email */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs text-gray-400 ml-1">Titular de la tarjeta</label>
                       <input 
-                        id="form-cardholder-name" 
+                        id={`form-cardholder-name-${formKey}`} 
                         placeholder="Como aparece en la tarjeta" 
                         className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors"
                       />
@@ -676,7 +813,7 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                     <div className="space-y-1">
                       <label className="text-xs text-gray-400 ml-1">Email</label>
                       <input 
-                        id="form-cardholder-email" 
+                        id={`form-cardholder-email-${formKey}`} 
                         placeholder="Email" 
                         className="w-full p-3 rounded bg-[#2D2D2D] text-white/70 border border-transparent outline-none cursor-not-allowed"
                         defaultValue={user?.email || ''}
@@ -689,25 +826,9 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                   <div className="space-y-1">
                     <label className="text-xs text-gray-400 ml-1">Número de tarjeta</label>
                     <div className="relative">
-                      <input 
-                        id="form-card-number" 
-                        ref={cardNumRef}
-                        placeholder="0000 0000 0000 0000" 
-                        className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors pr-28"
-                        maxLength={19}
-                        onChange={(e) => {
-                          let val = e.target.value.replace(/\D/g, '')
-                          // Detectar tipo
-                          setCardType(detectCardType(val))
-                          // Formato visual
-                          val = val.replace(/(\d{4})/g, '$1 ').trim()
-                          e.target.value = val
-                          
-                          // Auto-focus: si tiene 16 dígitos (19 caracteres con espacios)
-                          if (val.length >= 19) {
-                            expMonthRef.current?.focus()
-                          }
-                        }}
+                      <div
+                        id={`form-card-number-${formKey}`} 
+                        className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors pr-28 h-[50px] flex items-center"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1 pointer-events-none">
                         {CardIcons.visa(cardType === 'visa')}
@@ -721,52 +842,16 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs text-gray-400 ml-1">Vencimiento</label>
-                      <div className="flex gap-2">
-                        <input 
-                          id="form-card-exp-month" 
-                          ref={expMonthRef}
-                          placeholder="MM" 
-                          className="w-full p-3 rounded bg-[#2D2D2D] text-center text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors"
-                          maxLength={2}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '')
-                            e.target.value = val
-                            if (val.length >= 2) expYearRef.current?.focus()
-                          }}
-                        />
-                        <span className="text-white/50 py-3">/</span>
-                        <input 
-                          id="form-card-exp-year" 
-                          ref={expYearRef}
-                          placeholder="AA" 
-                          className="w-full p-3 rounded bg-[#2D2D2D] text-center text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors"
-                          maxLength={2}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '')
-                            e.target.value = val
-                            if (val.length >= 2) cvvRef.current?.focus()
-                          }}
-                        />
-                      </div>
+                      <div
+                        id={`form-card-expiration-date-${formKey}`}
+                        className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors h-[50px] flex items-center"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs text-gray-400 ml-1">CVV / CVC</label>
-                      <input 
-                        id="form-security-code" 
-                        ref={cvvRef}
-                        placeholder="123" 
-                        className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors"
-                        maxLength={4}
-                        type="password"
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '')
-                          e.target.value = val
-                          // Si es Amex son 4 dígitos, otros son 3. 
-                          // Auto-focus opcional al documento si completa 3 o 4
-                          if (val.length >= (cardType === 'amex' ? 4 : 3)) {
-                             // Opcional: docRef.current?.focus()
-                          }
-                        }}
+                      <div
+                        id={`form-security-code-${formKey}`} 
+                        className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent focus:border-[#00CED1] outline-none transition-colors h-[50px] flex items-center"
                       />
                     </div>
                   </div>
@@ -777,30 +862,26 @@ export const PlansSection: FC<Props> = ({ plans }) => {
                     <div className="col-span-1 space-y-1">
                       <label className="text-[10px] text-gray-500 ml-1">Tipo Doc</label>
                       <select 
-                        id="form-doc-type" 
+                        id={`form-doc-type-${formKey}`} 
                         className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent text-sm outline-none"
                       >
-                         <option value="RUT">RUT</option>
-                         <option value="CI">CI</option>
-                         <option value="DNI">DNI</option>
-                         <option value="PASAPORTE">Pasaporte</option>
-                         <option value="CC">CC</option>
+                         <option value="" disabled>Selecciona</option>
                       </select>
                     </div>
                     <div className="col-span-2 space-y-1">
                       <label className="text-[10px] text-gray-500 ml-1">Número Documento</label>
                       <input 
-                        id="form-doc-number" 
+                        id={`form-doc-number-${formKey}`} 
                         placeholder="Ej: 12345678-9" 
                         className="w-full p-3 rounded bg-[#2D2D2D] text-white border border-transparent outline-none text-sm"
-                        onBlur={(e) => {
-                          e.target.value = formatRUT(e.target.value)
-                        }}
                       />
                     </div>
                   </div>
 
-                  <button type="submit" disabled={loading || !publicKey} className="mt-6 w-full bg-[#00CED1] text-[#1E1E1E] font-bold text-lg rounded-full py-3 hover:bg-[#00b8bb] transition-all disabled:opacity-50 shadow-lg shadow-[#00CED1]/20">
+                  <select id={`form-issuer-${formKey}`} className="hidden" />
+                  <select id={`form-installments-${formKey}`} className="hidden" />
+
+                  <button type="submit" disabled={loading || !publicKey || !cardFormReady} className="mt-6 w-full bg-[#00CED1] text-[#1E1E1E] font-bold text-lg rounded-full py-3 hover:bg-[#00b8bb] transition-all disabled:opacity-50 shadow-lg shadow-[#00CED1]/20">
                     {loading ? 'Procesando pago...' : 'Confirmar suscripción'}
                   </button>
                 </form>

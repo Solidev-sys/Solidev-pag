@@ -133,6 +133,13 @@ export class ApiService extends BaseApiService {
     });
   }
 
+  async startSubscriptionCheckout(suscripcionId: number): Promise<{ preapproval_id: string; init_point: string | null; init_point_prod?: string | null; init_point_test?: string | null }> {
+    return this.request(`/api/suscripciones/${suscripcionId}/iniciar`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
   async confirmSubscription(preapprovalId: string): Promise<{ ok: boolean; estado: string }> {
     return this.request(`/api/suscripcion-exitosa?preapproval_id=${encodeURIComponent(preapprovalId)}`);
   }

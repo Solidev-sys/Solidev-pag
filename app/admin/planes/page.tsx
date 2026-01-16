@@ -7,10 +7,10 @@ import { adminApiService } from "@/lib/api"
 
 export default function AdminPlanes() {
   const [list, setList] = useState<any[]>([])
-  const [form, setForm] = useState({ codigo: '', nombre: '', precio: 0, moneda: 'CLP', ciclo_fact: 'mensual', activo: true })
+  const [form, setForm] = useState({ codigo: '', nombre: '', precio: 0, moneda: 'CLP', ciclo_fact: 'mensual', activo: true, dias_prueba_gratis: 0 })
   const [error, setError] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
-  const [editMode, setEditMode] = useState<'nombre' | 'precio' | 'resumen' | null>(null)
+  const [editMode, setEditMode] = useState<'nombre' | 'precio' | 'resumen' | 'dias_prueba_gratis' | null>(null)
   const [editValue, setEditValue] = useState<string>('')
 
   useEffect(() => {
@@ -23,18 +23,21 @@ export default function AdminPlanes() {
     try {
       if (!form.codigo || !form.nombre) throw new Error('Completa código y nombre')
       if (!form.precio || form.precio <= 0) throw new Error('Ingresa un precio en CLP mayor a 0')
+      const trial = Math.max(0, Math.trunc(Number(form.dias_prueba_gratis || 0)))
+      if (!Number.isFinite(trial) || trial < 0 || trial > 365) throw new Error('Días de prueba gratis debe ser 0 a 365')
       const payload = {
         codigo: form.codigo,
         nombre: form.nombre,
         precio_centavos: Math.round(Number(form.precio) * 100),
         moneda: form.moneda,
         ciclo_fact: form.ciclo_fact,
-        activo: form.activo
+        activo: form.activo,
+        dias_prueba_gratis: trial
       }
       await adminApiService.createPlan(payload as any)
       const x = await adminApiService.getPlans()
       setList(Array.isArray(x) ? x : [])
-      setForm({ codigo: '', nombre: '', precio: 0, moneda: 'CLP', ciclo_fact: 'mensual', activo: true })
+      setForm({ codigo: '', nombre: '', precio: 0, moneda: 'CLP', ciclo_fact: 'mensual', activo: true, dias_prueba_gratis: 0 })
     } catch (err: any) {
       setError(err?.message || 'Error')
     }
@@ -66,7 +69,7 @@ export default function AdminPlanes() {
     }
   }
 
-  const startEdit = (type: 'nombre' | 'precio' | 'resumen', currentValue: string) => {
+  const startEdit = (type: 'nombre' | 'precio' | 'resumen' | 'dias_prueba_gratis', currentValue: string) => {
     setEditMode(type)
     setEditValue(currentValue)
   }
@@ -90,6 +93,10 @@ export default function AdminPlanes() {
         payload.nombre = editValue
       } else if (editMode === 'resumen') {
         payload.resumen = editValue
+      } else if (editMode === 'dias_prueba_gratis') {
+        const trial = Math.max(0, Math.trunc(Number(editValue || '0')))
+        if (!Number.isFinite(trial) || trial < 0 || trial > 365) throw new Error('Días de prueba gratis debe ser 0 a 365')
+        payload.dias_prueba_gratis = trial
       }
 
       await adminApiService.updatePlan(selectedPlan.id, payload)
@@ -146,6 +153,13 @@ export default function AdminPlanes() {
               value={form.precio}
               onChange={e => setForm({ ...form, precio: parseInt(e.target.value || '0') })}
               placeholder="Precio en CLP"
+              className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
+            />
+            <input
+              type="number"
+              value={form.dias_prueba_gratis}
+              onChange={e => setForm({ ...form, dias_prueba_gratis: parseInt(e.target.value || '0') })}
+              placeholder="Días prueba gratis (0-365)"
               className="p-3 rounded-xl bg-dark-secondary border border-slate-700 text-white focus:border-emerald-500 focus:outline-none transition-all"
             />
             <select
@@ -230,6 +244,12 @@ export default function AdminPlanes() {
                   <Calendar className="w-4 h-4 text-cyan-400" />
                   <span>Ciclo {plan.ciclo_fact}</span>
                 </div>
+                {Number(plan.dias_prueba_gratis || 0) > 0 && (
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs">{Number(plan.dias_prueba_gratis)} días gratis</span>
+                  </div>
+                )}
                 {plan.mp_preapproval_plan_id && (
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-yellow-400" />
@@ -320,6 +340,29 @@ export default function AdminPlanes() {
                 </div>
 
                 <div className="bg-dark-secondary rounded-xl p-4">
+                  <p className="text-sm text-slate-400 mb-1">Prueba gratis</p>
+                  {editMode === 'dias_prueba_gratis' ? (
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        className="flex-1 p-2 rounded-lg bg-dark-main border border-emerald-500 text-white text-lg font-semibold"
+                        autoFocus
+                      />
+                      <button onClick={saveEdit} className="p-2 rounded-lg bg-emerald-500 text-white">
+                        <Check className="w-5 h-5" />
+                      </button>
+                      <button onClick={cancelEdit} className="p-2 rounded-lg bg-slate-700 text-white">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xl font-bold text-white">{Number(selectedPlan.dias_prueba_gratis || 0)} días</p>
+                  )}
+                </div>
+
+                <div className="bg-dark-secondary rounded-xl p-4">
                   <p className="text-sm text-slate-400 mb-1">Estado</p>
                   <p className={`text-xl font-bold ${selectedPlan.activo ? 'text-emerald-400' : 'text-slate-400'}`}>
                     {selectedPlan.activo ? 'Activo' : 'Inactivo'}
@@ -383,7 +426,7 @@ export default function AdminPlanes() {
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-4 gap-3 mb-4">
                 <button
                   onClick={() => startEdit('nombre', selectedPlan.nombre)}
                   disabled={editMode !== null}
@@ -409,6 +452,15 @@ export default function AdminPlanes() {
                 >
                   <FileText className="w-4 h-4" />
                   Cambiar Descripción
+                </button>
+
+                <button
+                  onClick={() => startEdit('dias_prueba_gratis', String(Number(selectedPlan.dias_prueba_gratis || 0)))}
+                  disabled={editMode !== null}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-teal-600/20 border border-teal-500/50 text-teal-300 hover:bg-teal-600/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Cambiar Prueba
                 </button>
               </div>
 

@@ -22,7 +22,9 @@ export interface BackendPlan {
   nombre: string
   precio_centavos: number
   moneda: string
+  dias_prueba_gratis?: number
   ciclo_fact: 'mensual' | 'anual'
+  mp_preapproval_plan_id?: string | null
   activo: boolean
   mensaje_rapido: boolean
   mensaje_seguro: boolean

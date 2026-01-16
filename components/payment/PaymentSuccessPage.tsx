@@ -22,9 +22,16 @@ interface OrderDetails {
 
 export function PaymentSuccessPage() {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
+  const [isSubscription, setIsSubscription] = useState(false)
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
 
   useEffect(() => {
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+    const preapprovalId = params.get('preapproval_id')
+    if (preapprovalId) {
+      setIsSubscription(true)
+      setSubscriptionId(preapprovalId)
+    }
     const orderId = params.get('order_id') || 'ORD-' + Date.now()
     const itemName = params.get('item_name') || 'Producto'
     const subtotalStr = params.get('subtotal') || '0'
@@ -68,9 +75,23 @@ export function PaymentSuccessPage() {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold text-green-800 mb-2">¡Pago Exitoso!</h1>
-            <p className="text-green-600">Tu compra ha sido procesada correctamente</p>
+            <h1 className="text-3xl font-bold text-green-800 mb-2">
+              {isSubscription ? "¡Suscripción Autorizada!" : "¡Pago Exitoso!"}
+            </h1>
+            <p className="text-green-600">
+              {isSubscription ? "Tu suscripción ha sido autorizada correctamente" : "Tu compra ha sido procesada correctamente"}
+            </p>
           </div>
+
+          {isSubscription && subscriptionId && (
+            <div className="bg-green-50 rounded-lg p-4 mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Package className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-800">ID de Suscripción</span>
+              </div>
+              <p className="text-sm font-mono text-green-900 break-all">{subscriptionId}</p>
+            </div>
+          )}
 
           {/* Order Number */}
           <div className="bg-green-50 rounded-lg p-4 mb-6">
